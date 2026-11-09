@@ -22,6 +22,7 @@ jest.mock('@/ui/MapPicker', () => ({ MapPicker: () => null }));
 jest.mock('@/lib/location', () => ({ geocodeAddress: jest.fn(), currentPlace: jest.fn(), LocationPermissionError: class extends Error {} }));
 
 import Manage from '@/app/(app)/spaces/[id]/index';
+import { dayLabel } from '@/ui/RangeCalendar';
 import Edit from '@/app/(app)/spaces/[id]/edit';
 
 const space = {
@@ -62,27 +63,39 @@ describe('Gerir espaço', () => {
     expect(await screen.findByText('O espaço tem de ter pelo menos uma fotografia')).toBeTruthy();
   });
 
-  it('bloquear datas: dias inteiros, fim inclusive', async () => {
+  it('bloquear datas: escolhe o intervalo no calendário (dias inteiros, fim inclusive)', async () => {
     mockApi.post.mockResolvedValue([]);
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 40);
+    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
     await render(<Manage />);
     await fireEvent.press(await screen.findByRole('button', { name: 'Bloquear datas' }));
-    await fireEvent.changeText(screen.getByLabelText('Início'), '20/12/2026');
-    await fireEvent.changeText(screen.getByLabelText('Fim'), '27/12/2026');
+    for (const d of [start, end]) {
+      for (let i = 0; i < 4 && !screen.queryByRole('button', { name: dayLabel(d) }); i++) {
+        await fireEvent.press(screen.getByRole('button', { name: 'Mês seguinte' }));
+      }
+      await fireEvent.press(screen.getByRole('button', { name: dayLabel(d) }));
+    }
     await fireEvent.changeText(screen.getByLabelText('Motivo (opcional)'), 'Férias');
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar bloqueio' }));
     expect(mockApi.post).toHaveBeenCalledWith('/me/spaces/s1/blocks', {
-      startsAt: new Date(2026, 11, 20).toISOString(), endsAt: new Date(2026, 11, 28).toISOString(), reason: 'Férias',
+      startsAt: start.toISOString(),
+      endsAt: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1).toISOString(),
+      reason: 'Férias',
     });
   });
 
-  it('data inválida não envia', async () => {
+  it('dias passados não se podem escolher; sem intervalo não guarda', async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
     await render(<Manage />);
     await fireEvent.press(await screen.findByRole('button', { name: 'Bloquear datas' }));
-    await fireEvent.changeText(screen.getByLabelText('Início'), '31/02/2026');
-    await fireEvent.changeText(screen.getByLabelText('Fim'), '27/12/2026');
+    if (yesterday.getMonth() === new Date().getMonth()) {
+      expect(screen.getByRole('button', { name: dayLabel(yesterday) }).props.accessibilityState.disabled).toBe(true);
+    }
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar bloqueio' }));
     expect(mockApi.post).not.toHaveBeenCalled();
-    expect(screen.getByText('Data inválida (DD/MM/AAAA)')).toBeTruthy();
+    expect(screen.getByText('Escolhe o primeiro e o último dia no calendário')).toBeTruthy();
   });
 
   it('remover bloqueio', async () => {
@@ -126,7 +139,7 @@ describe('Editar espaço', () => {
     mockParams = { id: 's1', section: 'schedule' };
     mockApi.put = jest.fn().mockResolvedValue(space);
     await render(<Edit />);
-    await fireEvent(await screen.findByRole('switch', { name: 'Sábado' }), 'valueChange', true);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Sábado' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar' }));
     expect(mockApi.put).toHaveBeenCalledWith('/me/spaces/s1/availability', [
       { weekday: 0, startTime: '19:00', endTime: '08:00' },

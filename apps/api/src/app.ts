@@ -18,6 +18,14 @@ export function createApp(deps: AppDeps): express.Express {
   const app = express();
   // A app web (Expo) chama a API a partir de outra origem; sem cookies, só Bearer token.
   app.use(cors({ origin: true }));
+  // Registo simples de cada pedido no terminal (desligado nos testes).
+  if (process.env.NODE_ENV !== 'test') {
+    app.use((req, res, next) => {
+      const t0 = Date.now();
+      res.on('finish', () => console.log(`${req.method} ${req.originalUrl} → ${res.statusCode} (${Date.now() - t0} ms)`));
+      next();
+    });
+  }
   app.use(express.json());
 
   app.get('/health', (_req, res) => {

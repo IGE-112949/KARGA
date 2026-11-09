@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { TextField } from '@/ui/TextField';
-import { Button } from '@/ui/Button';
 import { formatEuro, monthlyEstimate, parseEuro, weeklyHours } from '@/lib/spaces';
 import type { Errors } from '@/lib/validation';
 import { theme } from '@/theme';
 import { windowsOf, type SpaceDraft } from '../draft';
-import { DayRow, FieldError, Label, Note } from '../ui';
+import { FieldError, Label, Note } from '../ui';
+import { SchedulePicker } from '../SchedulePicker';
 
 export function PricePart({ d, set, errors }: { d: SpaceDraft; set: (p: Partial<SpaceDraft>) => void; errors: Errors }) {
   return (
@@ -26,21 +26,11 @@ export function PricePart({ d, set, errors }: { d: SpaceDraft; set: (p: Partial<
 }
 
 export function SchedulePart({ d, set, errors }: { d: SpaceDraft; set: (p: Partial<SpaceDraft>) => void; errors: Errors }) {
-  const applyToAll = () => {
-    const first = d.days.find((x) => x.on);
-    if (!first) return;
-    set({ days: d.days.map(() => ({ ...first, on: true })) });
-  };
   return (
     <View style={styles.section}>
-      <Label>Dias e horas disponíveis</Label>
-      <View>
-        {d.days.map((day, i) => (
-          <DayRow key={i} weekday={i} day={day} onChange={(nd) => set({ days: d.days.map((x, j) => (j === i ? nd : x)) })} />
-        ))}
-      </View>
+      <Label>Dias disponíveis</Label>
+      <SchedulePicker d={d} set={set} />
       <FieldError>{errors.days}</FieldError>
-      <Button title="Aplicar a todos os dias" variant="secondary" onPress={applyToAll} disabled={!d.days.some((x) => x.on)} />
     </View>
   );
 }

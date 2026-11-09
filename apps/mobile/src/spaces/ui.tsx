@@ -1,9 +1,7 @@
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { Icon, type IconName } from '@/ui/Icon';
 import { theme } from '@/theme';
-import { END_TIMES, TIMES, WEEKDAY_NAMES, isAllDay } from '@/lib/spaces';
-import type { DayDraft } from './draft';
 
 export function Label({ children }: { children: string }) {
   return <Text style={styles.label}>{children}</Text>;
@@ -58,58 +56,6 @@ export function OptionCard({ title, subtitle, selected, onPress, art }: {
       </View>
       <View style={[styles.radio, selected && styles.radioOn]} />
     </Pressable>
-  );
-}
-
-function Stepper({ value, onPrev, onNext, label }: { value: string; onPrev: () => void; onNext: () => void; label: string }) {
-  return (
-    <View style={styles.stepper}>
-      <Pressable accessibilityRole="button" accessibilityLabel={`${label}: mais cedo`} onPress={onPrev} hitSlop={6} style={styles.stepBtn}>
-        <Text style={styles.stepSign}>−</Text>
-      </Pressable>
-      <Text style={styles.stepValue}>{value}</Text>
-      <Pressable accessibilityRole="button" accessibilityLabel={`${label}: mais tarde`} onPress={onNext} hitSlop={6} style={styles.stepBtn}>
-        <Text style={styles.stepSign}>+</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-const cycle = (list: string[], v: string, d: number) => list[(list.indexOf(v) + d + list.length) % list.length];
-
-// Um dia da semana: interruptor + "das/às" (30 em 30 min) + "Dia todo".
-export function DayRow({ weekday, day, onChange }: { weekday: number; day: DayDraft; onChange: (d: DayDraft) => void }) {
-  const name = WEEKDAY_NAMES[weekday];
-  const allDay = isAllDay(day);
-  return (
-    <View style={styles.day}>
-      <View style={styles.dayHead}>
-        <Text style={[styles.dayName, !day.on && styles.dayOff]}>{name}</Text>
-        <Switch accessibilityRole="switch" accessibilityLabel={name} accessibilityState={{ checked: day.on }} value={day.on}
-          onValueChange={(on) => onChange({ ...day, on })} trackColor={{ true: theme.colors.accent, false: '#D5DCD9' }} thumbColor="#FFFFFF" />
-      </View>
-      {day.on ? (
-        <View style={styles.dayBody}>
-          {allDay ? <Text style={styles.allDay}>Disponível o dia todo</Text> : (
-            <>
-              <Text style={styles.small}>das</Text>
-              <Stepper label={`${name} início`} value={day.startTime}
-                onPrev={() => onChange({ ...day, startTime: cycle(TIMES, day.startTime, -1) })}
-                onNext={() => onChange({ ...day, startTime: cycle(TIMES, day.startTime, 1) })} />
-              <Text style={styles.small}>às</Text>
-              <Stepper label={`${name} fim`} value={day.endTime}
-                onPrev={() => onChange({ ...day, endTime: cycle(END_TIMES, day.endTime, -1) })}
-                onNext={() => onChange({ ...day, endTime: cycle(END_TIMES, day.endTime, 1) })} />
-            </>
-          )}
-          <Pressable accessibilityRole="button" accessibilityLabel={`${name}: dia todo`} accessibilityState={{ selected: allDay }}
-            onPress={() => onChange(allDay ? { on: true, startTime: '19:00', endTime: '08:00' } : { on: true, startTime: '00:00', endTime: '24:00' })}
-            style={[styles.allDayChip, allDay && styles.allDayChipOn]}>
-            <Text style={[styles.allDayChipText, allDay && { color: theme.colors.white }]}>Dia todo</Text>
-          </Pressable>
-        </View>
-      ) : null}
-    </View>
   );
 }
 

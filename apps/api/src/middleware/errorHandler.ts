@@ -4,6 +4,7 @@ import { AppError } from '../lib/errors.js';
 
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ZodError) {
+    if (process.env.NODE_ENV !== 'test') console.warn('  validação:', err.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
     res.status(400).json({
       error: {
         code: 'VALIDATION_ERROR',
@@ -14,6 +15,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
   if (err instanceof AppError) {
+    if (process.env.NODE_ENV !== 'test') console.warn(`  ${err.code}: ${err.message}`);
     res.status(err.status).json({
       error: { code: err.code, message: err.message, ...(err.details ? { details: err.details } : {}) },
     });

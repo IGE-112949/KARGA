@@ -5,31 +5,28 @@ import { Button } from '@/ui/Button';
 import { Icon } from '@/ui/Icon';
 import type { SpaceBlock } from '@/lib/spaces';
 import { theme } from '@/theme';
-import { blockLabel, blockRange, parseDate } from './blocks';
+import { RangeCalendar, shortDate } from '@/ui/RangeCalendar';
+import { blockLabel, blockRange } from './blocks';
 
 export function BlocksSection({ blocks, onAdd, onRemove }: {
   blocks: SpaceBlock[];
-  onAdd: (b: { startsAt: string; endsAt: string; reason: string | null }) => Promise<void>;
-  onRemove: (id: string) => Promise<void>;
+  onAdd: (b: { startsAt: string; endsAt: string; reason: string | null }) => Promise<boolean>;
+  onRemove: (id: string) => Promise<unknown>;
 }) {
   const [open, setOpen] = useState(false);
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
+  const [start, setStart] = useState<Date | null>(null);
+  const [end, setEnd] = useState<Date | null>(null);
   const [reason, setReason] = useState('');
-  const [errors, setErrors] = useState<{ start?: string; end?: string }>({});
+  const [error, setError] = useState<string | null>(null);
+
+  const reset = () => { setOpen(false); setStart(null); setEnd(null); setReason(''); setError(null); };
 
   const save = async () => {
-    const s = parseDate(start);
-    const e = parseDate(end);
-    const errs: typeof errors = {};
-    if (!s) errs.start = 'Data inválida (DD/MM/AAAA)';
-    if (!e) errs.end = 'Data inválida (DD/MM/AAAA)';
-    else if (s && e < s) errs.end = 'O fim tem de ser depois do início';
-    setErrors(errs);
-    if (errs.start || errs.end) return;
-    await onAdd({ ...blockRange(s!, e!), reason: reason.trim() || null });
-    setOpen(false);
-    setStart(''); setEnd(''); setReason('');
+    if (!start) return setError('Escolhe o primeiro e o último dia no calendário');
+    setError(null);
+    // Só um dia escolhido = bloqueia esse dia.
+    const ok = await onAdd({ ...blockRange(start, end ?? start), reason: reason.trim() || null });
+    if (ok) reset();
   };
 
   return (
@@ -49,13 +46,14 @@ export function BlocksSection({ blocks, onAdd, onRemove }: {
       ))}
       {open ? (
         <View style={styles.form}>
-          <View style={styles.dates}>
-            <View style={styles.flex}><TextField label="Início" placeholder="DD/MM/AAAA" value={start} onChangeText={setStart} error={errors.start} keyboardType="numbers-and-punctuation" /></View>
-            <View style={styles.flex}><TextField label="Fim" placeholder="DD/MM/AAAA" value={end} onChangeText={setEnd} error={errors.end} keyboardType="numbers-and-punctuation" /></View>
-          </View>
+          <RangeCalendar start={start} end={end} onChange={(s, e) => { setStart(s); setEnd(e); setError(null); }} />
+          <Text style={styles.range}>
+            {start ? (end && end.getTime() !== start.getTime() ? `${shortDate(start)} – ${shortDate(end)}` : `${shortDate(start)} (toca no último dia)`) : 'Toca no primeiro dia'}
+          </Text>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
           <TextField label="Motivo (opcional)" placeholder="ex.: Férias" value={reason} onChangeText={setReason} />
           <Button title="Guardar bloqueio" onPress={save} />
-          <Button title="Cancelar" variant="text" onPress={() => setOpen(false)} />
+          <Button title="Cancelar" variant="text" onPress={reset} />
         </View>
       ) : (
         <Button title="Bloquear datas" variant="secondary" onPress={() => setOpen(true)} icon={<Icon name="plus" size={18} color={theme.colors.text} />} />
@@ -71,5 +69,6 @@ const styles = StyleSheet.create({
   item: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
   itemTitle: { fontSize: 15, fontFamily: theme.font.medium, color: theme.colors.text },
   form: { gap: 12 },
-  dates: { flexDirection: 'row', gap: 12 },
+  range: { fontSize: 15, fontFamily: theme.font.semibold, color: theme.colors.text, textAlign: 'center' },
+  error: { fontSize: 13, color: theme.colors.danger, fontFamily: theme.font.medium, textAlign: 'center' },
 });

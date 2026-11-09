@@ -42,14 +42,16 @@ export default function ManageSpace() {
   useFocusEffect(load);
 
   // Executa uma ação; a resposta (o espaço atualizado) substitui o estado, senão volta a carregar.
-  const act = async (fn: () => Promise<unknown>) => {
+  const act = async (fn: () => Promise<unknown>): Promise<boolean> => {
     setNotice(null);
     try {
       const r = await fn();
       if (r && typeof r === 'object' && 'id' in (r as object) && 'photos' in (r as object)) setS(r as Space);
       else load();
+      return true;
     } catch (e) {
       setNotice(errMsg(e));
+      return false;
     }
   };
 
@@ -96,7 +98,7 @@ export default function ManageSpace() {
           <Text style={styles.k}>{visible ? 'Os condutores podem encontrar e reservar' : 'Escondido: ninguém o vê nem reserva'}</Text>
         </View>
         <Switch accessibilityRole="switch" accessibilityLabel="Visível no mapa" accessibilityState={{ checked: visible }} value={visible}
-          onValueChange={(on) => act(() => api.patch(`/me/spaces/${s.id}`, { status: on ? 'active' : 'inactive' }))}
+          onValueChange={(on) => void act(() => api.patch(`/me/spaces/${s.id}`, { status: on ? 'active' : 'inactive' }))}
           trackColor={{ true: theme.colors.accent, false: '#D5DCD9' }} thumbColor="#FFFFFF" />
       </View>
 
@@ -109,8 +111,8 @@ export default function ManageSpace() {
 
       <Text style={styles.h2}>Fotografias</Text>
       <PhotosSection photos={s.photos} onAdd={addPhoto}
-        onCover={(pid) => act(() => api.patch(`/me/spaces/${s.id}/photos/${pid}`, { isCover: true }))}
-        onRemove={(pid) => act(() => api.del(`/me/spaces/${s.id}/photos/${pid}`))} />
+        onCover={async (pid) => { await act(() => api.patch(`/me/spaces/${s.id}/photos/${pid}`, { isCover: true })); }}
+        onRemove={async (pid) => { await act(() => api.del(`/me/spaces/${s.id}/photos/${pid}`)); }} />
 
       <Text style={styles.h2}>Datas bloqueadas</Text>
       <BlocksSection blocks={s.blocks}

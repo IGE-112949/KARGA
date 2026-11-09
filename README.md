@@ -85,7 +85,7 @@ Erros: `{ "error": { "code", "message", "details"? } }`.
    npx expo start
    ```
 
-3. **Emulador Android** (Android Studio › Device Manager › ▶): em `apps/mobile/.env` usar `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000`, correr `npx expo start -c` e carregar em `a`. O mapa (react-native-maps) só existe no emulador/telemóvel; no browser aparece "Mapa disponível na app".
+3. **Emulador Android** (Android Studio › Device Manager › ▶): em `apps/mobile/.env` usar `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000`, correr `npx expo start --localhost -c` e carregar em `a` (o `--localhost` liga o emulador ao PC sem passar pela rede). Para fotos: abrir a app Camera do emulador e tirar algumas. O mapa (react-native-maps) só existe no emulador/telemóvel; no browser aparece "Mapa disponível na app".
 
 4. No telemóvel instalar a app **Expo Go** (Play Store / App Store), estar na mesma rede Wi-Fi que o PC e ler o QR code que aparece no terminal. Tecla `w` abre a versão web no browser.
 

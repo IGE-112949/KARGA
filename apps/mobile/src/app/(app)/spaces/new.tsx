@@ -56,8 +56,9 @@ export default function NewSpace() {
       const space = await api.upload<{ id: string }>('/me/spaces', form, 'POST');
       router.replace({ pathname: '/spaces/published', params: { id: space.id } });
     } catch (e) {
-      const detail = e instanceof ApiError && e.code === 'VALIDATION_ERROR' ? e.details?.[0]?.message : undefined;
-      setError(detail ? `Não foi possível publicar: ${detail}` : 'Não foi possível publicar. Tenta novamente.');
+      // Mostra o motivo real (validação, imagem, rede…) para o proprietário saber o que corrigir.
+      const reason = e instanceof ApiError ? e.details?.[0]?.message ?? e.message : null;
+      setError(reason ? `Não foi possível publicar: ${reason}` : 'Não foi possível publicar. Tenta novamente.');
     }
   };
 

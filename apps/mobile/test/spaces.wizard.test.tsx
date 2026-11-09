@@ -48,7 +48,7 @@ async function step2(plug: 'Schuko' | 'Tipo 2' = 'Tipo 2') {
 }
 async function step3() {
   await fireEvent.changeText(screen.getByLabelText('Lugar (€/hora)'), '0,30');
-  await fireEvent(screen.getByRole('switch', { name: 'Segunda' }), 'valueChange', true);
+  await fireEvent.press(screen.getByRole('button', { name: 'Segunda' }));
   await next();
 }
 
@@ -95,9 +95,27 @@ describe('Novo espaço', () => {
     await render(<NewSpace />);
     await step1();
     await step2();
-    await fireEvent(screen.getByRole('switch', { name: 'Segunda' }), 'valueChange', true);
+    await fireEvent.press(screen.getByRole('button', { name: 'Segunda' }));
+    expect(screen.getByRole('button', { name: 'Segunda' }).props.accessibilityState.selected).toBe(true);
+    expect(screen.getByRole('button', { name: 'Domingo' }).props.accessibilityState.selected).toBe(false);
     await fireEvent.press(screen.getByRole('button', { name: 'Aplicar a todos os dias' }));
-    expect(screen.getByRole('switch', { name: 'Domingo' }).props.accessibilityState.checked).toBe(true);
+    expect(screen.getByRole('button', { name: 'Domingo' }).props.accessibilityState.selected).toBe(true);
+    expect(screen.getByText('Seg–Dom 19:00–08:00')).toBeTruthy();
+  });
+
+  it('cada dia tem o seu horário: tocar num dia mostra o horário desse dia', async () => {
+    await render(<NewSpace />);
+    await step1();
+    await step2();
+    await fireEvent.press(screen.getByRole('button', { name: 'Segunda' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Sábado' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Sábado: dia todo' }));
+    expect(screen.getByText('Disponível as 24 horas')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Segunda' }));
+    expect(screen.getByText('19:00')).toBeTruthy();
+    expect(screen.getByText('Seg 19:00–08:00 · Sáb dia todo')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Remover Segunda' }));
+    expect(screen.getByRole('button', { name: 'Segunda' }).props.accessibilityState.selected).toBe(false);
   });
 
   it('publica com Schuko 13 A = 3 kW e vai para o ecrã de publicado', async () => {
@@ -122,14 +140,14 @@ describe('Novo espaço', () => {
   });
 
   it('erro ao publicar mantém os dados e mostra a mensagem', async () => {
-    mockApi.upload.mockRejectedValue(new ApiError(0, 'NETWORK_ERROR', 'Sem ligação'));
+    mockApi.upload.mockRejectedValue(new ApiError(0, 'NETWORK_ERROR', 'Sem ligação à internet ou servidor indisponível.'));
     await render(<NewSpace />);
     await step1();
     await step2();
     await step3();
     await next();
     await fireEvent.press(screen.getByRole('button', { name: 'Publicar espaço' }));
-    expect(await screen.findByText('Não foi possível publicar. Tenta novamente.')).toBeTruthy();
+    expect(await screen.findByText('Não foi possível publicar: Sem ligação à internet ou servidor indisponível.')).toBeTruthy();
     expect(screen.getByText('Garagem do Tiago')).toBeTruthy();
     expect(mockReplace).not.toHaveBeenCalled();
   });
