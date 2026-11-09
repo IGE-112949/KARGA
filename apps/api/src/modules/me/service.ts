@@ -1,5 +1,6 @@
 import type { Db } from '../../db/types.js';
 import type { AuthAdmin } from '../../auth/admin.js';
+import type { AvatarStore } from '../../storage/avatarStore.js';
 import { AppError } from '../../lib/errors.js';
 import { listVehiclesByUser } from '../vehicles/repository.js';
 import { findProfile, insertProfile, updateProfile, type ProfileRow } from './repository.js';
@@ -13,6 +14,7 @@ async function toDto(db: Db, p: ProfileRow): Promise<ProfileDto> {
     id: p.id,
     fullName: p.fullName,
     phone: p.phone,
+    avatarUrl: p.avatarUrl,
     isDriver: p.isDriver,
     isHost: p.isHost,
     termsAcceptedAt: p.termsAcceptedAt.toISOString(),
@@ -62,7 +64,14 @@ export async function editProfile(db: Db, userId: string, input: UpdateProfileIn
 }
 
 // RGPD: apaga o utilizador na Auth; o cascade apaga o perfil e os dados associados.
-export async function deleteAccount(db: Db, authAdmin: AuthAdmin, userId: string): Promise<void> {
-  await requireProfile(db, userId);
+export async function deleteAccount(db: Db, authAdmin: AuthAdmin, avatars: AvatarStore, userId: string): Promise<void> {
+  const profile = await requireProfile(db, userId);
   await authAdmin.deleteUser(userId);
+  if (profile.avatarUrl) {
+    try {
+      await avatars.remove(profile.avatarUrl);
+    } catch (e) {
+      console.error('Não foi possível apagar a foto da conta apagada:', (e as Error).message);
+    }
+  }
 }

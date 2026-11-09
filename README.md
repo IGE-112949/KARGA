@@ -4,7 +4,7 @@ Plataforma P2P de aluguer de lugares de estacionamento com carregamento elétric
 
 ```
 apps/api/      → API REST (Node.js + TypeScript + Express + Drizzle ORM + Zod)
-apps/mobile/   → app React Native (Expo) — em breve
+apps/mobile/   → app React Native (Expo SDK 58 + Expo Router)
 db/migrations/ → migrações SQL da base de dados (Supabase / PostgreSQL + PostGIS)
 docs/          → especificações e planos
 ```
@@ -51,6 +51,7 @@ Endpoints (todos exceto `/health` exigem `Authorization: Bearer <JWT da Supabase
 | GET / POST / PATCH / DELETE | `/me` | perfil do utilizador (DELETE apaga a conta — RGPD) |
 | GET / POST | `/me/vehicles` | veículos |
 | PATCH / DELETE | `/me/vehicles/:id` | editar / definir predefinido / remover |
+| PUT / DELETE | `/me/avatar` | foto de perfil (multipart, campo `file`, JPEG/PNG/WebP até 5 MB) |
 
 Erros: `{ "error": { "code", "message", "details"? } }`.
 
@@ -62,9 +63,35 @@ Erros: `{ "error": { "code", "message", "details"? } }`.
 4. Abrir um segundo terminal (+) e correr `SUPABASE_PUBLISHABLE_KEY=sb_publishable__voVNlvZIR9p0jRP3jIvkA_vk_KY98_ npm run smoke -w apps/api`.
    O script cria um utilizador de teste, chama `/me` e `/me/vehicles`, apaga a conta no fim e mostra ✅ ou ❌.
 
+## App móvel
+
+1. Criar `apps/mobile/.env` a partir do exemplo: `cp apps/mobile/.env.example apps/mobile/.env`
+
+   | Variável | Valor |
+   |---|---|
+   | `EXPO_PUBLIC_SUPABASE_URL` | `https://vfpgzvhfxezszjrajuyv.supabase.co` |
+   | `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | chave *publishable* (é pública, já está no exemplo) |
+   | `EXPO_PUBLIC_API_URL` | IP do PC na rede local + porta da API, ex. `http://192.168.1.20:3000` (no Windows: `ipconfig`; no Mac: `ipconfig getifaddr en0`). No browser do PC pode ser `http://localhost:3000`. |
+
+2. Num terminal arrancar a API (`npm run dev -w apps/api`); noutro, a app:
+
+   ```bash
+   cd apps/mobile
+   npx expo start
+   ```
+
+3. No telemóvel instalar a app **Expo Go** (Play Store / App Store), estar na mesma rede Wi-Fi que o PC e ler o QR code que aparece no terminal. Tecla `w` abre a versão web no browser.
+
+Testes da app (sem telemóvel nem rede): `npm test -w apps/mobile` e `npx tsc --noEmit` dentro de `apps/mobile`.
+
+Verificação visual (opcional, precisa do Playwright): `node scripts/visual-check.mjs` dentro de `apps/mobile` gera `visual-check/<ecrã>.png` com a app ao lado do mockup.
+
+Ecrãs desta fase: boas-vindas, login, registo em 3 passos (conta → modo de utilização + foto → veículo) e perfil (foto, dados pessoais, modo condutor/proprietário, veículos, terminar sessão, apagar conta). Os restantes separadores mostram "Em breve".
+
 ## Base de dados
 
 - Projeto Supabase: `karga` (`vfpgzvhfxezszjrajuyv`, região eu-west-3 Paris).
 - O schema está em `apps/api/src/db/schema.ts`. Para uma alteração: editar o schema, correr `npm run db:generate -w apps/api` (gera um novo ficheiro em `db/migrations/`) e aplicar esse ficheiro ao Supabase (pelo conector do Claude ou pelo SQL Editor). Nunca usar `drizzle-kit push`.
 - Regras que o Drizzle não declara (extensões, constraint de exclusão das reservas, RLS) estão nas migrações manuais `0000_extensions.sql` e `0002_constraints_rls.sql`.
+- Fotos de perfil no Supabase Storage, bucket público `avatars` (escrito só pela API).
 - Todas as tabelas têm RLS ativo **sem políticas**: só a API (ligação de servidor) acede aos dados. O aviso "RLS Enabled No Policy" do Supabase é esperado.

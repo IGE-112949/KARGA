@@ -3,6 +3,7 @@ import type { PGlite } from '@electric-sql/pglite';
 import { createApp } from '../../src/app.js';
 import { createHs256Verifier } from '../../src/auth/verifier.js';
 import type { AuthAdmin } from '../../src/auth/admin.js';
+import type { AvatarStore } from '../../src/storage/avatarStore.js';
 import type { Db } from '../../src/db/types.js';
 import { getCleanTestDb } from './testDb.js';
 
@@ -18,10 +19,26 @@ export class FakeAuthAdmin implements AuthAdmin {
   }
 }
 
+export class FakeAvatarStore implements AvatarStore {
+  uploaded: string[] = [];
+  removed: string[] = [];
+  private n = 0;
+  async upload(userId: string, _data: Buffer, contentType: string) {
+    const ext = contentType.split('/')[1];
+    const url = `https://storage.test/avatars/${userId}/${++this.n}.${ext}`;
+    this.uploaded.push(url);
+    return url;
+  }
+  async remove(url: string) {
+    this.removed.push(url);
+  }
+}
+
 export async function createTestApp() {
   const { db, pg } = await getCleanTestDb();
   const authAdmin = new FakeAuthAdmin(pg);
-  const app = createApp({ db: db as Db, auth: createHs256Verifier(SECRET, ISSUER), authAdmin });
+  const avatars = new FakeAvatarStore();
+  const app = createApp({ db: db as Db, auth: createHs256Verifier(SECRET, ISSUER), authAdmin, avatars });
 
   // Cria o utilizador na "Auth" (se não existir) e devolve um token válido para ele.
   async function tokenFor(userId: string, opts: { expiresIn?: string } = {}) {
@@ -36,5 +53,5 @@ export async function createTestApp() {
       .sign(new TextEncoder().encode(SECRET));
   }
 
-  return { app, db, pg, authAdmin, tokenFor };
+  return { app, db, pg, authAdmin, avatars, tokenFor };
 }

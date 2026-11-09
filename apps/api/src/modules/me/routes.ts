@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import type { Db } from '../../db/types.js';
 import type { AuthAdmin } from '../../auth/admin.js';
+import type { AvatarStore } from '../../storage/avatarStore.js';
 import { createProfileSchema, updateProfileSchema } from './schemas.js';
 import { createProfile, deleteAccount, editProfile, getProfile } from './service.js';
 
-export function meRoutes(db: Db, authAdmin: AuthAdmin): Router {
+export function meRoutes(db: Db, authAdmin: AuthAdmin, avatars: AvatarStore): Router {
   const r = Router();
 
   r.get('/me', async (req, res, next) => {
@@ -29,7 +30,7 @@ export function meRoutes(db: Db, authAdmin: AuthAdmin): Router {
 
   r.delete('/me', async (req, res, next) => {
     try {
-      await deleteAccount(db, authAdmin, req.userId);
+      await deleteAccount(db, authAdmin, avatars, req.userId);
       res.status(204).end();
     } catch (e) { next(e); }
   });

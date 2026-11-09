@@ -29,6 +29,7 @@ export type ProfileDto = {
   id: string;
   fullName: string;
   phone: string | null;
+  avatarUrl: string | null;
   isDriver: boolean;
   isHost: boolean;
   termsAcceptedAt: string;
