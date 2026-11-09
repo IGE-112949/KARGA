@@ -134,12 +134,16 @@ Regra: pelo menos um dos perfis ativo (`check (is_driver or is_host)`).
 | status | enum (`confirmed`, `cancelled_by_driver`, `cancelled_by_host`, `completed`) | |
 | price_per_hour | numeric(6,2) | cópia do valor no momento da reserva |
 | energy_price_kwh | numeric(5,3) null | idem |
-| service_fee | numeric(5,2) | idem |
+| service_fee_percent | numeric(5,2) | percentagem em vigor no momento da reserva |
+| service_fee | numeric(6,2) | valor da taxa calculado (percentagem × subtotal do lugar + energia estimada) |
 | estimated_total | numeric(8,2) | |
 | cancelled_at | timestamptz null | |
 | cancel_reason | text null | obrigatório quando cancelada pelo proprietário (validado na API) |
 
 Constraint de exclusão (migração manual, requer `btree_gist`): não podem existir duas reservas `confirmed` no mesmo espaço com intervalos sobrepostos — `exclude using gist (space_id with =, tstzrange(starts_at, ends_at) with &&) where (status = 'confirmed')`.
+
+### platform_settings
+Configuração da plataforma, chave/valor: `key text PK`, `value numeric not null`, `updated_at`. Valor inicial: `service_fee_percent = 10` (taxa de serviço de 10% sobre o subtotal). A API lê este valor ao calcular cada reserva; mudar a taxa não altera reservas já feitas (ficam com a cópia).
 
 ### Fase seguinte (sem tabelas agora)
 `smart_plugs`, `charging_sessions`, `payments`, `reviews`; campo `spaces.smart_plug_id`.
@@ -184,11 +188,13 @@ Códigos HTTP: 400 validação, 401 sem token / token inválido, 403 sem permiss
 ### Ecrãs da app (React Native / Expo)
 
 Reproduzem os ecrãs do mockup (Claude Design "Karga APP — Protótipo"), reescritos em componentes React Native:
-- **Tema** em `apps/mobile/src/theme.ts` com as cores, tipografia (Outfit), espaçamentos, raios e sombras do mockup; ícones SVG via `react-native-svg`.
+- **Fidelidade ao design (requisito):** cada ecrã segue o mockup do artifact "Karga APP — Protótipo" (`project/Main.dc.html`) — mesma estrutura, textos, cores, tipografia, espaçamentos, raios, sombras e ícones. Os valores são extraídos diretamente do código do mockup (não aproximados).
+- **Tema** em `apps/mobile/src/theme.ts` com esses valores (cores, Outfit, espaçamentos, raios, sombras); ícones SVG do mockup via `react-native-svg`.
+- **Verificação visual:** para cada ecrã, captura do mockup e da app (Expo web) lado a lado ao mesmo tamanho (390×844); diferenças visíveis são corrigidas antes de dar o ecrã por concluído.
 - **Navegação** com `expo-router`.
 - **Ecrãs desta fatia:** Boas-vindas; Login; Registo passo 1 (dados + termos/RGPD), passo 2 (Condutor / Proprietário / Ambos), passo 3 (veículo, com "Saltar por agora"); Perfil (dados, modo atual, troca de modo, lista de veículos com adicionar/editar/remover, terminar sessão, apagar conta).
 - **Sessão** gerida pelo `supabase-js` (armazenamento seguro com `expo-secure-store`); um cliente HTTP da API junta o JWT a cada pedido e converte o formato de erro da API em mensagens no ecrã.
-- Os botões Google/Apple aparecem desativados com "Em breve".
+- Só existe login social com **Google** (nunca Apple). Nesta fase o botão Google aparece desativado com "Em breve"; é ativado quando o fornecedor for configurado na Supabase Auth.
 
 ## 5. Testes
 
