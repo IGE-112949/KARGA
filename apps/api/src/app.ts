@@ -4,6 +4,7 @@ import type { AuthVerifier } from './auth/verifier.js';
 import type { AuthAdmin } from './auth/admin.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { meRoutes } from './modules/me/routes.js';
 
 export type AppDeps = { db: Db; auth: AuthVerifier; authAdmin: AuthAdmin };
 
@@ -18,6 +19,7 @@ export function createApp(deps: AppDeps): express.Express {
   // Todas as rotas abaixo exigem sessão.
   const api = express.Router();
   api.use(requireAuth(deps.auth));
+  api.use(meRoutes(deps.db));
   app.use(api);
 
   app.use(errorHandler);
