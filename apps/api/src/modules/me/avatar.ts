@@ -1,36 +1,16 @@
-import { Router, type RequestHandler } from 'express';
-import multer from 'multer';
+import { Router } from 'express';
+import { detectImageType, invalidImage, MAX_IMAGE_BYTES, receiveImages } from '../../lib/images.js';
 import { eq, sql } from 'drizzle-orm';
 import type { Db } from '../../db/types.js';
 import { profiles } from '../../db/schema.js';
-import type { AvatarStore, ImageType } from '../../storage/avatarStore.js';
+import type { AvatarStore } from '../../storage/avatarStore.js';
 import { AppError } from '../../lib/errors.js';
 import { getProfile, requireProfile } from './service.js';
 
-export const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+export const MAX_AVATAR_BYTES = MAX_IMAGE_BYTES;
+export { detectImageType };
 
-const invalidImage = () =>
-  new AppError(400, 'INVALID_IMAGE', 'Formato de imagem não suportado (usa JPEG, PNG ou WebP)');
-
-// Tipo real pela assinatura dos primeiros bytes (o Content-Type enviado não é fiável).
-export function detectImageType(buf: Buffer): ImageType | null {
-  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
-  if (buf.length >= 4 && buf.readUInt32BE(0) === 0x89504e47) return 'image/png';
-  if (buf.length >= 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
-  return null;
-}
-
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_AVATAR_BYTES, files: 1 } });
-
-const receiveFile: RequestHandler = (req, res, next) => {
-  upload.single('file')(req, res, (err: unknown) => {
-    if (err instanceof multer.MulterError) {
-      if (err.code === 'LIMIT_FILE_SIZE') return next(new AppError(413, 'IMAGE_TOO_LARGE', 'A imagem tem mais de 5 MB'));
-      return next(invalidImage());
-    }
-    next(err);
-  });
-};
+const receiveFile = receiveImages('file', 1);
 
 async function removeQuietly(avatars: AvatarStore, url: string | null) {
   if (!url) return;
