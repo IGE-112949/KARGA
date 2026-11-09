@@ -8,7 +8,7 @@ const updatedAt = () => timestamp('updated_at', { withTimezone: true }).notNull(
 
 export const plugType = pgEnum('plug_type', ['type2', 'schuko', 'ccs']);
 export const spaceType = pgEnum('space_type', ['closed_garage', 'covered', 'outdoor']);
-export const spaceStatus = pgEnum('space_status', ['active', 'inactive']);
+export const spaceStatus = pgEnum('space_status', ['active', 'inactive', 'deleted']);
 export const bookingStatus = pgEnum('booking_status', ['confirmed', 'cancelled_by_driver', 'cancelled_by_host', 'completed']);
 
 // id = auth.users.id (FK criada na migração manual 0002)
@@ -55,6 +55,7 @@ export const spaces = pgTable('spaces', {
   pricePerHour: numeric('price_per_hour', { precision: 6, scale: 2 }).notNull(),
   energyPriceKwh: numeric('energy_price_kwh', { precision: 5, scale: 3 }),
   status: spaceStatus('status').notNull().default('active'),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [
@@ -84,6 +85,7 @@ export const spaceAvailability = pgTable('space_availability', {
   createdAt: createdAt(),
 }, (t) => [
   check('space_availability_weekday', sql`${t.weekday} between 0 and 6`),
+  uniqueIndex('space_availability_one_per_day').on(t.spaceId, t.weekday),
 ]);
 
 export const spaceBlocks = pgTable('space_blocks', {
@@ -100,7 +102,8 @@ export const spaceBlocks = pgTable('space_blocks', {
 // Exclusion constraint (sem sobreposição de reservas confirmadas) na migração manual 0002
 export const bookings = pgTable('bookings', {
   id: uuid('id').primaryKey().defaultRandom(),
-  spaceId: uuid('space_id').notNull().references(() => spaces.id, { onDelete: 'cascade' }),
+  // restrict: o histórico de reservas nunca é apagado por arrasto (espaços são eliminados por estado)
+  spaceId: uuid('space_id').notNull().references(() => spaces.id, { onDelete: 'restrict' }),
   driverId: uuid('driver_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   vehicleId: uuid('vehicle_id').references(() => vehicles.id, { onDelete: 'set null' }),
   startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
