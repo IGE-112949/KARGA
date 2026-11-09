@@ -188,9 +188,9 @@ Códigos HTTP: 400 validação, 401 sem token / token inválido, 403 sem permiss
 ### Ecrãs da app (React Native / Expo)
 
 Reproduzem os ecrãs do mockup (Claude Design "Karga APP — Protótipo"), reescritos em componentes React Native:
-- **Fidelidade ao design (requisito):** cada ecrã segue o mockup do artifact "Karga APP — Protótipo" (`project/Main.dc.html`) — mesma estrutura, textos, cores, tipografia, espaçamentos, raios, sombras e ícones. Os valores são extraídos diretamente do código do mockup (não aproximados).
+- **Fidelidade ao design (requisito):** o design base segue o mockup do artifact "Karga APP — Protótipo" (`project/Main.dc.html`) — cores, tipografia, espaçamentos, raios, sombras, ícones e estilo dos componentes (botões, campos, cartões, chips, barra de navegação), com os valores extraídos do código do mockup. Os campos e conteúdos de cada ecrã podem mudar conforme a app evolui; o que se mantém é o aspeto.
 - **Tema** em `apps/mobile/src/theme.ts` com esses valores (cores, Outfit, espaçamentos, raios, sombras); ícones SVG do mockup via `react-native-svg`.
-- **Verificação visual:** para cada ecrã, captura do mockup e da app (Expo web) lado a lado ao mesmo tamanho (390×844); diferenças visíveis são corrigidas antes de dar o ecrã por concluído.
+- **Verificação visual:** para cada ecrã, captura do mockup e da app (Expo web) lado a lado ao mesmo tamanho (390×844), para confirmar que o aspeto bate certo.
 - **Navegação** com `expo-router`.
 - **Ecrãs desta fatia:** Boas-vindas; Login; Registo passo 1 (dados + termos/RGPD), passo 2 (Condutor / Proprietário / Ambos), passo 3 (veículo, com "Saltar por agora"); Perfil (dados, modo atual, troca de modo, lista de veículos com adicionar/editar/remover, terminar sessão, apagar conta).
 - **Sessão** gerida pelo `supabase-js` (armazenamento seguro com `expo-secure-store`); um cliente HTTP da API junta o JWT a cada pedido e converte o formato de erro da API em mensagens no ecrã.
@@ -198,9 +198,13 @@ Reproduzem os ecrãs do mockup (Claude Design "Karga APP — Protótipo"), reesc
 
 ## 5. Testes
 
-- **Vitest** para os services e **Supertest** para os endpoints, contra um Postgres local com PostGIS (Docker Compose em `apps/api/docker-compose.test.yml`), nunca contra a base de dados real.
-- Desenvolvimento em TDD: teste primeiro, depois o código.
+- **Vitest** para os services e **Supertest** para os endpoints.
+- **Base de dados de teste em memória com PGlite** (Postgres compilado para WebAssembly, instalado via npm): sem Docker nem Postgres local. Suporta as extensões `postgis` e `btree_gist` (validado: pesquisa por raio e constraint de exclusão das reservas funcionam). Cada execução cria a base, aplica as mesmas migrações de `db/migrations/` e corre os testes; nunca se testa contra a base de dados real.
+- Como o PGlite não tem o schema `auth` do Supabase, o setup dos testes cria uma tabela mínima `auth.users (id uuid primary key)` antes das migrações.
+- O Drizzle liga-se ao PGlite nos testes (`drizzle-orm/pglite`) e ao Postgres do Supabase em execução normal (`drizzle-orm/node-postgres`), com o mesmo schema.
 - O JWT é substituído nos testes por um token assinado com uma chave de teste (o middleware aceita a chave configurada por variável de ambiente).
+- Desenvolvimento em TDD: teste primeiro, depois o código.
+- Para correr: `npm test` em `apps/api` (só requer Node.js).
 - Os testes servem o desenvolvimento. Ficam no repositório na pasta `apps/api/test/` e são **excluídos da entrega final** do código (a entrega é feita sem essa pasta).
 
 ## 6. Fora de âmbito desta especificação
