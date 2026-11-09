@@ -5,6 +5,7 @@ import type { AuthAdmin } from './auth/admin.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { meRoutes } from './modules/me/routes.js';
+import { vehicleRoutes } from './modules/vehicles/routes.js';
 
 export type AppDeps = { db: Db; auth: AuthVerifier; authAdmin: AuthAdmin };
 
@@ -20,6 +21,7 @@ export function createApp(deps: AppDeps): express.Express {
   const api = express.Router();
   api.use(requireAuth(deps.auth));
   api.use(meRoutes(deps.db));
+  api.use(vehicleRoutes(deps.db));
   app.use(api);
 
   app.use(errorHandler);
