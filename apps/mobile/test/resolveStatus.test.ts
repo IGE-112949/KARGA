@@ -44,3 +44,18 @@ describe('redirectFor', () => {
     expect(redirectFor('ready', ['(auth)', 'register', 'vehicle'])).toBeNull();
   });
 });
+
+describe('redirectFor (revisão final)', () => {
+  it('sem sessão nos passos 2/3 do registo → boas-vindas; no passo 1 fica', () => {
+    expect(redirectFor('signedOut', ['(auth)', 'register', 'role'])).toBe('/welcome');
+    expect(redirectFor('signedOut', ['(auth)', 'register', 'vehicle'])).toBe('/welcome');
+    expect(redirectFor('signedOut', ['(auth)', 'register'])).toBeNull();
+  });
+  it('erro fora do index → index (ecrã com "Tentar novamente")', () => {
+    expect(redirectFor('error', ['(auth)', 'login'])).toBe('/');
+    expect(redirectFor('error', ['(app)', 'profile'])).toBe('/');
+  });
+  it('sem sessão por falta de rede → error', () => {
+    expect(resolveStatus({ sessionLoaded: true, hasSession: false, me: null, offline: true })).toBe('error');
+  });
+});
