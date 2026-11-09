@@ -81,7 +81,7 @@ profiles ──1:N── vehicles
 | id | uuid PK | = `auth.users.id`, FK com `on delete cascade` |
 | full_name | text not null | 2–100 caracteres |
 | phone | text null | formato E.164 (`+351…`) |
-| avatar_url | text null | fase posterior |
+| avatar_url | text null | URL pública da foto de perfil (Supabase Storage, bucket `avatars`) |
 | is_driver | boolean not null default false | |
 | is_host | boolean not null default false | |
 | terms_accepted_at | timestamptz not null | momento da aceitação dos termos/RGPD |
@@ -167,6 +167,8 @@ Todos exigem `Authorization: Bearer <JWT>`. Corpo e respostas em JSON, nomes em 
 | POST | `/me` | cria o perfil | 201, 400, 409 `PROFILE_EXISTS` |
 | PATCH | `/me` | edita `fullName`, `phone`, `isDriver`, `isHost` | 200, 400, 404 |
 | DELETE | `/me` | apaga perfil, veículos e o utilizador na Auth (RGPD) | 204, 409 `HAS_ACTIVE_BOOKINGS` (fase das reservas) |
+| PUT | `/me/avatar` | envia a foto de perfil (multipart, campo `file`; JPEG/PNG/WebP, máx. 5 MB) e substitui a anterior | 200 (perfil), 400 `INVALID_IMAGE`, 413 `IMAGE_TOO_LARGE`, 404 |
+| DELETE | `/me/avatar` | remove a foto | 204, 404 |
 | GET | `/me/vehicles` | lista os veículos | 200 |
 | POST | `/me/vehicles` | adiciona veículo; o primeiro fica predefinido | 201, 400, 409 `PLATE_TAKEN` |
 | PATCH | `/me/vehicles/:id` | edita / define como predefinido | 200, 400, 404, 409 |
@@ -176,7 +178,8 @@ Regras de negócio (no service):
 - `POST /me` exige `acceptTerms === true` e pelo menos um de `isDriver`/`isHost`; grava `terms_accepted_at = now()`.
 - `PATCH /me` não permite ficar sem nenhum perfil ativo.
 - Veículos: matrícula normalizada (maiúsculas, hífenes) e validada no formato português; um utilizador só acede aos seus veículos (404 caso contrário, para não revelar a existência); definir um predefinido desmarca os restantes na mesma transação.
-- `DELETE /me` usa a Admin API da Supabase (service role, só no servidor) para apagar o utilizador da Auth; o `cascade` trata dos dados.
+- `DELETE /me` usa a Admin API da Supabase (service role, só no servidor) para apagar o utilizador da Auth; o `cascade` trata dos dados; a foto de perfil é apagada do Storage.
+- **Foto de perfil:** bucket público `avatars` no Supabase Storage (fotos visíveis a outros utilizadores, como no Airbnb), escrito só pela API com a service role. Caminho `<userId>/<timestamp>.<ext>` (o timestamp evita cache antiga); ao substituir, a anterior é apagada. A app reduz a imagem a 512×512 antes de enviar.
 
 ### Erros
 Formato único:
@@ -192,7 +195,7 @@ Reproduzem os ecrãs do mockup (Claude Design "Karga APP — Protótipo"), reesc
 - **Tema** em `apps/mobile/src/theme.ts` com esses valores (cores, Outfit, espaçamentos, raios, sombras); ícones SVG do mockup via `react-native-svg`.
 - **Verificação visual:** para cada ecrã, captura do mockup e da app (Expo web) lado a lado ao mesmo tamanho (390×844), para confirmar que o aspeto bate certo.
 - **Navegação** com `expo-router`.
-- **Ecrãs desta fatia:** Boas-vindas; Login; Registo passo 1 (dados + termos/RGPD), passo 2 (Condutor / Proprietário / Ambos), passo 3 (veículo, com "Saltar por agora"); Perfil (dados, modo atual, troca de modo, lista de veículos com adicionar/editar/remover, terminar sessão, apagar conta).
+- **Ecrãs desta fatia:** Boas-vindas; Login; Registo passo 1 (dados + termos/RGPD), passo 2 (foto de perfil opcional + Condutor / Proprietário / Ambos), passo 3 (veículo, com "Saltar por agora"); Perfil (foto, dados, modo atual, troca de modo, lista de veículos com adicionar/editar/remover, terminar sessão, apagar conta).
 - **Sessão** gerida pelo `supabase-js` (armazenamento seguro com `expo-secure-store`); um cliente HTTP da API junta o JWT a cada pedido e converte o formato de erro da API em mensagens no ecrã.
 - Só existe login social com **Google** (nunca Apple). Nesta fase o botão Google aparece desativado com "Em breve"; é ativado quando o fornecedor for configurado na Supabase Auth.
 
@@ -209,4 +212,4 @@ Reproduzem os ecrãs do mockup (Claude Design "Karga APP — Protótipo"), reesc
 
 ## 6. Fora de âmbito desta especificação
 
-Ecrãs de espaços, mapa e reservas; endpoints de espaços, pesquisa e reservas; upload de fotografias e avatar; login com Google; tomada inteligente, pagamentos e avaliações; publicação da API. O modelo de dados já os prevê; os endpoints virão em especificações próprias.
+Ecrãs de espaços, mapa e reservas; endpoints de espaços, pesquisa e reservas; fotografias dos espaços; login com Google; tomada inteligente, pagamentos e avaliações; publicação da API. O modelo de dados já os prevê; os endpoints virão em especificações próprias.

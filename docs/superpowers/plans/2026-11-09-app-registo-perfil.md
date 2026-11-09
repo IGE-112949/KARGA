@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** App Expo (React Native) com boas-vindas, login, registo em 3 passos e ecrã de Perfil (dados, modo, veículos, terminar sessão, apagar conta), ligada à Supabase Auth e à API `/me`.
+**Goal:** App Expo (React Native) com boas-vindas, login, registo em 3 passos e ecrã de Perfil (foto, dados, modo, veículos, terminar sessão, apagar conta), ligada à Supabase Auth e à API `/me`.
 
 **Architecture:** `apps/mobile` com expo-router. A sessão vem do `supabase-js` (só autenticação); os dados vêm da API via um cliente HTTP que junta o JWT e converte o formato de erro. Um `AuthProvider` decide o destino (boas-vindas / onboarding / app) a partir da sessão e de `GET /me`. UI com um pequeno kit de componentes que reproduz o design base do mockup.
 
@@ -70,6 +70,25 @@ scripts/visual-check.mjs                → capturas app vs mockup (dev)
 - [ ] **Step 4:** Suite da API → PASS.
 - [ ] **Step 5:** Commit `feat(api): CORS para a app web` + `docs: mockup de referência`.
 
+### Task 1b: Foto de perfil na API
+
+**Files:**
+- Create: `apps/api/src/storage/avatarStore.ts`, `apps/api/src/modules/me/avatar.ts` (rotas + service)
+- Modify: `apps/api/src/app.ts` (`AppDeps.avatars`), `src/server.ts`, `src/modules/me/service.ts` (`deleteAccount` apaga a foto; `ProfileDto.avatarUrl`), `src/modules/me/schemas.ts`, `test/helpers/testApp.ts` (`FakeAvatarStore`)
+- Test: `apps/api/test/avatar.test.ts`
+- Supabase (conector): bucket `avatars` público, `file_size_limit` 5 MB, `allowed_mime_types` jpeg/png/webp.
+
+**Interfaces:**
+- Produces: `interface AvatarStore { upload(userId: string, data: Buffer, contentType: 'image/jpeg'|'image/png'|'image/webp'): Promise<string /* URL pública */>; remove(url: string): Promise<void> }`; `createSupabaseAvatarStore(url, serviceRoleKey)`; `ProfileDto` ganha `avatarUrl: string | null`.
+- `PUT /me/avatar` (multer em memória, campo `file`, limite 5 MB): tipo verificado pelos bytes iniciais (JPEG `FFD8FF`, PNG `89504E47`, WebP `RIFF....WEBP`), não pelo header → 400 `INVALID_IMAGE` "Formato de imagem não suportado (usa JPEG, PNG ou WebP)"; > 5 MB → 413 `IMAGE_TOO_LARGE` "A imagem tem mais de 5 MB"; sem perfil → 404; sucesso → grava `avatar_url`, remove a anterior, devolve `ProfileDto`.
+- `DELETE /me/avatar` → remove do Storage e põe `avatar_url = null` → 204.
+
+- [ ] **Step 1:** `avatar.test.ts`: PNG válido → 200 com `avatarUrl` do fake; segundo upload remove o primeiro URL; ficheiro de texto com `Content-Type: image/png` → 400 `INVALID_IMAGE`; 6 MB → 413; sem perfil → 404; `DELETE /me/avatar` → 204 e `GET /me` com `avatarUrl: null`; `DELETE /me` com foto → `FakeAvatarStore.removed` contém o URL.
+- [ ] **Step 2:** Correr → FAIL.
+- [ ] **Step 3:** Implementar; criar o bucket pelo conector.
+- [ ] **Step 4:** Suite da API → PASS.
+- [ ] **Step 5:** Commit `feat(api): foto de perfil`.
+
 ### Task 2: Projeto Expo, tema e kit de UI
 
 **Files:**
@@ -81,9 +100,10 @@ scripts/visual-check.mjs                → capturas app vs mockup (dev)
   - `theme = { colors: {...}, radius: { field: 14, button: 16, card: 20, chip: 20 }, font: { regular: 'Outfit_400Regular', medium: 'Outfit_500Medium', semibold: 'Outfit_600SemiBold', bold: 'Outfit_700Bold' }, shadow: { primary } }` com os valores das Global Constraints.
   - `<Button title variant="primary"|"secondary"|"text" onPress loading? disabled? />` — enquanto `loading` ou `disabled`, não chama `onPress`; `loading` mostra `ActivityIndicator`; `accessibilityRole="button"`.
   - `<TextField label value onChangeText error? secureTextEntry? keyboardType? autoComplete? hint? />` — mostra `error` (vermelho `#B91C1C`) ou `hint`; o olho de mostrar/esconder em campos `secureTextEntry`.
+  - `<Avatar uri? initials size onPress? />` (círculo; sem `uri` mostra as iniciais em fundo `#13263A`) e `pickAvatar(): Promise<{ uri, mimeType } | null>` em `src/lib/avatar.ts` (expo-image-picker com corte quadrado, depois expo-image-manipulator para 512×512 JPEG qualidade 0.8).
   - `<Checkbox checked onToggle>{children}</Checkbox>`, `<RoleCard title description icon selected onPress />`, `<StepDots total current />`, `<BackButton onPress />`, `<Screen scroll? background?>`, `<Chip label selected onPress />`, `<Icon name size color />` (SVG dos ícones do mockup usados nestes ecrãs: back, eye, car, home, swap, check, bolt, user, map, calendar, wallet, logout, trash, plus).
 
-- [ ] **Step 1:** Criar o projeto, instalar dependências (`npx expo install expo-router react-native-svg @expo-google-fonts/outfit expo-font expo-secure-store @react-native-async-storage/async-storage`, `npm i @supabase/supabase-js aes-js zod react-native-url-polyfill`, dev: `jest-expo jest @testing-library/react-native @types/jest`). `npm test` configurado com preset `jest-expo`.
+- [ ] **Step 1:** Criar o projeto, instalar dependências (`npx expo install expo-router react-native-svg @expo-google-fonts/outfit expo-font expo-secure-store @react-native-async-storage/async-storage expo-image-picker expo-image-manipulator`, `npm i @supabase/supabase-js aes-js zod react-native-url-polyfill`, dev: `jest-expo jest @testing-library/react-native @types/jest`). `npm test` configurado com preset `jest-expo`.
 - [ ] **Step 2:** Escrever `test/ui.test.tsx`: Button com `loading` não chama `onPress` ao ser pressionado e mostra indicador; Button `disabled` não chama `onPress`; dois toques seguidos num Button cujo `onPress` é uma promise pendente chamam `onPress` só uma vez (o Button fica `loading` enquanto a promise corre); TextField mostra o `error`; Checkbox chama `onToggle`.
 - [ ] **Step 3:** `npm test -w apps/mobile -- ui` → FAIL.
 - [ ] **Step 4:** Implementar tema e componentes (estilos com os tokens; o Button gere internamente o estado a carregar quando `onPress` devolve uma promise).
@@ -145,12 +165,12 @@ scripts/visual-check.mjs                → capturas app vs mockup (dev)
   - `validateRegister({ fullName, email, phone, password, acceptTerms })` → `Record<field, string>` de erros (vazio se válido): nome 2–100 após trim; email com `@` e domínio; telemóvel opcional, sem espaços `^\+[1-9]\d{7,14}$`; password ≥ 8 com pelo menos uma letra e um número; termos obrigatórios. Mensagens iguais às da API.
   - `normalizePlate(input): string | null` — cópia exata da regra da API (`apps/api/src/modules/vehicles/plate.ts`), com os mesmos casos de teste.
   - Passo 1: `supabase.auth.signUp({ email, password, options: { data: { full_name, phone } } })`. Nome e telemóvel ficam no `user_metadata`, para o passo 2 os ler mesmo que a app tenha sido fechada.
-  - Passo 2: lê `full_name`/`phone` de `session.user.user_metadata`; `RoleCard` Condutor / Proprietário / Ambos; "Continuar" → `POST /me { fullName, phone, isDriver, isHost, acceptTerms: true }` → `refreshProfile()`; se Proprietário → `/(app)/profile`, senão → `/register/vehicle`.
+  - Passo 2: foto de perfil opcional no topo (`Avatar` + "Adicionar foto"); lê `full_name`/`phone` de `session.user.user_metadata`; `RoleCard` Condutor / Proprietário / Ambos; "Continuar" → `POST /me { fullName, phone, isDriver, isHost, acceptTerms: true }` → se houver foto, `PUT /me/avatar` (multipart; falha da foto não bloqueia o registo, mostra aviso) → `refreshProfile()`; se Proprietário → `/(app)/profile`, senão → `/register/vehicle`.
   - Passo 3: Marca/Modelo, Matrícula, Ficha (chips Tipo 2 / Schuko / CCS) → `POST /me/vehicles` → `/(app)/profile`; "Saltar por agora" → `/(app)/profile`. Erros da API por campo (`details`) mostrados no campo respetivo; `PLATE_TAKEN` na matrícula.
   - Textos: passo 1 "Criar conta" / "Junta-te à rede comunitária de carregamento." / "Li e aceito os Termos de Utilização e a Política de Privacidade, incluindo o tratamento dos meus dados segundo o RGPD."; passo 2 "Como vais usar a Karga?" / "Podes mudar de modo a qualquer momento no Perfil."; passo 3 "Qual é o teu veículo?" / "Usamos estes dados para mostrar só os lugares compatíveis com o teu carro." / "Começar a usar a Karga" / "Saltar por agora". `StepDots` 1/2/3 de 3.
 
 - [ ] **Step 1:** `test/validation.test.ts`: os casos de `normalizePlate` da API; `validateRegister` com termos por aceitar → erro em `acceptTerms`; password `abcdefgh` → erro; telemóvel `"+351 912 345 678"` válido; `"912"` inválido; nome `" A "` inválido.
-- [ ] **Step 2:** `test/register.test.tsx`: passo 1 com termos por aceitar não chama `signUp`; preenchido e aceite → `signUp` com `options.data.full_name` (trim) e telemóvel sem espaços; passo 2 com "Ambos" envia `isDriver:true,isHost:true` e o nome do metadata; passo 2 com "Proprietário" navega para o perfil (sem passo 3); passo 3 com resposta `409 PLATE_TAKEN` mostra "Esta matrícula já está registada" no campo da matrícula; "Saltar por agora" não chama a API.
+- [ ] **Step 2:** `test/register.test.tsx`: passo 1 com termos por aceitar não chama `signUp`; preenchido e aceite → `signUp` com `options.data.full_name` (trim) e telemóvel sem espaços; passo 2 com "Ambos" envia `isDriver:true,isHost:true` e o nome do metadata; passo 2 com "Proprietário" navega para o perfil (sem passo 3); passo 2 com foto escolhida faz `POST /me` e depois `PUT /me/avatar`; passo 3 com resposta `409 PLATE_TAKEN` mostra "Esta matrícula já está registada" no campo da matrícula; "Saltar por agora" não chama a API.
 - [ ] **Step 3:** Correr → FAIL.
 - [ ] **Step 4:** Implementar.
 - [ ] **Step 5:** Correr → PASS; `tsc` sem erros.
@@ -167,7 +187,7 @@ scripts/visual-check.mjs                → capturas app vs mockup (dev)
 - Produces:
   - `type AppMode = 'driver' | 'host'`; `initialMode(profile): AppMode` (condutor se `isDriver`, senão proprietário); modo atual guardado em AsyncStorage (`karga.mode`), ignorado se o perfil já não tiver esse papel.
   - Separadores como no mockup: modo condutor "Mapa / Reservas / Carteira / Perfil"; modo proprietário "Início / Espaços / Reservas / Perfil". Os que não são Perfil mostram um ecrã "Em breve" com o ícone respetivo.
-  - **Perfil** (mockup "PERFIL"): cabeçalho "Perfil" com o selo do modo ("Modo Condutor" fundo `#ECF8F2` texto `#065F46` / "Modo Proprietário" fundo `#13263A` texto branco), avatar com iniciais, nome, email (da sessão), telemóvel; cartão de troca de modo:
+  - **Perfil** (mockup "PERFIL"): cabeçalho "Perfil" com o selo do modo ("Modo Condutor" fundo `#ECF8F2` texto `#065F46` / "Modo Proprietário" fundo `#13263A` texto branco), avatar (foto ou iniciais; tocar abre "Alterar foto" / "Remover foto" → `PUT`/`DELETE /me/avatar` → `refreshProfile()`), nome, email (da sessão), telemóvel; cartão de troca de modo:
     - com os dois papéis: "Mudar para Modo Proprietário/Condutor" (só muda o modo local);
     - com um só papel: "Ativar Modo Proprietário/Condutor" → `PATCH /me { isHost|isDriver: true }` → `refreshProfile()` → muda o modo.
   - Secção "Os meus veículos": lista (matrícula, marca/modelo, ficha, selo "Predefinido"); tocar abre `vehicle-form` (editar, "Definir como predefinido", "Remover"); botão "Adicionar veículo". Formulário reutiliza os campos do passo 3.
@@ -176,7 +196,7 @@ scripts/visual-check.mjs                → capturas app vs mockup (dev)
   - "Apagar conta" (texto vermelho) → confirmação ("Esta ação apaga a tua conta e todos os teus dados. Não pode ser desfeita.") → `DELETE /me` → `signOut()`.
 
 - [ ] **Step 1:** `test/mode.test.ts`: `initialMode` para só condutor, só proprietário e ambos; modo guardado `host` com perfil só condutor → `driver`.
-- [ ] **Step 2:** `test/profile.test.tsx` (com `useAuth` mockado): mostra nome, email e "Modo Condutor"; perfil só condutor mostra "Ativar Modo Proprietário" e ao tocar envia `PATCH /me {isHost:true}`; lista os veículos com "Predefinido" no certo; "Apagar conta" só chama `DELETE /me` depois de confirmar; "Terminar sessão" chama `signOut`.
+- [ ] **Step 2:** `test/profile.test.tsx` (com `useAuth` mockado): mostra nome, email e "Modo Condutor"; com `avatarUrl` mostra a imagem, sem mostra as iniciais; perfil só condutor mostra "Ativar Modo Proprietário" e ao tocar envia `PATCH /me {isHost:true}`; lista os veículos com "Predefinido" no certo; "Apagar conta" só chama `DELETE /me` depois de confirmar; "Terminar sessão" chama `signOut`.
 - [ ] **Step 3:** Correr → FAIL.
 - [ ] **Step 4:** Implementar.
 - [ ] **Step 5:** Correr → PASS; `tsc` sem erros.
@@ -197,4 +217,4 @@ scripts/visual-check.mjs                → capturas app vs mockup (dev)
 
 ## Fora deste plano
 
-Recuperação de password ("Esqueceste-te da password?" fica visível mas desativado com "Em breve"), login Google, fotografia de perfil, ecrãs de mapa/espaços/reservas.
+Recuperação de password ("Esqueceste-te da password?" fica visível mas desativado com "Em breve"), login Google, ecrãs de mapa/espaços/reservas.
