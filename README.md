@@ -54,6 +54,14 @@ Endpoints (todos exceto `/health` exigem `Authorization: Bearer <JWT da Supabase
 
 Erros: `{ "error": { "code", "message", "details"? } }`.
 
+## Testar contra o Supabase real (sem instalar nada: GitHub Codespaces)
+
+1. No GitHub, em **Settings › Secrets and variables › Codespaces**, criar os secrets `DATABASE_URL`, `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (ficam como variáveis de ambiente no Codespace; não vão para o código).
+2. Na página do repositório: **Code › Codespaces › Create codespace on feat/bd-api-perfil**. O `npm install` corre sozinho.
+3. No terminal do Codespace: `npm run dev -w apps/api`.
+4. Abrir um segundo terminal (+) e correr `SUPABASE_PUBLISHABLE_KEY=sb_publishable__voVNlvZIR9p0jRP3jIvkA_vk_KY98_ npm run smoke -w apps/api`.
+   O script cria um utilizador de teste, chama `/me` e `/me/vehicles`, apaga a conta no fim e mostra ✅ ou ❌.
+
 ## Base de dados
 
 - Projeto Supabase: `karga` (`vfpgzvhfxezszjrajuyv`, região eu-west-3 Paris).
