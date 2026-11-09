@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import type { Db } from './db/types.js';
 import type { AuthVerifier } from './auth/verifier.js';
 import type { AuthAdmin } from './auth/admin.js';
@@ -11,6 +12,8 @@ export type AppDeps = { db: Db; auth: AuthVerifier; authAdmin: AuthAdmin };
 
 export function createApp(deps: AppDeps): express.Express {
   const app = express();
+  // A app web (Expo) chama a API a partir de outra origem; sem cookies, só Bearer token.
+  app.use(cors({ origin: true }));
   app.use(express.json());
 
   app.get('/health', (_req, res) => {
