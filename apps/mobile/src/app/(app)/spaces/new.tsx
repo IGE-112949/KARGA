@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/auth/AuthProvider';
+import { ApiError } from '@/lib/api';
 import type { Errors } from '@/lib/validation';
 import { Screen } from '@/ui/Screen';
 import { Button } from '@/ui/Button';
@@ -54,8 +55,9 @@ export default function NewSpace() {
       const form = await spaceFormData(createPayload(d), d.photos);
       const space = await api.upload<{ id: string }>('/me/spaces', form, 'POST');
       router.replace({ pathname: '/spaces/published', params: { id: space.id } });
-    } catch {
-      setError('Não foi possível publicar. Tenta novamente.');
+    } catch (e) {
+      const detail = e instanceof ApiError && e.code === 'VALIDATION_ERROR' ? e.details?.[0]?.message : undefined;
+      setError(detail ? `Não foi possível publicar: ${detail}` : 'Não foi possível publicar. Tenta novamente.');
     }
   };
 

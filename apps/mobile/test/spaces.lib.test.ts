@@ -1,3 +1,4 @@
+import { emptyDraft, validateLocation, validatePriceSchedule } from '@/spaces/draft';
 import { ampsToKw, formatEuro, monthlyEstimate, parseEuro, scheduleSummary, weeklyHours, windowHours } from '@/lib/spaces';
 
 describe('regras dos espaços (app)', () => {
@@ -31,5 +32,18 @@ describe('regras dos espaços (app)', () => {
     expect(parseEuro(' 1.5 ')).toBe(1.5);
     expect(Number.isNaN(parseEuro('abc'))).toBe(true);
     expect(formatEuro(0.3)).toBe('0,30 €');
+  });
+});
+
+describe('validação do rascunho', () => {
+  it('dia com início igual ao fim é recusado com o nome do dia', () => {
+    const d = emptyDraft();
+    d.price = '0,30';
+    d.days[0] = { on: true, startTime: '19:00', endTime: '19:00' };
+    expect(validatePriceSchedule(d).days).toBe('Segunda: a hora de fim tem de ser diferente da de início');
+  });
+  it('morada com mais de 200 caracteres é recusada', () => {
+    const d = { ...emptyDraft(), title: 'Garagem', address: 'R'.repeat(201), point: { latitude: 1, longitude: 1 } };
+    expect(validateLocation(d).address).toBe('A morada é demasiado longa');
   });
 });

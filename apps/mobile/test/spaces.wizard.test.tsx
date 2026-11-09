@@ -53,6 +53,29 @@ async function step3() {
 }
 
 describe('Novo espaço', () => {
+  it('erro de validação da API ao publicar mostra a mensagem do campo', async () => {
+    mockApi.upload.mockRejectedValue(new ApiError(400, 'VALIDATION_ERROR', 'Dados inválidos', [{ field: 'title', message: 'O nome é demasiado longo' }]));
+    await render(<NewSpace />);
+    await step1();
+    await step2();
+    await step3();
+    await next();
+    await fireEvent.press(screen.getByRole('button', { name: 'Publicar espaço' }));
+    expect(await screen.findByText('Não foi possível publicar: O nome é demasiado longo')).toBeTruthy();
+  });
+
+  it('sem permissão de localização, a morada mostra o aviso certo e volta a tentar', async () => {
+    const loc = jest.requireMock('@/lib/location');
+    loc.geocodeAddress.mockRejectedValueOnce(new loc.LocationPermissionError('x'));
+    await render(<NewSpace />);
+    const addr = screen.getByLabelText('Morada');
+    await fireEvent.changeText(addr, 'Rua Ferreira Borges, 40');
+    await fireEvent(addr, 'blur');
+    expect(await screen.findByText('Sem acesso à localização: marca o lugar tocando no mapa.')).toBeTruthy();
+    await fireEvent(addr, 'blur');
+    expect(loc.geocodeAddress).toHaveBeenCalledTimes(2);
+  });
+
   it('passo 1 não avança sem marcar o lugar', async () => {
     await render(<NewSpace />);
     await fireEvent.changeText(screen.getByLabelText('Nome do espaço'), 'Garagem');

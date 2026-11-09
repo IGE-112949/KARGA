@@ -17,13 +17,17 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
   const geocode = async () => {
     const a = d.address.trim();
     if (a.length < 5 || a === lastGeocoded.current) return;
-    lastGeocoded.current = a;
-    const p = await geocodeAddress(a);
-    if (p) {
-      setWarning(null);
-      set({ point: p });
-    } else {
-      setWarning('Não encontrámos esta morada. Ajusta o pin no mapa.');
+    try {
+      const p = await geocodeAddress(a);
+      if (p) {
+        lastGeocoded.current = a;
+        setWarning(null);
+        set({ point: p });
+      } else {
+        setWarning('Não encontrámos esta morada. Ajusta o pin no mapa.');
+      }
+    } catch {
+      setWarning('Sem acesso à localização: marca o lugar tocando no mapa.');
     }
   };
 

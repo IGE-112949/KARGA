@@ -1,5 +1,5 @@
 import type { LatLng } from '@/lib/location';
-import { ampsToKw, kwToAmps, parseEuro, type Space, type SpacePlug, type SpaceType, type Window } from '@/lib/spaces';
+import { WEEKDAY_NAMES, ampsToKw, kwToAmps, parseEuro, type Space, type SpacePlug, type SpaceType, type Window } from '@/lib/spaces';
 import type { Errors } from '@/lib/validation';
 
 export type DayDraft = { on: boolean; startTime: string; endTime: string };
@@ -58,6 +58,7 @@ export function validateLocation(d: SpaceDraft): Errors {
   if (t.length < 3) e.title = 'O nome tem de ter pelo menos 3 caracteres';
   else if (t.length > 60) e.title = 'O nome é demasiado longo';
   if (d.address.trim().length < 5) e.address = 'Indica a morada';
+  else if (d.address.trim().length > 200) e.address = 'A morada é demasiado longa';
   if (!d.point) e.point = 'Marca o lugar no mapa';
   if (d.spotDetails.length > 60) e.spotDetails = 'Demasiado longo';
   return e;
@@ -82,6 +83,8 @@ export function validatePriceSchedule(d: SpaceDraft): Errors {
     if (Number.isNaN(en) || en < 0.05 || en > 1) e.energy = 'Entre 0,05 € e 1 € por kWh (ou deixa vazio)';
   }
   if (!d.days.some((x) => x.on)) e.days = 'Escolhe pelo menos um dia';
+  const same = d.days.findIndex((x) => x.on && x.startTime === x.endTime);
+  if (same >= 0) e.days = `${WEEKDAY_NAMES[same]}: a hora de fim tem de ser diferente da de início`;
   return e;
 }
 
