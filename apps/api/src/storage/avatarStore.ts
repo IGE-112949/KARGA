@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-
-export type ImageType = 'image/jpeg' | 'image/png' | 'image/webp';
+import { IMAGE_EXT as EXT, type ImageType } from '../lib/images.js';
+export type { ImageType };
 
 export interface AvatarStore {
   /** Guarda a imagem e devolve o URL público. */
@@ -10,7 +10,6 @@ export interface AvatarStore {
 }
 
 const BUCKET = 'avatars';
-const EXT: Record<ImageType, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 
 // Bucket público "avatars" no Supabase Storage; escrita só pelo servidor (service role).
 export function createSupabaseAvatarStore(supabaseUrl: string, serviceRoleKey: string): AvatarStore {

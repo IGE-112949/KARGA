@@ -5,6 +5,7 @@ import { createDb } from './db/client.js';
 import { createSupabaseVerifier } from './auth/verifier.js';
 import { createSupabaseAuthAdmin } from './auth/admin.js';
 import { createSupabaseAvatarStore } from './storage/avatarStore.js';
+import { createSupabaseSpacePhotoStore } from './storage/spacePhotoStore.js';
 
 const config = loadConfig();
 const app = createApp({
@@ -12,6 +13,7 @@ const app = createApp({
   auth: createSupabaseVerifier(config.SUPABASE_URL),
   authAdmin: createSupabaseAuthAdmin(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY),
   avatars: createSupabaseAvatarStore(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY),
+  spacePhotos: createSupabaseSpacePhotoStore(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY),
 });
 
 app.listen(config.PORT, () => {

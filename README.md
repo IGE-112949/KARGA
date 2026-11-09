@@ -52,6 +52,11 @@ Endpoints (todos exceto `/health` exigem `Authorization: Bearer <JWT da Supabase
 | GET / POST | `/me/vehicles` | veículos |
 | PATCH / DELETE | `/me/vehicles/:id` | editar / definir predefinido / remover |
 | PUT / DELETE | `/me/avatar` | foto de perfil (multipart, campo `file`, JPEG/PNG/WebP até 5 MB) |
+| GET / POST | `/me/spaces` | os meus espaços / criar (multipart: `data` JSON + `photos` 1–5) — só modo proprietário |
+| GET / PATCH / DELETE | `/me/spaces/:id` | detalhe / editar e visibilidade / eliminar (fica com estado `deleted`) |
+| PUT | `/me/spaces/:id/availability` | horário semanal (um por dia) |
+| POST · PATCH · DELETE | `/me/spaces/:id/photos(/:photoId)` | adicionar / tornar capa / remover foto |
+| GET · POST · DELETE | `/me/spaces/:id/blocks(/:blockId)` | datas bloqueadas |
 
 Erros: `{ "error": { "code", "message", "details"? } }`.
 
@@ -80,18 +85,21 @@ Erros: `{ "error": { "code", "message", "details"? } }`.
    npx expo start
    ```
 
-3. No telemóvel instalar a app **Expo Go** (Play Store / App Store), estar na mesma rede Wi-Fi que o PC e ler o QR code que aparece no terminal. Tecla `w` abre a versão web no browser.
+3. **Emulador Android** (Android Studio › Device Manager › ▶): em `apps/mobile/.env` usar `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000`, correr `npx expo start --localhost -c` e carregar em `a` (o `--localhost` liga o emulador ao PC sem passar pela rede). Para fotos: abrir a app Camera do emulador e tirar algumas. O mapa (react-native-maps) só existe no emulador/telemóvel; no browser aparece "Mapa disponível na app".
+
+4. No telemóvel instalar a app **Expo Go** (Play Store / App Store), estar na mesma rede Wi-Fi que o PC e ler o QR code que aparece no terminal. Tecla `w` abre a versão web no browser.
 
 Testes da app (sem telemóvel nem rede): `npm test -w apps/mobile` e `npx tsc --noEmit` dentro de `apps/mobile`.
 
 Verificação visual (opcional, precisa do Playwright): `node scripts/visual-check.mjs` dentro de `apps/mobile` gera `visual-check/<ecrã>.png` com a app ao lado do mockup.
 
-Ecrãs desta fase: boas-vindas, login, registo em 3 passos (conta → modo de utilização + foto → veículo) e perfil (foto, dados pessoais, modo condutor/proprietário, veículos, terminar sessão, apagar conta). Os restantes separadores mostram "Em breve".
+Ecrãs: boas-vindas, login, registo em 3 passos (conta → modo de utilização + foto → veículo) e perfil (foto, dados pessoais, modo condutor/proprietário, veículos, terminar sessão, apagar conta) e, no modo proprietário, o separador Espaços (lista, assistente "Novo espaço" em 5 passos, gerir espaço: visibilidade, edição, fotos, datas bloqueadas, eliminar). Os restantes separadores mostram "Em breve".
 
 ## Base de dados
 
 - Projeto Supabase: `karga` (`vfpgzvhfxezszjrajuyv`, região eu-west-3 Paris).
 - O schema está em `apps/api/src/db/schema.ts`. Para uma alteração: editar o schema, correr `npm run db:generate -w apps/api` (gera um novo ficheiro em `db/migrations/`) e aplicar esse ficheiro ao Supabase (pelo conector do Claude ou pelo SQL Editor). Nunca usar `drizzle-kit push`.
 - Regras que o Drizzle não declara (extensões, constraint de exclusão das reservas, RLS) estão nas migrações manuais `0000_extensions.sql` e `0002_constraints_rls.sql`.
-- Fotos de perfil no Supabase Storage, bucket público `avatars` (escrito só pela API).
+- Fotos no Supabase Storage, buckets públicos `avatars` e `space-photos` (escritos só pela API).
+- Eliminar um espaço não apaga a linha (estado `deleted`): as reservas e o histórico mantêm-se.
 - Todas as tabelas têm RLS ativo **sem políticas**: só a API (ligação de servidor) acede aos dados. O aviso "RLS Enabled No Policy" do Supabase é esperado.

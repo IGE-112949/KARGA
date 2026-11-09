@@ -11,7 +11,8 @@ export type Api = {
   get<T>(path: string): Promise<T>;
   post<T>(path: string, body: unknown): Promise<T>;
   patch<T>(path: string, body: unknown): Promise<T>;
-  upload<T>(path: string, form: FormData): Promise<T>;
+  put<T>(path: string, body: unknown): Promise<T>;
+  upload<T>(path: string, form: FormData, method?: 'PUT' | 'POST'): Promise<T>;
   del(path: string): Promise<void>;
 };
 
@@ -29,7 +30,9 @@ export function createApi(getToken: () => Promise<string | null>, baseUrl: strin
         headers,
         body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
       });
-    } catch {
+    } catch (e) {
+      // Em desenvolvimento, o motivo real aparece no terminal do Expo.
+      if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn(`[api] ${method} ${path} falhou:`, e);
       throw new ApiError(0, 'NETWORK_ERROR', 'Sem ligação à internet ou servidor indisponível.');
     }
     if (res.status === 204) return undefined as T;
@@ -52,7 +55,8 @@ export function createApi(getToken: () => Promise<string | null>, baseUrl: strin
     get: (path) => request('GET', path),
     post: (path, body) => request('POST', path, body),
     patch: (path, body) => request('PATCH', path, body),
-    upload: (path, form) => request('PUT', path, undefined, form),
+    put: (path, body) => request('PUT', path, body),
+    upload: (path, form, method = 'PUT') => request(method, path, undefined, form),
     del: (path) => request<void>('DELETE', path),
   };
 }

@@ -5,6 +5,7 @@ import { createHs256Verifier } from '../../src/auth/verifier.js';
 import type { AuthAdmin } from '../../src/auth/admin.js';
 import type { AvatarStore } from '../../src/storage/avatarStore.js';
 import type { Db } from '../../src/db/types.js';
+import type { SpacePhotoStore } from '../../src/storage/spacePhotoStore.js';
 import { getCleanTestDb } from './testDb.js';
 
 const SECRET = 'test-secret';
@@ -34,11 +35,33 @@ export class FakeAvatarStore implements AvatarStore {
   }
 }
 
+export class FakeSpacePhotoStore implements SpacePhotoStore {
+  uploaded: string[] = [];
+  removed: string[] = [];
+  /** Faz falhar o n-ésimo envio (1 = primeiro). */
+  failOn: number | null = null;
+  private n = 0;
+  async upload(ownerId: string, spaceId: string, _data: Buffer, contentType: string) {
+    this.n++;
+    if (this.failOn === this.n) throw new Error('falha simulada do Storage');
+    const path = `${ownerId}/${spaceId}/${this.n}.${contentType.split('/')[1]}`;
+    this.uploaded.push(path);
+    return path;
+  }
+  async remove(paths: string[]) {
+    this.removed.push(...paths);
+  }
+  publicUrl(path: string) {
+    return `https://storage.test/space-photos/${path}`;
+  }
+}
+
 export async function createTestApp() {
   const { db, pg } = await getCleanTestDb();
   const authAdmin = new FakeAuthAdmin(pg);
   const avatars = new FakeAvatarStore();
-  const app = createApp({ db: db as Db, auth: createHs256Verifier(SECRET, ISSUER), authAdmin, avatars });
+  const spacePhotos = new FakeSpacePhotoStore();
+  const app = createApp({ db: db as Db, auth: createHs256Verifier(SECRET, ISSUER), authAdmin, avatars, spacePhotos });
 
   // Cria o utilizador na "Auth" (se não existir) e devolve um token válido para ele.
   async function tokenFor(userId: string, opts: { expiresIn?: string } = {}) {
@@ -53,5 +76,5 @@ export async function createTestApp() {
       .sign(new TextEncoder().encode(SECRET));
   }
 
-  return { app, db, pg, authAdmin, avatars, tokenFor };
+  return { app, db, pg, authAdmin, avatars, spacePhotos, tokenFor };
 }

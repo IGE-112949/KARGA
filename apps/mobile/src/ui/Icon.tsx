@@ -19,6 +19,12 @@ const ICONS = {
   camera: <><Path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><Circle cx="12" cy="13" r="3" /></>,
   grid: <><Rect width="7" height="7" x="3" y="3" rx="1" /><Rect width="7" height="7" x="14" y="3" rx="1" /><Rect width="7" height="7" x="14" y="14" rx="1" /><Rect width="7" height="7" x="3" y="14" rx="1" /></>,
   bolt: <Polygon points="13 2 4 14 11 14 10 22 19 10 12 10 13 2" />,
+  close: <Path d="M18 6 6 18M6 6l12 12" />,
+  info: <><Circle cx="12" cy="12" r="10" /><Path d="M12 16v-4M12 8h.01" /></>,
+  clock: <><Circle cx="12" cy="12" r="10" /><Path d="M12 6v6l4 2" /></>,
+  star: <Polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
+  locate: <><Circle cx="12" cy="12" r="3" /><Path d="M12 2v3M12 19v3M2 12h3M19 12h3" /><Circle cx="12" cy="12" r="7" /></>,
+  lock: <><Rect width="18" height="11" x="3" y="11" rx="2" /><Path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
 } as const;
 
 export type IconName = keyof typeof ICONS;
