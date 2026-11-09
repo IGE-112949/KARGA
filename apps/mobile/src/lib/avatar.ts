@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
@@ -14,4 +15,16 @@ export async function pickAvatar(): Promise<PickedImage | null> {
   const img = await ctx.renderAsync();
   const out = await img.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });
   return { uri: out.uri, mimeType: 'image/jpeg' };
+}
+
+// Corpo multipart para PUT /me/avatar (campo `file`).
+export async function avatarFormData(uri: string): Promise<FormData> {
+  const form = new FormData();
+  if (Platform.OS === 'web') {
+    form.append('file', await (await fetch(uri)).blob(), 'avatar.jpg');
+  } else {
+    // React Native aceita { uri, name, type } como ficheiro.
+    form.append('file', { uri, name: 'avatar.jpg', type: 'image/jpeg' } as unknown as Blob);
+  }
+  return form;
 }
