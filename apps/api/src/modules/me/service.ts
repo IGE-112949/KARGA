@@ -1,4 +1,5 @@
 import type { Db } from '../../db/types.js';
+import type { AuthAdmin } from '../../auth/admin.js';
 import { AppError } from '../../lib/errors.js';
 import { listVehiclesByUser } from '../vehicles/repository.js';
 import { findProfile, insertProfile, updateProfile, type ProfileRow } from './repository.js';
@@ -58,4 +59,10 @@ export async function editProfile(db: Db, userId: string, input: UpdateProfileIn
     isHost,
   });
   return toDto(db, row);
+}
+
+// RGPD: apaga o utilizador na Auth; o cascade apaga o perfil e os dados associados.
+export async function deleteAccount(db: Db, authAdmin: AuthAdmin, userId: string): Promise<void> {
+  await requireProfile(db, userId);
+  await authAdmin.deleteUser(userId);
 }
