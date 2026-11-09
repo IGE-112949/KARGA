@@ -16,10 +16,10 @@ export function TextField({ label, error, hint, secureTextEntry, style, ...input
           accessibilityLabel={label}
           placeholderTextColor="#9AA5AE"
           secureTextEntry={secureTextEntry && hidden}
+          {...input}
           onFocus={(e) => { setFocused(true); input.onFocus?.(e); }}
           onBlur={(e) => { setFocused(false); input.onBlur?.(e); }}
-          style={[styles.input, secureTextEntry && { paddingRight: 52 }, focused && styles.focused, !!error && styles.invalid, style]}
-          {...input}
+          style={[styles.input, secureTextEntry && { paddingRight: 52 }, focused && styles.focused, !!error && styles.invalid, input.multiline && styles.multiline, style]}
         />
         {secureTextEntry && (
           <Pressable accessibilityRole="button" accessibilityLabel={hidden ? 'Mostrar password' : 'Esconder password'}
@@ -35,6 +35,7 @@ export function TextField({ label, error, hint, secureTextEntry, style, ...input
 
 const styles = StyleSheet.create({
   wrap: { gap: 6 },
+  multiline: { height: 96, paddingTop: 12, textAlignVertical: 'top' },
   label: { fontSize: 14, fontFamily: theme.font.medium, color: theme.colors.textLabel },
   input: {
     height: 50, paddingHorizontal: 16, borderWidth: 1.5, borderColor: theme.colors.fieldBorder, borderRadius: theme.radius.field,
