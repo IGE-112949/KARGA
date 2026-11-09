@@ -11,6 +11,7 @@ export type Api = {
   get<T>(path: string): Promise<T>;
   post<T>(path: string, body: unknown): Promise<T>;
   patch<T>(path: string, body: unknown): Promise<T>;
+  put<T>(path: string, body: unknown): Promise<T>;
   upload<T>(path: string, form: FormData, method?: 'PUT' | 'POST'): Promise<T>;
   del(path: string): Promise<void>;
 };
@@ -52,6 +53,7 @@ export function createApi(getToken: () => Promise<string | null>, baseUrl: strin
     get: (path) => request('GET', path),
     post: (path, body) => request('POST', path, body),
     patch: (path, body) => request('PATCH', path, body),
+    put: (path, body) => request('PUT', path, body),
     upload: (path, form, method = 'PUT') => request(method, path, undefined, form),
     del: (path) => request<void>('DELETE', path),
   };
