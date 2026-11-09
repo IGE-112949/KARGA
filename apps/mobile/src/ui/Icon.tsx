@@ -1,0 +1,35 @@
+import Svg, { Path, Circle, Rect, Polygon } from 'react-native-svg';
+
+// Ícones do mockup (traço 2px, estilo Lucide).
+const ICONS = {
+  back: <><Path d="m12 19-7-7 7-7" /><Path d="M19 12H5" /></>,
+  eye: <><Path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0" /><Circle cx="12" cy="12" r="3" /></>,
+  car: <><Path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18.4 10 16 6.6A2 2 0 0 0 14.4 6H7.2a2 2 0 0 0-1.7 1L3 11v5c0 .6.4 1 1 1h2" /><Circle cx="7" cy="17" r="2" /><Circle cx="17" cy="17" r="2" /><Path d="M9 17h6" /></>,
+  home: <><Path d="M3 21V9l9-6 9 6v12" /><Path d="M7 21v-8h10v8" /><Path d="M7 17h10" /></>,
+  swap: <><Path d="m17 2 4 4-4 4" /><Path d="M3 11v-1a4 4 0 0 1 4-4h14" /><Path d="m7 22-4-4 4-4" /><Path d="M21 13v1a4 4 0 0 1-4 4H3" /></>,
+  check: <Path d="M20 6 9 17l-5-5" />,
+  user: <><Circle cx="12" cy="8" r="4" /><Path d="M4 21a8 8 0 0 1 16 0" /></>,
+  map: <><Path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><Circle cx="12" cy="10" r="3" /></>,
+  calendar: <><Rect width="18" height="18" x="3" y="4" rx="2" /><Path d="M16 2v4M8 2v4M3 10h18" /></>,
+  wallet: <><Path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><Path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></>,
+  logout: <><Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><Path d="m16 17 5-5-5-5" /><Path d="M21 12H9" /></>,
+  trash: <><Path d="M3 6h18" /><Path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><Path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>,
+  plus: <Path d="M12 5v14M5 12h14" />,
+  chevron: <Path d="m9 18 6-6-6-6" />,
+  camera: <><Path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><Circle cx="12" cy="13" r="3" /></>,
+  grid: <><Rect width="7" height="7" x="3" y="3" rx="1" /><Rect width="7" height="7" x="14" y="3" rx="1" /><Rect width="7" height="7" x="14" y="14" rx="1" /><Rect width="7" height="7" x="3" y="14" rx="1" /></>,
+  bolt: <Polygon points="13 2 4 14 11 14 10 22 19 10 12 10 13 2" />,
+} as const;
+
+export type IconName = keyof typeof ICONS;
+
+export function Icon({ name, size = 22, color = '#13263A', filled = false, strokeWidth = 2 }: {
+  name: IconName; size?: number; color?: string; filled?: boolean; strokeWidth?: number;
+}) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={filled ? 'none' : color}
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      {ICONS[name]}
+    </Svg>
+  );
+}
