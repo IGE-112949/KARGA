@@ -1,4 +1,5 @@
 import { render, fireEvent, screen } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Profile } from '@/lib/types';
 
 const mockApi = { get: jest.fn(), post: jest.fn(), patch: jest.fn(), del: jest.fn(), upload: jest.fn() };
@@ -27,8 +28,9 @@ const base: Profile = {
 
 const show = () => render(<ModeProvider><ProfileScreen /></ModeProvider>);
 
-beforeEach(() => {
+beforeEach(async () => {
   jest.clearAllMocks();
+  await AsyncStorage.clear();
   mockProfile = base;
   mockRefresh.mockResolvedValue(base);
 });
@@ -51,12 +53,24 @@ describe('Perfil', () => {
     expect(screen.getByTestId('avatar-image')).toBeTruthy();
   });
 
-  it('só condutor: "Ativar Modo Proprietário" envia PATCH /me {isHost:true}', async () => {
+  it('só condutor: "Ativar Modo Proprietário" pede confirmação antes do PATCH /me {isHost:true}', async () => {
     mockApi.patch.mockResolvedValue({});
     await show();
     await fireEvent.press(screen.getByRole('button', { name: /Ativar Modo Proprietário/ }));
+    expect(mockApi.patch).not.toHaveBeenCalled();
+    expect(screen.getByText('Ativar Modo Proprietário?')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Ativar' }));
     expect(mockApi.patch).toHaveBeenCalledWith('/me', { isHost: true });
     expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it('com os dois modos ativos muda sem pedir confirmação', async () => {
+    mockProfile = { ...base, isHost: true };
+    await show();
+    await fireEvent.press(screen.getByRole('button', { name: /Mudar para Modo Proprietário/ }));
+    expect(screen.queryByText('Ativar Modo Proprietário?')).toBeNull();
+    expect(await screen.findByText('Modo Proprietário')).toBeTruthy();
+    expect(mockApi.patch).not.toHaveBeenCalled();
   });
 
   it('lista os veículos com "Predefinido" no certo', async () => {

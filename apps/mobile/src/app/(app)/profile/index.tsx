@@ -41,6 +41,7 @@ export default function ProfileScreen() {
   const { mode, setMode } = useMode();
   const [photoSheet, setPhotoSheet] = useState(false);
   const [deleteSheet, setDeleteSheet] = useState(false);
+  const [activateSheet, setActivateSheet] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [name, setName] = useState(profile?.fullName ?? '');
   const [phone, setPhone] = useState(formatPhone(profile?.phone));
@@ -58,16 +59,21 @@ export default function ProfileScreen() {
   const otherLabel = isHostMode ? 'Modo Condutor' : 'Modo Proprietário';
   const hasOther = isHostMode ? profile.isDriver : profile.isHost;
 
-  const switchMode = async () => {
+  // Ativar um modo novo pede confirmação (evita toques acidentais); mudar entre modos já ativos é imediato.
+  const switchMode = () => {
     setNotice(null);
-    if (!hasOther) {
-      try {
-        await api.patch('/me', isHostMode ? { isDriver: true } : { isHost: true });
-        await refreshProfile();
-      } catch (e) {
-        setNotice(errMsg(e));
-        return;
-      }
+    if (hasOther) setMode(other);
+    else setActivateSheet(true);
+  };
+
+  const activateOther = async () => {
+    setActivateSheet(false);
+    try {
+      await api.patch('/me', isHostMode ? { isDriver: true } : { isHost: true });
+      await refreshProfile();
+    } catch (e) {
+      setNotice(errMsg(e));
+      return;
     }
     setMode(other);
   };
@@ -187,6 +193,11 @@ export default function ProfileScreen() {
           { title: profile.avatarUrl ? 'Alterar foto' : 'Adicionar foto', onPress: changePhoto, variant: 'primary' },
           ...(profile.avatarUrl ? [{ title: 'Remover foto', onPress: removePhoto, variant: 'danger' as const }] : []),
         ]} />
+      <Sheet visible={activateSheet} title={`Ativar ${otherLabel}?`} onClose={() => setActivateSheet(false)}
+        message={isHostMode
+          ? 'Vais poder procurar e reservar lugares com carregamento. Podes voltar ao Modo Proprietário a qualquer momento.'
+          : 'Vais poder anunciar o teu lugar de estacionamento com tomada. Podes voltar ao Modo Condutor a qualquer momento.'}
+        actions={[{ title: 'Ativar', onPress: activateOther, variant: 'primary' }]} />
       <Sheet visible={deleteSheet} title="Apagar conta?" onClose={() => setDeleteSheet(false)}
         message="Esta ação apaga a tua conta e todos os teus dados. Não pode ser desfeita."
         actions={[{ title: 'Apagar definitivamente', onPress: deleteAccount, variant: 'danger' }]} />
