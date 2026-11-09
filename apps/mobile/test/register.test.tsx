@@ -28,7 +28,7 @@ beforeEach(() => {
 async function fillStep1() {
   await fireEvent.changeText(screen.getByLabelText('Nome completo'), '  Ana Silva ');
   await fireEvent.changeText(screen.getByLabelText('Email'), ' Ana@Mail.pt');
-  await fireEvent.changeText(screen.getByLabelText('Telemóvel'), '+351 912 345 678');
+  await fireEvent.changeText(screen.getByLabelText('Telemóvel'), '912 345 678');
   await fireEvent.changeText(screen.getByLabelText('Password'), 'segredo123');
 }
 
@@ -36,7 +36,7 @@ describe('Registo · passo 1', () => {
   it('sem aceitar os termos não chama signUp', async () => {
     await render(<Step1 />);
     await fillStep1();
-    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Criar conta' }));
     expect(mockSignUp).not.toHaveBeenCalled();
     expect(screen.getByText('Tens de aceitar os Termos e a Política de Privacidade')).toBeTruthy();
   });
@@ -46,7 +46,7 @@ describe('Registo · passo 1', () => {
     await render(<Step1 />);
     await fillStep1();
     await fireEvent.press(screen.getByRole('checkbox'));
-    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Criar conta' }));
     expect(mockSignUp).toHaveBeenCalledWith({
       email: 'ana@mail.pt', password: 'segredo123', options: { data: { full_name: 'Ana Silva', phone: '+351912345678' } },
     });
@@ -58,7 +58,7 @@ describe('Registo · passo 1', () => {
     await render(<Step1 />);
     await fillStep1();
     await fireEvent.press(screen.getByRole('checkbox'));
-    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Criar conta' }));
     expect(await screen.findByText('Já existe uma conta com este email.')).toBeTruthy();
   });
 });

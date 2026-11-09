@@ -5,7 +5,7 @@ import { useAuth } from '@/auth/AuthProvider';
 import { useMode } from '@/profile/ModeContext';
 import { ApiError } from '@/lib/api';
 import { avatarFormData, pickAvatar } from '@/lib/avatar';
-import { apiFieldErrors, cleanPhone, validateName, validatePhone, type Errors } from '@/lib/validation';
+import { apiFieldErrors, formatPhone, normalizePhone, validateName, validatePhone, type Errors } from '@/lib/validation';
 import type { Vehicle } from '@/lib/types';
 import { Screen } from '@/ui/Screen';
 import { Avatar } from '@/ui/Avatar';
@@ -43,12 +43,12 @@ export default function ProfileScreen() {
   const [deleteSheet, setDeleteSheet] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [name, setName] = useState(profile?.fullName ?? '');
-  const [phone, setPhone] = useState(profile?.phone ?? '');
+  const [phone, setPhone] = useState(formatPhone(profile?.phone));
   const [errors, setErrors] = useState<Errors>({});
 
   useEffect(() => {
     setName(profile?.fullName ?? '');
-    setPhone(profile?.phone ?? '');
+    setPhone(formatPhone(profile?.phone));
   }, [profile?.fullName, profile?.phone]);
 
   if (!profile) return null;
@@ -94,7 +94,7 @@ export default function ProfileScreen() {
     }
   };
 
-  const dirty = name.trim() !== profile.fullName || cleanPhone(phone) !== (profile.phone ?? '');
+  const dirty = name.trim() !== profile.fullName || normalizePhone(phone) !== (profile.phone ?? '');
   const saveDetails = async () => {
     const e: Errors = {};
     const ne = validateName(name);
@@ -104,7 +104,7 @@ export default function ProfileScreen() {
     setErrors(e);
     if (Object.keys(e).length) return;
     try {
-      await api.patch('/me', { fullName: name.trim(), phone: cleanPhone(phone) || null });
+      await api.patch('/me', { fullName: name.trim(), phone: normalizePhone(phone) || null });
       await refreshProfile();
       setNotice('Dados guardados.');
     } catch (err) {
@@ -137,7 +137,7 @@ export default function ProfileScreen() {
         <Avatar uri={profile.avatarUrl} name={profile.fullName} size={84} editable onPress={() => setPhotoSheet(true)} />
         <Text style={styles.name}>{profile.fullName}</Text>
         <Text style={styles.muted}>{session?.user.email}</Text>
-        {profile.phone ? <Text style={styles.muted}>{profile.phone}</Text> : null}
+        {profile.phone ? <Text style={styles.muted}>{formatPhone(profile.phone)}</Text> : null}
       </View>
 
       {notice ? <Text style={styles.notice} accessibilityLiveRegion="polite">{notice}</Text> : null}
@@ -173,7 +173,7 @@ export default function ProfileScreen() {
         <View style={[styles.card, styles.form]}>
           <TextField label="Nome completo" value={name} onChangeText={setName} error={errors.fullName} autoComplete="name" />
           <TextField label="Telemóvel" value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad"
-            placeholder="+351 9XX XXX XXX" autoComplete="tel" />
+            placeholder="912 345 678" autoComplete="tel" />
           {errors.form ? <Text style={styles.error}>{errors.form}</Text> : null}
           <Button title="Guardar alterações" variant="secondary" disabled={!dirty} onPress={saveDetails} />
         </View>

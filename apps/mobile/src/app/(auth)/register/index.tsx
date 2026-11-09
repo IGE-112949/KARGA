@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { authErrorMessage } from '@/lib/authErrors';
-import { cleanPhone, validateRegister, type Errors } from '@/lib/validation';
+import { normalizePhone, validateRegister, type Errors } from '@/lib/validation';
 import { Screen } from '@/ui/Screen';
 import { StepHeader, Heading } from '@/ui/StepHeader';
 import { TextField } from '@/ui/TextField';
@@ -24,7 +24,7 @@ export default function RegisterAccount() {
     const e = validateRegister(f);
     setErrors(e);
     if (Object.keys(e).length) return;
-    const phone = cleanPhone(f.phone);
+    const phone = normalizePhone(f.phone);
     const { data, error } = await supabase.auth.signUp({
       email: f.email.trim().toLowerCase(),
       password: f.password,
@@ -44,7 +44,7 @@ export default function RegisterAccount() {
           value={f.fullName} onChangeText={set('fullName')} error={errors.fullName} />
         <TextField label="Email" placeholder="nome@email.pt" keyboardType="email-address" autoCapitalize="none" autoComplete="email"
           textContentType="emailAddress" value={f.email} onChangeText={set('email')} error={errors.email} />
-        <TextField label="Telemóvel" placeholder="+351 9XX XXX XXX" keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber"
+        <TextField label="Telemóvel" placeholder="912 345 678" keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber"
           value={f.phone} onChangeText={set('phone')} error={errors.phone} />
         <TextField label="Password" placeholder="••••••••" secureTextEntry autoComplete="new-password" textContentType="newPassword"
           value={f.password} onChangeText={set('password')} error={errors.password} hint="Mínimo 8 caracteres, com letras e números." />
@@ -59,7 +59,7 @@ export default function RegisterAccount() {
       </View>
       {formError ? <Text style={styles.error} accessibilityLiveRegion="polite">{formError}</Text> : null}
       <View style={styles.flex} />
-      <Button title="Continuar" onPress={submit} style={!f.acceptTerms ? styles.dim : undefined} />
+      <Button title="Criar conta" onPress={submit} style={!f.acceptTerms ? styles.dim : undefined} />
       <View style={styles.switch}>
         <Text style={styles.switchQ}>Já tens conta?</Text>
         <Pressable accessibilityRole="link" hitSlop={8} onPress={() => router.replace('/login')}>

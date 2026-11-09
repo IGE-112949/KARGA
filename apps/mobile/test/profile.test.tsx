@@ -38,6 +38,7 @@ describe('Perfil', () => {
     await show();
     expect(screen.getAllByText('Ana Silva').length).toBeGreaterThan(0);
     expect(screen.getByText('ana@mail.pt')).toBeTruthy();
+    expect(screen.getByLabelText('Telemóvel').props.value).toBe('912 345 678');
     expect(await screen.findByText('Modo Condutor')).toBeTruthy();
   });
 
@@ -86,7 +87,7 @@ describe('Perfil', () => {
   it('guardar dados pessoais envia PATCH /me com o telemóvel sem espaços', async () => {
     mockApi.patch.mockResolvedValue({});
     await show();
-    await fireEvent.changeText(screen.getByLabelText('Telemóvel'), '+351 913 000 000');
+    await fireEvent.changeText(screen.getByLabelText('Telemóvel'), '913 000 000');
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar alterações' }));
     expect(mockApi.patch).toHaveBeenCalledWith('/me', { fullName: 'Ana Silva', phone: '+351913000000' });
   });

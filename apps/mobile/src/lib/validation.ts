@@ -5,7 +5,23 @@ import type { PlugType } from './types';
 // Mesmas regras e mensagens da API (apps/api/src/modules/*/schemas.ts), para avisar antes de enviar.
 export type Errors = Record<string, string>;
 
-export const cleanPhone = (s: string) => s.replace(/[\s-]/g, '');
+const stripPhone = (s: string) => s.replace(/[\s\-().]/g, '');
+
+// Aceita "912 345 678" (assume Portugal), "+351 …" ou "00351 …"; devolve no formato da API (+351912345678) ou '' se vazio.
+export function normalizePhone(s: string): string {
+  const p = stripPhone(s);
+  if (!p) return '';
+  if (p.startsWith('00')) return `+${p.slice(2)}`;
+  if (/^[29]\d{8}$/.test(p)) return `+351${p}`;
+  return p;
+}
+
+// Para mostrar/editar: números portugueses sem o indicativo, agrupados 3-3-3.
+export function formatPhone(p: string | null | undefined): string {
+  if (!p) return '';
+  const m = /^\+351(\d{3})(\d{3})(\d{3})$/.exec(p);
+  return m ? `${m[1]} ${m[2]} ${m[3]}` : p;
+}
 
 export function validateName(fullName: string): string | undefined {
   const n = fullName.trim();
@@ -15,8 +31,8 @@ export function validateName(fullName: string): string | undefined {
 }
 
 export function validatePhone(phone: string): string | undefined {
-  const p = cleanPhone(phone);
-  if (p && !/^\+[1-9]\d{7,14}$/.test(p)) return 'Telemóvel inválido (usa o formato +351 912 345 678)';
+  const p = normalizePhone(phone);
+  if (p && !/^\+[1-9]\d{7,14}$/.test(p)) return 'Telemóvel inválido (ex.: 912 345 678)';
 }
 
 export function validateRegister(f: { fullName: string; email: string; phone: string; password: string; acceptTerms: boolean }): Errors {
