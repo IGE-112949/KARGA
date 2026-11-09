@@ -51,6 +51,7 @@ Endpoints (todos exceto `/health` exigem `Authorization: Bearer <JWT da Supabase
 | GET / POST / PATCH / DELETE | `/me` | perfil do utilizador (DELETE apaga a conta — RGPD) |
 | GET / POST | `/me/vehicles` | veículos |
 | PATCH / DELETE | `/me/vehicles/:id` | editar / definir predefinido / remover |
+| PUT / DELETE | `/me/avatar` | foto de perfil (multipart, campo `file`, JPEG/PNG/WebP até 5 MB) |
 
 Erros: `{ "error": { "code", "message", "details"? } }`.
 
@@ -67,4 +68,5 @@ Erros: `{ "error": { "code", "message", "details"? } }`.
 - Projeto Supabase: `karga` (`vfpgzvhfxezszjrajuyv`, região eu-west-3 Paris).
 - O schema está em `apps/api/src/db/schema.ts`. Para uma alteração: editar o schema, correr `npm run db:generate -w apps/api` (gera um novo ficheiro em `db/migrations/`) e aplicar esse ficheiro ao Supabase (pelo conector do Claude ou pelo SQL Editor). Nunca usar `drizzle-kit push`.
 - Regras que o Drizzle não declara (extensões, constraint de exclusão das reservas, RLS) estão nas migrações manuais `0000_extensions.sql` e `0002_constraints_rls.sql`.
+- Fotos de perfil no Supabase Storage, bucket público `avatars` (escrito só pela API).
 - Todas as tabelas têm RLS ativo **sem políticas**: só a API (ligação de servidor) acede aos dados. O aviso "RLS Enabled No Policy" do Supabase é esperado.
