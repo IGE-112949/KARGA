@@ -109,7 +109,8 @@ Regra: pelo menos um dos perfis ativo (`check (is_driver or is_host)`).
 | space_type | enum (`closed_garage`, `covered`, `outdoor`) | |
 | power_kw | numeric(4,1) not null | > 0 |
 | plug_type | enum `plug_type` | |
-| access_instructions | text null | só mostradas ao condutor com reserva |
+| access_instructions | text null | texto livre; só mostrado ao condutor com reserva confirmada |
+| access_code | text null | código de acesso opcional (portão, cadeado), até 20 caracteres; só devolvido ao condutor com reserva confirmada, a partir de 30 min antes do início e até ao fim da reserva; nunca aparece em listagens nem na pesquisa |
 | price_per_hour | numeric(6,2) not null | > 0 |
 | energy_price_kwh | numeric(5,3) null | > 0 quando preenchido; só aplicado com tomada associada (fase seguinte: `smart_plug_id`) |
 | status | enum (`active`, `inactive`) default `active` | |
