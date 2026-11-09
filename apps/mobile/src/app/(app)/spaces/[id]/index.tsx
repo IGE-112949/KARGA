@@ -4,7 +4,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { ApiError } from '@/lib/api';
 import { pickSpacePhoto } from '@/lib/avatar';
-import { formatEuro, formatKw, plugLabelOf, scheduleSummary, spaceTypeLabel, type Space } from '@/lib/spaces';
+import { formatEnergy, formatEuro, formatKw, plugLabelOf, scheduleSummary, spaceTypeLabel, type Space } from '@/lib/spaces';
 import { Screen } from '@/ui/Screen';
 import { Button } from '@/ui/Button';
 import { BackButton } from '@/ui/BackButton';
@@ -103,7 +103,7 @@ export default function ManageSpace() {
       <View style={styles.card}>
         <Row k="Nome e localização" v={s.title} onEdit={() => edit('location')} />
         <Row k="Características" v={`${formatKw(s.powerKw)} · ${plugLabelOf(s.plugType)} · ${spaceTypeLabel(s.spaceType)}`} onEdit={() => edit('features')} />
-        <Row k="Preço" v={`${formatEuro(s.pricePerHour)}/hora${s.energyPriceKwh != null ? ` · energia ${formatEuro(s.energyPriceKwh, 3)}/kWh` : ''}`} onEdit={() => edit('price')} />
+        <Row k="Preço" v={`${formatEuro(s.pricePerHour)}/hora${s.energyPriceKwh != null ? ` · energia ${formatEnergy(s.energyPriceKwh)}/kWh` : ''}`} onEdit={() => edit('price')} />
         <Row k="Disponibilidade semanal" v={scheduleSummary(s.availability)} onEdit={() => edit('schedule')} />
       </View>
 

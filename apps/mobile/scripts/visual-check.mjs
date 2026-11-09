@@ -81,6 +81,20 @@ const session = { access_token: 'x.y.z', refresh_token: 'r', token_type: 'bearer
 const profile = { id: 'u1', fullName: 'Ana Silva', phone: '+351912345678', avatarUrl: null, isDriver: true, isHost: false, termsAcceptedAt: new Date().toISOString(),
   vehicles: [{ id: 'v1', makeModel: 'Renault Zoe', plate: 'AA-12-BB', plugType: 'type2', isDefault: true }] };
 
+const hostProfile = { ...profile, isHost: true };
+const photo = 'https://images.test/garagem.jpg';
+const spaceDetail = {
+  id: 's1', title: 'Garagem do Tiago', address: 'Rua Ferreira Borges, 40, Lisboa', spotDetails: 'Piso -1 · Lugar 7', latitude: 38.7183, longitude: -9.1655,
+  spaceType: 'closed_garage', plugType: 'type2', powerKw: 7.4, pricePerHour: 0.3, energyPriceKwh: 0.15, status: 'active',
+  accessInstructions: 'Portão à esquerda', accessCode: '1234', createdAt: new Date().toISOString(),
+  photos: [{ id: 'p1', url: photo, isCover: true }],
+  availability: [0, 1, 2, 3, 4].map((weekday) => ({ weekday, startTime: '19:00', endTime: '08:00' })).concat([5, 6].map((weekday) => ({ weekday, startTime: '00:00', endTime: '24:00' }))),
+  blocks: [{ id: 'b1', startsAt: '2026-12-20T00:00:00Z', endsAt: '2026-12-27T00:00:00Z', reason: 'Férias' }],
+};
+const { accessCode, accessInstructions, photos, blocks, ...summaryBase } = spaceDetail;
+const spaceSummary = { ...summaryBase, coverUrl: photo };
+const HOST_API = { '/me': hostProfile, '/me/spaces': [spaceSummary], '/me/spaces/s1': spaceDetail };
+
 const SCREENS = [
   { name: 'boas-vindas', path: '/welcome', mock: 'AUTENTICAÇÃO · 1' },
   { name: 'login', path: '/login', mock: 'AUTENTICAÇÃO · 2' },
@@ -88,15 +102,28 @@ const SCREENS = [
   { name: 'registo-2', path: '/register/role', mock: 'AUTENTICAÇÃO · 4', session: true, me: 404 },
   { name: 'registo-3', path: '/register/vehicle', mock: 'AUTENTICAÇÃO · 5', session: true, me: 200 },
   { name: 'perfil', path: '/profile', mock: 'PERFIL (condutor', session: true, me: 200, tabs: true },
+  { name: 'espacos', path: '/spaces', mock: 'PROPRIETÁRIO · OS MEUS ESPAÇOS', session: true, host: true },
+  { name: 'novo-espaco', path: '/spaces/new', mock: 'PROPRIETÁRIO · NOVO ESPAÇO', session: true, host: true },
+  { name: 'gerir-espaco', path: '/spaces/s1', mock: 'PROPRIETÁRIO · GERIR ESPAÇO', session: true, host: true },
+  { name: 'espaco-publicado', path: '/spaces/published?id=s1', mock: 'PROPRIETÁRIO · ESPAÇO PUBLICADO', session: true, host: true },
 ];
+const only = process.argv.find((a) => a.startsWith('--only='))?.slice(7).split(',');
 
 const browser = await chromium.launch();
-for (const s of SCREENS) {
+for (const s of SCREENS.filter((x) => !only || only.includes(x.name))) {
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
   if (s.session) {
     await page.addInitScript((v) => localStorage.setItem('sb-vfpgzvhfxezszjrajuyv-auth-token', v), JSON.stringify(session));
   }
+  if (s.host) {
+    await page.addInitScript(() => localStorage.setItem('karga.mode', 'host'));
+    await page.route((u) => u.port === '3000', (route) => {
+      const body = HOST_API[new URL(route.request().url()).pathname];
+      return route.fulfill(body ? { status: 200, contentType: 'application/json', body: JSON.stringify(body) } : { status: 404, contentType: 'application/json', body: '{"error":{"code":"NOT_FOUND","message":"x"}}' });
+    });
+    await page.route(/images\.test/, (route) => route.fulfill({ status: 200, contentType: 'image/png', body: readFileSync(resolve(ROOT, '../../docs/design/mockup/logo.png')) }));
+  } else
   await page.route(/\/me(\?|$)/, (route) => route.fulfill(s.me === 200
     ? { status: 200, contentType: 'application/json', body: JSON.stringify(profile) }
     : { status: 404, contentType: 'application/json', body: JSON.stringify({ error: { code: 'PROFILE_NOT_FOUND', message: 'Perfil não encontrado' } }) }));

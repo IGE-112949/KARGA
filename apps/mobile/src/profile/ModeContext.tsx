@@ -8,9 +8,10 @@ const ModeContext = createContext<{ mode: AppMode; setMode: (m: AppMode) => void
 export function ModeProvider({ children }: { children: React.ReactNode }) {
   const { profile } = useAuth();
   const [stored, setStored] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(MODE_KEY).then(setStored).catch(() => undefined);
+    AsyncStorage.getItem(MODE_KEY).then(setStored).catch(() => undefined).finally(() => setLoaded(true));
   }, []);
 
   const setMode = useCallback((m: AppMode) => {
@@ -18,7 +19,10 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(MODE_KEY, m).catch(() => undefined);
   }, []);
 
-  const mode = resolveMode(stored, profile ?? { isDriver: true, isHost: false });
+  // Só mostra os separadores quando o modo está decidido: senão o separador do outro modo começa escondido
+  // e o router salta para outro ecrã (ex.: abrir /spaces ia parar a /home).
+  if (!loaded || !profile) return null;
+  const mode = resolveMode(stored, profile);
   return <ModeContext.Provider value={{ mode, setMode }}>{children}</ModeContext.Provider>;
 }
 

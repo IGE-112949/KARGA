@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { TextField } from '@/ui/TextField';
-import { Button } from '@/ui/Button';
 import { Icon } from '@/ui/Icon';
 import { MapPicker } from '@/ui/MapPicker';
 import { currentPlace, geocodeAddress, LocationPermissionError } from '@/lib/location';
@@ -50,8 +49,10 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
       <MapPicker value={d.point} onChange={(point) => set({ point })} />
       <FieldError>{errors.point}</FieldError>
       {warning ? <Text style={styles.warning}>{warning}</Text> : null}
-      <Button title="Usar a minha localização atual" variant="secondary" onPress={useCurrent}
-        icon={<Icon name="locate" size={18} color={theme.colors.text} />} />
+      <Pressable accessibilityRole="button" accessibilityLabel="Usar a minha localização atual" onPress={useCurrent} hitSlop={8} style={styles.locate}>
+        <Icon name="locate" size={18} color={theme.colors.link} />
+        <Text style={styles.locateText}>Usar a minha localização atual</Text>
+      </Pressable>
       <TextField label="Piso e número do lugar" placeholder="ex.: Piso -1 · Lugar 14" value={d.spotDetails} error={errors.spotDetails}
         onChangeText={(spotDetails) => set({ spotDetails })} />
     </View>
@@ -60,5 +61,7 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
 
 const styles = StyleSheet.create({
   wrap: { gap: 14 },
+  locate: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', paddingVertical: 4 },
+  locateText: { fontSize: 15, fontFamily: theme.font.semibold, color: theme.colors.link },
   warning: { fontSize: 13, color: '#9A6B00', fontFamily: theme.font.medium },
 });

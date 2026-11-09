@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/AuthProvider';
-import { formatEuro, scheduleSummary, type Space } from '@/lib/spaces';
+import { formatEnergy, formatEuro, scheduleSummary, type Space } from '@/lib/spaces';
 import { Screen } from '@/ui/Screen';
 import { Button } from '@/ui/Button';
 import { Icon } from '@/ui/Icon';
@@ -21,7 +21,7 @@ export default function Published() {
   const rows: [string, string][] = s ? [
     ['Disponibilidade', scheduleSummary(s.availability)],
     ['Lugar', `${formatEuro(s.pricePerHour)}/hora`],
-    ['Energia (preço de custo)', s.energyPriceKwh == null ? 'Não definida' : `${formatEuro(s.energyPriceKwh, 3)}/kWh`],
+    ['Energia (preço de custo)', s.energyPriceKwh == null ? 'Não definida' : `${formatEnergy(s.energyPriceKwh)}/kWh`],
     ['Tomada inteligente', 'Em breve'],
   ] : [];
 

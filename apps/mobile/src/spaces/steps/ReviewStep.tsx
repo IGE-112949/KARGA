@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { formatEuro, formatKw, parseEuro, plugLabelOf, scheduleSummary, spaceTypeLabel } from '@/lib/spaces';
+import { formatEnergy, formatEuro, formatKw, parseEuro, plugLabelOf, scheduleSummary, spaceTypeLabel } from '@/lib/spaces';
 import { theme } from '@/theme';
 import { powerOf, windowsOf, type SpaceDraft } from '../draft';
 import { Note } from '../ui';
@@ -12,7 +12,7 @@ export function ReviewStep({ d }: { d: SpaceDraft }) {
     ['Características', `${formatKw(powerOf(d) ?? 0)} · ${d.plugType ? plugLabelOf(d.plugType) : ''} · ${spaceTypeLabel(d.spaceType)}`],
     ['Fotografias', `${d.photos.length}`],
     ['Lugar', `${formatEuro(parseEuro(d.price))}/hora`],
-    ['Energia', energy == null ? 'Não definida' : `${formatEuro(energy, 3)}/kWh (preço de custo)`],
+    ['Energia', energy == null ? 'Não definida' : `${formatEnergy(energy)}/kWh (preço de custo)`],
     ['Disponibilidade', scheduleSummary(windowsOf(d))],
     ['Código de acesso', d.accessCode.trim() ? 'Definido' : 'Sem código'],
   ];

@@ -84,6 +84,8 @@ export function parseEuro(s: string): number {
 }
 
 export const formatEuro = (v: number, decimals = 2) => `${v.toFixed(decimals).replace('.', ',')} €`;
+// Energia: 2 casas decimais, ou 3 quando necessário (0,15 → "0,15 €"; 0,155 → "0,155 €").
+export const formatEnergy = (v: number) => formatEuro(v, Math.round(v * 1000) % 10 ? 3 : 2);
 export const formatKw = (kw: number) => `${String(kw).replace('.', ',')} kW`;
 
 // Horas de 30 em 30 minutos; "24:00" só como fim.

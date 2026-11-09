@@ -46,7 +46,7 @@ export default function SpacesList() {
           {spaces.map((s) => (
             <SpaceCard key={s.id} s={s} onManage={() => router.push({ pathname: '/spaces/[id]', params: { id: s.id } })} />
           ))}
-          <Button title="Adicionar espaço" variant="secondary" onPress={add} icon={<Icon name="plus" size={18} color={theme.colors.text} />} />
+          <Button title="Adicionar espaço" onPress={add} icon={<Icon name="plus" size={18} color={theme.colors.white} />} />
         </>
       )}
     </Screen>
