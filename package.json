@@ -1,0 +1,6 @@
+{
+  "name": "karga",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "engines": { "node": ">=20" }
+}
