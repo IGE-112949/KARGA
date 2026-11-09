@@ -30,10 +30,11 @@ export async function pickSpacePhoto(): Promise<PickedImage | null> {
   return { uri: out.uri, mimeType: 'image/jpeg' };
 }
 
-// Ficheiro para multipart: no browser é um Blob; no telemóvel { uri, name, type }.
-export async function filePart(uri: string, name: string): Promise<Blob> {
-  if (Platform.OS === 'web') return (await fetch(uri)).blob();
-  return { uri, name, type: 'image/jpeg' } as unknown as Blob;
+// Junta uma imagem ao multipart. No telemóvel o React Native espera { uri, name, type } e só 2 argumentos
+// (um 3.º argumento faz o Android tratar o objeto como Blob e o pedido falha com "Network request failed").
+export async function appendImage(form: FormData, field: string, uri: string, name: string): Promise<void> {
+  if (Platform.OS === 'web') form.append(field, await (await fetch(uri)).blob(), name);
+  else form.append(field, { uri, name, type: 'image/jpeg' } as unknown as Blob);
 }
 
 // Corpo multipart para PUT /me/avatar (campo `file`).

@@ -30,7 +30,9 @@ export function createApi(getToken: () => Promise<string | null>, baseUrl: strin
         headers,
         body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
       });
-    } catch {
+    } catch (e) {
+      // Em desenvolvimento, o motivo real aparece no terminal do Expo.
+      if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn(`[api] ${method} ${path} falhou:`, e);
       throw new ApiError(0, 'NETWORK_ERROR', 'Sem ligação à internet ou servidor indisponível.');
     }
     if (res.status === 204) return undefined as T;
