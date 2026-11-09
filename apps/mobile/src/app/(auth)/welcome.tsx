@@ -23,6 +23,7 @@ function MapArt() {
       {pin(70, 90, 44)}
       {pin(260, 60, 36, 0.85)}
       {pin(290, 230, 40)}
+      <View style={styles.halo} />
       <View style={styles.me} />
     </View>
   );
@@ -54,6 +55,7 @@ const styles = StyleSheet.create({
   road: { position: 'absolute', backgroundColor: theme.colors.white },
   water: { position: 'absolute', right: -110, bottom: -160, width: 380, height: 280, borderRadius: 190, backgroundColor: '#CFE2EE' },
   pin: { position: 'absolute', backgroundColor: theme.colors.accent, alignItems: 'center', justifyContent: 'center', ...theme.shadow.primary },
+  halo: { position: 'absolute', left: 176, top: 176, width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(47,128,237,0.18)' },
   me: { position: 'absolute', left: 186, top: 186, width: 18, height: 18, borderRadius: 9, backgroundColor: '#2F80ED', borderWidth: 3, borderColor: theme.colors.white },
   brand: { alignItems: 'center', gap: 16, marginTop: 8, paddingHorizontal: 24 },
   logo: { height: 64, width: 200 },
