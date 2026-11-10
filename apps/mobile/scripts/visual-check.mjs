@@ -106,6 +106,8 @@ const SCREENS = [
   { name: 'registo-2', path: '/register/role', mock: 'AUTENTICAÇÃO · 4', session: true, me: 404 },
   { name: 'registo-3', path: '/register/vehicle', mock: 'AUTENTICAÇÃO · 5', session: true, me: 200 },
   { name: 'perfil', path: '/profile', mock: 'PERFIL (condutor', session: true, me: 200, tabs: true },
+  { name: 'veiculos', path: '/profile/vehicles', mock: 'PERFIL (condutor', session: true, me: 200 },
+  { name: 'definicoes', path: '/profile/settings', mock: 'PERFIL (condutor', session: true, me: 200 },
   { name: 'espacos', path: '/spaces', mock: 'PROPRIETÁRIO · OS MEUS ESPAÇOS', session: true, host: true },
   { name: 'novo-espaco', path: '/spaces/new', mock: 'PROPRIETÁRIO · NOVO ESPAÇO', session: true, host: true },
   { name: 'gerir-espaco', path: '/spaces/s1', mock: 'PROPRIETÁRIO · GERIR ESPAÇO', session: true, host: true },

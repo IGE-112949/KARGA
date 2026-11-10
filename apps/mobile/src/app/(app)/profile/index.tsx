@@ -5,7 +5,6 @@ import { useAuth } from '@/auth/AuthProvider';
 import { useMode } from '@/profile/ModeContext';
 import { ApiError } from '@/lib/api';
 import { avatarFormData, pickAvatar } from '@/lib/avatar';
-import { formatPhone } from '@/lib/validation';
 import { Screen } from '@/ui/Screen';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
@@ -86,7 +85,6 @@ export default function ProfileScreen() {
         <Avatar uri={profile.avatarUrl} name={profile.fullName} size={84} editable onPress={() => setPhotoSheet(true)} />
         <Text style={styles.name}>{profile.fullName}</Text>
         <Text style={styles.muted}>{session?.user.email}</Text>
-        {profile.phone ? <Text style={styles.muted}>{formatPhone(profile.phone)}</Text> : null}
       </View>
 
       {notice ? <Text style={styles.notice} accessibilityLiveRegion="polite">{notice}</Text> : null}
