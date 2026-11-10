@@ -37,6 +37,9 @@
     "scheme": "karga",
     "experiments": {
       "typedRoutes": true
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }
