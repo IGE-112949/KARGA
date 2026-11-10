@@ -35,7 +35,7 @@ export function SpacesMap({ results, selectedId, onSelect, onRegion, center, ini
 
 const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: '#E9EDEB' },
-  content: { paddingTop: 190, paddingHorizontal: 16, paddingBottom: 240, gap: 8 },
+  content: { paddingTop: 16, paddingHorizontal: 16, paddingBottom: 200, gap: 8 },
   note: { fontSize: 13, color: theme.colors.textMuted, fontFamily: theme.font.medium, textAlign: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 14, backgroundColor: theme.colors.white },
   sel: { borderWidth: 2, borderColor: theme.colors.accent },

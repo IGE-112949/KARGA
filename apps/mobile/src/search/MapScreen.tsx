@@ -100,8 +100,8 @@ export function MapScreen() {
 
   return (
     <View style={styles.flex}>
-      <SpacesMap results={results} selectedId={selected} onSelect={setSelected} onRegion={setBbox} center={center} initial={LISBON} />
-      <SafeAreaView edges={['top']} style={styles.top} pointerEvents="box-none">
+      {/* Cabeçalho branco (logo, pesquisa, chips) como no mockup; o mapa começa por baixo. */}
+      <SafeAreaView edges={['top']} style={styles.top}>
         <View style={styles.logoRow}>
           <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" accessibilityLabel="Karga" />
           <Pressable accessibilityRole="button" accessibilityLabel="Ir para a minha localização" onPress={locate} style={styles.locate}>
@@ -123,15 +123,18 @@ export function MapScreen() {
           <QuickChip label="Rápido" icon="bolt" on={filters.fast} onPress={() => setFilters({ ...filters, fast: !filters.fast })} />
           <QuickChip label="Coberta" icon="home" on={filters.covered} onPress={() => setFilters({ ...filters, covered: !filters.covered })} />
         </View>
-        {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
       </SafeAreaView>
 
+      <View style={styles.mapArea}>
+      <SpacesMap results={results} selectedId={selected} onSelect={setSelected} onRegion={setBbox} center={center} initial={LISBON} />
+      {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
       <View style={styles.bottom} pointerEvents="box-none">
         {sel ? (
           <ResultCard s={sel} onOpen={() => open(sel.id)} onToggleFavorite={() => toggleFav(sel)} />
         ) : loaded && results.length === 0 ? (
           <View style={styles.empty}><Text style={styles.emptyText}>Nenhum lugar corresponde a estes filtros.</Text></View>
         ) : null}
+      </View>
       </View>
 
       <FiltersSheet visible={showFilters} when={when} filters={filters} count={loaded ? results.length : null}
@@ -142,20 +145,21 @@ export function MapScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: '#EEF1EC' },
-  top: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: 14, gap: 10 },
+  top: { backgroundColor: theme.colors.white, paddingHorizontal: 16, paddingBottom: 12, gap: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, zIndex: 1 },
+  mapArea: { flex: 1, overflow: 'hidden' },
   logoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
-  locate: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.colors.white, alignItems: 'center', justifyContent: 'center', ...theme.shadow.card },
+  locate: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.border, alignItems: 'center', justifyContent: 'center' },
   searchRow: { flexDirection: 'row', gap: 10 },
-  search: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, height: 52, borderRadius: 18, backgroundColor: theme.colors.white, paddingHorizontal: 14, ...theme.shadow.card },
+  search: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, height: 50, borderRadius: 16, backgroundColor: theme.colors.surface, paddingHorizontal: 14 },
   logo: { width: 112, height: 34 },
   input: { flex: 1, fontSize: 15, fontFamily: theme.font.regular, color: theme.colors.text },
-  filterBtn: { width: 52, height: 52, borderRadius: 18, backgroundColor: theme.colors.white, alignItems: 'center', justifyContent: 'center', ...theme.shadow.card },
+  filterBtn: { width: 50, height: 50, borderRadius: 16, backgroundColor: theme.colors.white, borderWidth: 1.5, borderColor: theme.colors.fieldBorder, alignItems: 'center', justifyContent: 'center' },
   chips: { flexDirection: 'row', gap: 8 },
-  chip: { height: 36, paddingHorizontal: 14, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.colors.white, ...theme.shadow.card },
-  chipOn: { backgroundColor: theme.colors.accent },
+  chip: { height: 36, paddingHorizontal: 14, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.colors.white, borderWidth: 1.5, borderColor: theme.colors.fieldBorder },
+  chipOn: { backgroundColor: theme.colors.accent, borderColor: theme.colors.accent },
   chipText: { fontSize: 14, fontFamily: theme.font.medium, color: theme.colors.text },
   chipTextOn: { color: theme.colors.white },
-  error: { alignSelf: 'center', fontSize: 13, color: theme.colors.danger, fontFamily: theme.font.medium, backgroundColor: theme.colors.white, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, overflow: 'hidden' },
+  error: { position: 'absolute', top: 12, alignSelf: 'center', fontSize: 13, color: theme.colors.danger, fontFamily: theme.font.medium, backgroundColor: theme.colors.white, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, overflow: 'hidden' },
   bottom: { position: 'absolute', left: 14, right: 14, bottom: 14 },
   empty: { alignSelf: 'center', backgroundColor: theme.colors.white, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 12, ...theme.shadow.card },
   emptyText: { fontSize: 14, fontFamily: theme.font.medium, color: theme.colors.textLabel },

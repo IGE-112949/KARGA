@@ -11,7 +11,12 @@ export const TONIGHT: When = { dayOffset: 0, start: '20:00', hours: 12 };
 export const FAST_KW = 7.4;
 export const NO_FILTERS: Filters = { maxPrice: null, minKw: null, plug: null, covered: false, fast: false, tonight: false };
 
-export const PRICE_OPTS = [{ label: 'Até 0,25 €/h', value: 0.25 }, { label: 'Até 0,30 €/h', value: 0.3 }, { label: 'Até 0,35 €/h', value: 0.35 }, { label: 'Qualquer', value: null }];
+// Preço máximo em barra: 0,10–2,00 €/h, de 0,05 em 0,05; no fim da barra = qualquer preço.
+export const PRICE_MIN = 0.1;
+export const PRICE_MAX = 2;
+export const PRICE_STEP = 0.05;
+export const priceLabel = (v: number | null) =>
+  v == null || v >= PRICE_MAX ? 'Qualquer preço' : `Até ${v.toFixed(2).replace('.', ',')} €/h`;
 export const KW_OPTS = [{ label: 'Qualquer', value: null }, { label: '3,7 kW ou mais', value: 3.7 }, { label: '7,4 kW ou mais', value: 7.4 }, { label: '11 kW', value: 11 }];
 export const PLUG_OPTS = [{ label: 'Qualquer', value: null }, { label: 'Tipo 2', value: 'type2' as const }, { label: 'Schuko', value: 'schuko' as const }];
 
