@@ -98,7 +98,7 @@ describe('POST /me/spaces', () => {
 
   it('falha do Storage na 3.ª foto → nada criado e as anteriores apagadas', async () => {
     t.spacePhotos.failOn = 3;
-    await create(host, base, 3).expect(500);
+    await create(host, base, 3).expect(503);
     expect(t.spacePhotos.removed).toHaveLength(2);
     const list = await request(t.app).get('/me/spaces').set('Authorization', `Bearer ${host}`).expect(200);
     expect(list.body).toEqual([]);

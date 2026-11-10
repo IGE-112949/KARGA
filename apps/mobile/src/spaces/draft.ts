@@ -1,5 +1,5 @@
 import type { LatLng } from '@/lib/location';
-import { WEEKDAY_NAMES, ampsToKw, kwToAmps, parseEuro, type Space, type SpacePlug, type SpaceType, type Window } from '@/lib/spaces';
+import { AMPS, WEEKDAY_NAMES, ampsToKw, kwToAmps, parseEuro, type Space, type SpacePlug, type SpaceType, type Window } from '@/lib/spaces';
 import type { Errors } from '@/lib/validation';
 
 export type DayDraft = { on: boolean; startTime: string; endTime: string };
@@ -14,6 +14,8 @@ export type SpaceDraft = {
   spaceType: SpaceType;
   plugType: SpacePlug | null;
   amps: number;
+  /** Potência Schuko que não corresponde a nenhuma amperagem da app (ex.: criada pela API); mantém-se até escolher outra. */
+  schukoKw: number | null;
   wallboxKw: number | null;
   photos: { uri: string }[];
   accessInstructions: string;
@@ -26,7 +28,7 @@ export type SpaceDraft = {
 export const DEFAULT_DAY: DayDraft = { on: false, startTime: '19:00', endTime: '08:00' };
 
 export const emptyDraft = (): SpaceDraft => ({
-  title: '', address: '', spotDetails: '', area: '', point: null, spaceType: 'closed_garage', plugType: null, amps: 10, wallboxKw: null,
+  title: '', address: '', spotDetails: '', area: '', point: null, spaceType: 'closed_garage', plugType: null, amps: 10, schukoKw: null, wallboxKw: null,
   photos: [], accessInstructions: '', accessCode: '', price: '', energy: '',
   days: Array.from({ length: 7 }, () => ({ ...DEFAULT_DAY })),
 });
@@ -41,14 +43,16 @@ export function draftFromSpace(s: Space): SpaceDraft {
   return {
     title: s.title, address: s.address, spotDetails: s.spotDetails ?? '', area: s.area ?? '', point: { latitude: s.latitude, longitude: s.longitude },
     spaceType: s.spaceType, plugType: s.plugType,
-    amps: s.plugType === 'schuko' ? kwToAmps(s.powerKw) : 10, wallboxKw: s.plugType === 'type2' ? s.powerKw : null,
+    amps: s.plugType === 'schuko' ? kwToAmps(s.powerKw) : 10,
+    schukoKw: s.plugType === 'schuko' && !AMPS.some((a) => ampsToKw(a) === s.powerKw) ? s.powerKw : null,
+    wallboxKw: s.plugType === 'type2' ? s.powerKw : null,
     photos: s.photos.map((p) => ({ uri: p.url })), accessInstructions: s.accessInstructions ?? '', accessCode: s.accessCode ?? '',
     price: s.pricePerHour.toFixed(2).replace('.', ','), energy: euro(s.energyPriceKwh), days,
   };
 }
 
 export const powerOf = (d: SpaceDraft): number | null =>
-  d.plugType === 'schuko' ? ampsToKw(d.amps) : d.plugType === 'type2' ? d.wallboxKw : null;
+  d.plugType === 'schuko' ? d.schukoKw ?? ampsToKw(d.amps) : d.plugType === 'type2' ? d.wallboxKw : null;
 
 export const windowsOf = (d: SpaceDraft): Window[] =>
   d.days.flatMap((x, weekday) => (x.on ? [{ weekday, startTime: x.startTime, endTime: x.endTime }] : []));

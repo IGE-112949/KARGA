@@ -26,12 +26,12 @@ beforeEach(async () => {
 const addPhoto = () => request(t.app).post(`/me/spaces/${id}/photos`).set(auth()).attach('file', JPEG, 'c.jpg');
 
 describe('fotografias', () => {
-  it('adiciona até 5; a 6.ª → TOO_MANY_PHOTOS e não fica no Storage', async () => {
+  it('adiciona até 5; a 6.ª → TOO_MANY_PHOTOS e não chega ao Storage', async () => {
     for (let i = 0; i < 3; i++) await addPhoto().expect(201);
-    const before = t.spacePhotos.removed.length;
+    const before = t.spacePhotos.uploaded.length;
     const r = await addPhoto().expect(409);
     expect(r.body.error.code).toBe('TOO_MANY_PHOTOS');
-    expect(t.spacePhotos.removed.length).toBe(before + 1);
+    expect(t.spacePhotos.uploaded.length).toBe(before);
   });
 
   it('pedidos em paralelo nunca deixam mais de 5', async () => {

@@ -27,6 +27,12 @@ describe('Os meus espaços', () => {
     expect(screen.getByText('Visível')).toBeTruthy();
   });
 
+  it('energia com 3 casas decimais aparece completa no cartão', async () => {
+    mockApi.get.mockResolvedValue([{ ...summary, energyPriceKwh: 0.155 }]);
+    await render(<SpacesList />);
+    expect(await screen.findByText('Energia 0,155 €/kWh')).toBeTruthy();
+  });
+
   it('sem espaços mostra o estado vazio', async () => {
     mockApi.get.mockResolvedValue([]);
     await render(<SpacesList />);

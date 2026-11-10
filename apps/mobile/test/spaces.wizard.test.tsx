@@ -43,6 +43,7 @@ async function step1() {
 }
 async function step2(plug: 'Schuko' | 'Tipo 2' = 'Tipo 2') {
   await fireEvent.press(screen.getByRole('button', { name: /Adicionar fotografia/ }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Escolher da galeria' }));
   await fireEvent.press(screen.getByRole('button', { name: new RegExp(`^${plug}`) }));
   if (plug === 'Tipo 2') await fireEvent.press(screen.getByRole('button', { name: '7,4 kW' }));
   await next();
@@ -133,6 +134,7 @@ describe('Novo espaço', () => {
     await render(<NewSpace />);
     await step1();
     await fireEvent.press(screen.getByRole('button', { name: /Adicionar fotografia/ }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Escolher da galeria' }));
     await fireEvent.press(screen.getByRole('button', { name: /^Schuko/ }));
     await fireEvent.press(screen.getByRole('button', { name: '13 A' }));
     await next();

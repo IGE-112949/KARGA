@@ -3,7 +3,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Switch, Text, View } from 're
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/auth/AuthProvider';
 import { ApiError } from '@/lib/api';
-import { pickSpacePhoto } from '@/lib/avatar';
+import { pickSpacePhoto, type PhotoSource } from '@/lib/avatar';
+import { pickerMessage } from '@/lib/pickerError';
 import { formatEnergy, formatEuro, formatKw, plugLabelOf, scheduleSummary, spaceTypeLabel, type Space } from '@/lib/spaces';
 import { Screen } from '@/ui/Screen';
 import { Button } from '@/ui/Button';
@@ -35,6 +36,7 @@ export default function ManageSpace() {
   const [s, setS] = useState<Space | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [pendingVisible, setPendingVisible] = useState<boolean | null>(null);
 
   const load = useCallback(() => {
     api.get<Space>(`/me/spaces/${id}`).then(setS).catch((e) => setNotice(errMsg(e)));
@@ -65,11 +67,25 @@ export default function ManageSpace() {
   }
 
   const edit = (section: string) => router.push({ pathname: '/spaces/[id]/edit', params: { id: s.id, section } });
-  const visible = s.status === 'active';
+  const visible = pendingVisible ?? s.status === 'active';
 
-  const addPhoto = async () => {
-    const p = await pickSpacePhoto().catch(() => null);
+  const addPhoto = async (source: PhotoSource) => {
+    setNotice(null);
+    let p;
+    try {
+      p = await pickSpacePhoto(source);
+    } catch (e) {
+      setNotice(pickerMessage(e));
+      return;
+    }
     if (p) await act(async () => api.upload(`/me/spaces/${s.id}/photos`, await photoFormData(p.uri), 'POST'));
+  };
+
+  // O interruptor muda logo; se o pedido falhar volta ao estado anterior (o erro aparece em cima).
+  const toggleVisible = async (on: boolean) => {
+    setPendingVisible(on);
+    await act(() => api.patch(`/me/spaces/${s.id}`, { status: on ? 'active' : 'inactive' }));
+    setPendingVisible(null);
   };
 
   const remove = async () => {
@@ -98,7 +114,7 @@ export default function ManageSpace() {
           <Text style={styles.k}>{visible ? 'Os condutores podem encontrar e reservar' : 'Escondido: ninguém o vê nem reserva'}</Text>
         </View>
         <Switch accessibilityRole="switch" accessibilityLabel="Visível no mapa" accessibilityState={{ checked: visible }} value={visible}
-          onValueChange={(on) => void act(() => api.patch(`/me/spaces/${s.id}`, { status: on ? 'active' : 'inactive' }))}
+          onValueChange={(on) => void toggleVisible(on)}
           trackColor={{ true: theme.colors.accent, false: '#D5DCD9' }} thumbColor="#FFFFFF" />
       </View>
 

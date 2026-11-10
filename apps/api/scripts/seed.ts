@@ -150,7 +150,7 @@ async function main() {
   for (const s of SEED_SPACES) {
     const id = randomUUID();
     const owner = userIds[s.owner];
-    const paths = [await store.upload(owner, id, garagePng(n), 'image/png' as never), await store.upload(owner, id, garagePng(n + 2), 'image/png' as never)];
+    const paths = [await store.upload(id, garagePng(n), 'image/png' as never), await store.upload(id, garagePng(n + 2), 'image/png' as never)];
     await db.insert(spaces).values({
       id, ownerId: owner, title: s.title, address: s.address, area: s.area, spotDetails: null,
       location: sql`ST_SetSRID(ST_MakePoint(${s.lng}, ${s.lat}), 4326)` as never,

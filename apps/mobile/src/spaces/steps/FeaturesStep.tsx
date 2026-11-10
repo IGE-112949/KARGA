@@ -5,7 +5,9 @@ import { Chip } from '@/ui/Chip';
 import { TextField } from '@/ui/TextField';
 import { Icon } from '@/ui/Icon';
 import { Sheet } from '@/ui/Sheet';
-import { pickSpacePhoto } from '@/lib/avatar';
+import { pickSpacePhoto, type PhotoSource } from '@/lib/avatar';
+import { pickerMessage } from '@/lib/pickerError';
+import { AddPhotoTile } from '../AddPhotoTile';
 import { AMPS, SPACE_TYPES, WALLBOX_KW, ampsToKw, formatKw } from '@/lib/spaces';
 import type { Errors } from '@/lib/validation';
 import { theme } from '@/theme';
@@ -19,9 +21,15 @@ export function FeaturesStep({ d, set, errors, withPhotos = true }: {
 }) {
   const [help, setHelp] = useState(false);
 
-  const addPhoto = async () => {
-    const p = await pickSpacePhoto().catch(() => null);
-    if (p) set({ photos: [...d.photos, { uri: p.uri }] });
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const addPhoto = async (source: PhotoSource) => {
+    setPhotoError(null);
+    try {
+      const p = await pickSpacePhoto(source);
+      if (p) set({ photos: [...d.photos, { uri: p.uri }] });
+    } catch (e) {
+      setPhotoError(pickerMessage(e));
+    }
   };
 
   return (
@@ -46,9 +54,10 @@ export function FeaturesStep({ d, set, errors, withPhotos = true }: {
         <View style={shared.section}>
           <Label>Amperagem do carregador</Label>
           <View style={shared.row}>
-            {AMPS.map((a) => <Chip key={a} label={`${a} A`} selected={d.amps === a} onPress={() => set({ amps: a })} />)}
+            {AMPS.map((a) => <Chip key={a} label={`${a} A`} selected={d.schukoKw == null && d.amps === a} onPress={() => set({ amps: a, schukoKw: null })} />)}
+            {d.schukoKw != null ? <Chip label={`${formatKw(d.schukoKw)} (atual)`} selected onPress={() => undefined} /> : null}
           </View>
-          <Text style={styles.hint}>≈ {formatKw(ampsToKw(d.amps))}. Vê no carregador ou na app do carro (10 A é o mais comum).</Text>
+          <Text style={styles.hint}>≈ {formatKw(d.schukoKw ?? ampsToKw(d.amps))}. Vê no carregador ou na app do carro (10 A é o mais comum).</Text>
         </View>
       ) : null}
 
@@ -57,6 +66,7 @@ export function FeaturesStep({ d, set, errors, withPhotos = true }: {
           <Label>Potência da wallbox</Label>
           <View style={shared.row}>
             {WALLBOX_KW.map((kw) => <Chip key={kw} label={formatKw(kw)} selected={d.wallboxKw === kw} onPress={() => set({ wallboxKw: kw })} />)}
+            {d.wallboxKw != null && !WALLBOX_KW.includes(d.wallboxKw) ? <Chip label={`${formatKw(d.wallboxKw)} (atual)`} selected onPress={() => undefined} /> : null}
           </View>
           <Pressable accessibilityRole="link" onPress={() => setHelp(true)} hitSlop={8}>
             <Text style={styles.link}>Não sei a potência</Text>
@@ -79,15 +89,10 @@ export function FeaturesStep({ d, set, errors, withPhotos = true }: {
                 </Pressable>
               </View>
             ))}
-            {d.photos.length < MAX_PHOTOS ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="Adicionar fotografia" onPress={addPhoto} style={[styles.thumb, styles.add]}>
-                <Icon name="camera" size={22} color={theme.colors.textLabel} />
-                <Text style={styles.addText}>Adicionar</Text>
-              </Pressable>
-            ) : null}
+            {d.photos.length < MAX_PHOTOS ? <AddPhotoTile onPick={addPhoto} /> : null}
           </View>
           <Text style={styles.hint}>Entre 1 e 5 fotografias. A primeira é a capa.</Text>
-          <FieldError>{errors.photos}</FieldError>
+          <FieldError>{photoError ?? errors.photos}</FieldError>
         </View>
       ) : null}
 
@@ -109,8 +114,6 @@ const styles = StyleSheet.create({
   hint: { fontSize: 13, color: theme.colors.textMuted, fontFamily: theme.font.regular },
   link: { fontSize: 14, color: theme.colors.link, fontFamily: theme.font.semibold },
   thumb: { width: 92, height: 70, borderRadius: 12, overflow: 'hidden', backgroundColor: theme.colors.surface },
-  add: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: theme.colors.fieldBorder, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  addText: { fontSize: 12, fontFamily: theme.font.medium, color: theme.colors.textLabel },
   cover: { position: 'absolute', left: 6, bottom: 6, fontSize: 11, fontFamily: theme.font.semibold, color: theme.colors.white, backgroundColor: 'rgba(19,38,58,0.7)', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6, overflow: 'hidden' },
   remove: { position: 'absolute', right: 5, top: 5, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(19,38,58,0.7)', alignItems: 'center', justifyContent: 'center' },
 });

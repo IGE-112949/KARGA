@@ -56,3 +56,25 @@ describe('zona pública do espaço', () => {
     expect(locationPatch({ ...base, address: 'Rua X, 12', area: 'Loures' }).area).toBe('Loures');
   });
 });
+
+import { draftFromSpace, powerOf } from '@/spaces/draft';
+
+describe('potência fora das opções da app', () => {
+  const sp = (plugType: 'schuko' | 'type2', powerKw: number) => ({
+    id: 's', title: 't', address: 'a', spotDetails: null, area: null, latitude: 0, longitude: 0, spaceType: 'covered', plugType, powerKw,
+    pricePerHour: 0.3, energyPriceKwh: null, status: 'active', accessInstructions: null, accessCode: null, createdAt: '',
+    photos: [], availability: [], blocks: [],
+  }) as never;
+
+  it('Schuko 2,8 kW (criado pela API) mantém-se ao editar', () => {
+    expect(powerOf(draftFromSpace(sp('schuko', 2.8)))).toBe(2.8);
+  });
+
+  it('Schuko 2,3 kW corresponde a 10 A', () => {
+    expect(draftFromSpace(sp('schuko', 2.3)).amps).toBe(10);
+  });
+
+  it('Tipo 2 9 kW mantém-se ao editar', () => {
+    expect(powerOf(draftFromSpace(sp('type2', 9)))).toBe(9);
+  });
+});

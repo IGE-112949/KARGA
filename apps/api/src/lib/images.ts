@@ -9,6 +9,8 @@ export const IMAGE_EXT: Record<ImageType, string> = { 'image/jpeg': 'jpg', 'imag
 export const invalidImage = () =>
   new AppError(400, 'INVALID_IMAGE', 'Formato de imagem não suportado (usa JPEG, PNG ou WebP)');
 export const imageTooLarge = () => new AppError(413, 'IMAGE_TOO_LARGE', 'A imagem tem mais de 5 MB');
+export const storageUnavailable = () =>
+  new AppError(503, 'STORAGE_UNAVAILABLE', 'Não foi possível guardar as fotografias. Tenta novamente daqui a pouco.');
 export const tooManyPhotos = () => new AppError(409, 'TOO_MANY_PHOTOS', 'Um espaço pode ter no máximo 5 fotografias');
 
 // Tipo real pela assinatura dos primeiros bytes (o Content-Type enviado não é fiável).
@@ -27,7 +29,8 @@ export function receiveImages(field: string, maxFiles: number): RequestHandler {
     handler(req, res, (err: unknown) => {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') return next(imageTooLarge());
-        if (err.code === 'LIMIT_FILE_COUNT' || err.code === 'LIMIT_UNEXPECTED_FILE') {
+        // Campo com outro nome: o ficheiro não é o esperado. Mesmo campo acima do limite: fotografias a mais.
+        if (err.code === 'LIMIT_FILE_COUNT' || (err.code === 'LIMIT_UNEXPECTED_FILE' && err.field === field)) {
           return next(maxFiles > 1 ? tooManyPhotos() : invalidImage());
         }
         return next(invalidImage());

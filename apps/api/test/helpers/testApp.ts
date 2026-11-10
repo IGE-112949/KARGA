@@ -41,10 +41,10 @@ export class FakeSpacePhotoStore implements SpacePhotoStore {
   /** Faz falhar o n-ésimo envio (1 = primeiro). */
   failOn: number | null = null;
   private n = 0;
-  async upload(ownerId: string, spaceId: string, _data: Buffer, contentType: string) {
+  async upload(spaceId: string, _data: Buffer, contentType: string) {
     this.n++;
     if (this.failOn === this.n) throw new Error('falha simulada do Storage');
-    const path = `${ownerId}/${spaceId}/${this.n}.${contentType.split('/')[1]}`;
+    const path = `${spaceId}/${this.n}.${contentType.split('/')[1]}`;
     this.uploaded.push(path);
     return path;
   }

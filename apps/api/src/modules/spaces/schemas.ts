@@ -8,6 +8,8 @@ const optionalText = (max: number, label: string) =>
 const money = (min: number, max: number, decimals: number, label: string) =>
   z.number({ invalid_type_error: `${label} inválido` }).min(min, `${label}: mínimo ${min.toFixed(2).replace('.', ',')} €`)
     .max(max, `${label}: máximo ${max.toFixed(2).replace('.', ',')} €`)
+    // Recusa em vez de arredondar sem avisar (0,333 não passa a 0,33).
+    .refine((v) => Math.abs(v * 10 ** decimals - Math.round(v * 10 ** decimals)) < 1e-6, `${label}: usa no máximo ${decimals} casas decimais`)
     .transform((v) => Number(v.toFixed(decimals)));
 
 // A zona é pública (mostrada antes de reservar): tira códigos postais e recusa o que pareça uma morada (números).
