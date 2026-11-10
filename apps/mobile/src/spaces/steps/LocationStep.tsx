@@ -23,6 +23,7 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
         lastGeocoded.current = a;
         setWarning(null);
         set({ point: p });
+        addressAt(p).then((pl) => pl?.area && set({ area: pl.area })).catch(() => undefined);
       } else {
         setWarning('Não encontrámos esta morada. Ajusta o pin no mapa.');
       }
@@ -37,9 +38,9 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
     setWarning(null);
     try {
       const a = await addressAt(point);
-      if (a) {
-        lastGeocoded.current = a;
-        set({ address: a });
+      if (a?.address) {
+        lastGeocoded.current = a.address;
+        set({ address: a.address, area: a.area ?? '' });
       }
     } catch {
       // sem permissão: o pin fica onde o utilizador o pôs e a morada escrita mantém-se
@@ -51,7 +52,7 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
     try {
       const p = await currentPlace();
       if (p.address) lastGeocoded.current = p.address;
-      set({ point: { latitude: p.latitude, longitude: p.longitude }, ...(p.address ? { address: p.address } : {}) });
+      set({ point: { latitude: p.latitude, longitude: p.longitude }, ...(p.address ? { address: p.address, area: p.area ?? '' } : {}) });
     } catch (e) {
       setWarning(e instanceof LocationPermissionError
         ? 'Sem acesso à localização. Escreve a morada.'

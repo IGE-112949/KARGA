@@ -92,6 +92,12 @@ describe('Perfil', () => {
     expect(mockSignOut).toHaveBeenCalled();
   });
 
+  it('"Os meus favoritos" abre a página dos favoritos', async () => {
+    await show();
+    await fireEvent.press(screen.getByRole('button', { name: 'Os meus favoritos' }));
+    expect(mockPush).toHaveBeenCalledWith('/profile/favorites');
+  });
+
   it('"Terminar sessão" chama signOut', async () => {
     await show();
     await fireEvent.press(screen.getByRole('button', { name: 'Terminar sessão' }));

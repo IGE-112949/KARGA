@@ -10,6 +10,7 @@ type SpaceBase = {
   title: string;
   address: string;
   spotDetails: string | null;
+  area: string | null;
   latitude: number;
   longitude: number;
   spaceType: SpaceType;

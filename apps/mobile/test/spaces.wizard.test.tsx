@@ -13,7 +13,7 @@ jest.mock('@/lib/location', () => ({
   LISBON: { latitude: 38.7, longitude: -9.1 },
   LocationPermissionError: class extends Error {},
   geocodeAddress: jest.fn(async () => ({ latitude: 38.71, longitude: -9.16 })),
-  addressAt: jest.fn(async () => 'Rua do Pin, 7, Loures'),
+  addressAt: jest.fn(async () => ({ address: 'Rua do Pin, 7, Loures', area: 'Loures' })),
   currentPlace: jest.fn(),
 }));
 jest.mock('@/ui/MapPicker', () => ({
@@ -141,6 +141,7 @@ describe('Novo espaço', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Publicar espaço' }));
     const [data, photos] = mockBuild.mock.calls[0];
     expect(data).toMatchObject({
+      area: 'Loures',
       title: 'Garagem do Tiago', plugType: 'schuko', powerKw: 3, pricePerHour: 0.3, energyPriceKwh: null,
       latitude: 38.72, longitude: -9.15, availability: [{ weekday: 0, startTime: '19:00', endTime: '08:00' }],
     });
