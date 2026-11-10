@@ -57,6 +57,9 @@ Endpoints (todos exceto `/health` exigem `Authorization: Bearer <JWT da Supabase
 | PUT | `/me/spaces/:id/availability` | horário semanal (um por dia) |
 | POST · PATCH · DELETE | `/me/spaces/:id/photos(/:photoId)` | adicionar / tornar capa / remover foto |
 | GET · POST · DELETE | `/me/spaces/:id/blocks(/:blockId)` | datas bloqueadas |
+| GET | `/spaces/search?bbox=&date=&start=&hours=` | lugares livres na zona do mapa (opcionais `maxPrice`, `minKw`, `plug`, `covered`); ponto aproximado, sem morada |
+| GET | `/spaces/:id` | detalhe público (com `date/start/hours`: disponibilidade e custo estimado) |
+| GET · PUT · DELETE | `/me/favorites(/:spaceId)` | favoritos |
 
 Erros: `{ "error": { "code", "message", "details"? } }`.
 
@@ -94,6 +97,10 @@ Testes da app (sem telemóvel nem rede): `npm test -w apps/mobile` e `npx tsc --
 Verificação visual (opcional, precisa do Playwright): `node scripts/visual-check.mjs` dentro de `apps/mobile` gera `visual-check/<ecrã>.png` com a app ao lado do mockup.
 
 Ecrãs: boas-vindas, login, registo em 3 passos (conta → modo de utilização + foto → veículo) e perfil (foto, dados pessoais, modo condutor/proprietário, veículos, terminar sessão, apagar conta) e, no modo proprietário, o separador Espaços (lista, assistente "Novo espaço" em 5 passos, gerir espaço: visibilidade, edição, fotos, datas bloqueadas, eliminar). Os restantes separadores mostram "Em breve".
+
+## Dados de teste
+
+Com `apps/api/.env` preenchido: `npm run seed -w apps/api` cria 3 proprietários de teste (`ana.teste@karga.pt`, `bruno.teste@karga.pt`, `carla.teste@karga.pt`, password `KargaTeste2026!`) e 20 garagens na zona de Odivelas/Loures (3 no mesmo prédio, horários e fichas variados, algumas bloqueadas ou desativadas). Correr de novo recria tudo; `npm run seed -w apps/api -- --apagar` apaga só estes dados.
 
 ## Base de dados
 

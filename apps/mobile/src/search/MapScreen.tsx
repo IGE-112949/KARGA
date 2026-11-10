@@ -41,19 +41,18 @@ export function MapScreen() {
   const [query, setQuery] = useState('');
   const seq = useRef(0);
 
-  // Abre na localização atual (se houver permissão).
-  useEffect(() => {
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') return;
-        const p = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-        setCenter({ latitude: p.coords.latitude, longitude: p.coords.longitude });
-      } catch {
-        // fica em Lisboa
-      }
-    })();
-  }, []);
+  // Abre na localização atual (se houver permissão); o botão volta a centrar.
+  const locate = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const p = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      setCenter({ latitude: p.coords.latitude + Math.random() * 1e-9, longitude: p.coords.longitude });
+    } catch {
+      // fica onde está
+    }
+  };
+  useEffect(() => { void locate(); }, []);
 
   // Pesquisa 0,5 s depois de o mapa parar ou de mudarem os filtros; respostas antigas são ignoradas.
   useEffect(() => {
@@ -103,15 +102,20 @@ export function MapScreen() {
     <View style={styles.flex}>
       <SpacesMap results={results} selectedId={selected} onSelect={setSelected} onRegion={setBbox} center={center} initial={LISBON} />
       <SafeAreaView edges={['top']} style={styles.top} pointerEvents="box-none">
+        <View style={styles.logoRow}>
+          <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" accessibilityLabel="Karga" />
+          <Pressable accessibilityRole="button" accessibilityLabel="Ir para a minha localização" onPress={locate} style={styles.locate}>
+            <Icon name="locate" size={20} color={theme.colors.text} />
+          </Pressable>
+        </View>
         <View style={styles.searchRow}>
           <View style={styles.search}>
-            <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" accessibilityLabel="Karga" />
             <Icon name="search" size={18} color={theme.colors.textMuted} />
             <TextInput style={styles.input} placeholder="Pesquisar morada ou zona" placeholderTextColor={theme.colors.textMuted}
               accessibilityLabel="Pesquisar morada ou zona" value={query} onChangeText={setQuery} onSubmitEditing={goTo} returnKeyType="search" />
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel="Filtros" onPress={() => setShowFilters(true)} style={styles.filterBtn}>
-            <Icon name="sliders" size={20} color={theme.colors.white} />
+            <Icon name="sliders" size={20} color={theme.colors.text} />
           </Pressable>
         </View>
         <View style={styles.chips}>
@@ -139,11 +143,13 @@ export function MapScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: '#EEF1EC' },
   top: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: 14, gap: 10 },
-  searchRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  logoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
+  locate: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.colors.white, alignItems: 'center', justifyContent: 'center', ...theme.shadow.card },
+  searchRow: { flexDirection: 'row', gap: 10 },
   search: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, height: 52, borderRadius: 18, backgroundColor: theme.colors.white, paddingHorizontal: 14, ...theme.shadow.card },
-  logo: { width: 26, height: 26 },
+  logo: { width: 112, height: 34 },
   input: { flex: 1, fontSize: 15, fontFamily: theme.font.regular, color: theme.colors.text },
-  filterBtn: { width: 52, height: 52, borderRadius: 18, backgroundColor: theme.colors.navy, alignItems: 'center', justifyContent: 'center', ...theme.shadow.card },
+  filterBtn: { width: 52, height: 52, borderRadius: 18, backgroundColor: theme.colors.white, alignItems: 'center', justifyContent: 'center', ...theme.shadow.card },
   chips: { flexDirection: 'row', gap: 8 },
   chip: { height: 36, paddingHorizontal: 14, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.colors.white, ...theme.shadow.card },
   chipOn: { backgroundColor: theme.colors.accent },
