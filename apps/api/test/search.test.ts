@@ -10,6 +10,8 @@ const BBOX = '-9.30,38.70,-9.10,38.90';
 let t: Awaited<ReturnType<typeof createTestApp>>;
 let driver: string;
 const today = todayLisbon();
+// Amanhã: as horas de hoje que já passaram são recusadas, e os testes não podem depender da hora a que correm.
+const day1 = addDays(today, 1);
 
 async function profile(id: string, isHost: boolean) {
   const token = await t.tokenFor(id);
@@ -34,7 +36,7 @@ async function space(o: Opts = {}) {
 
 const search = (q: Record<string, string | number> = {}) =>
   request(t.app).get('/spaces/search').set('Authorization', `Bearer ${driver}`)
-    .query({ bbox: BBOX, date: today, start: '10:00', hours: 2, ...q });
+    .query({ bbox: BBOX, date: day1, start: '10:00', hours: 2, ...q });
 
 beforeEach(async () => {
   t = await createTestApp();
@@ -107,7 +109,7 @@ describe('GET /spaces/:id', () => {
   it('detalhe público com custo estimado (lugar + energia + taxa 10%)', async () => {
     const id = await space({ price: 0.3, kw: 7.4, energy: 0.15 });
     const r = await request(t.app).get(`/spaces/${id}`).set('Authorization', `Bearer ${driver}`)
-      .query({ date: today, start: '10:00', hours: 4 }).expect(200);
+      .query({ date: day1, start: '10:00', hours: 4 }).expect(200);
     expect(r.body).toMatchObject({ id, area: 'Odivelas', available: true, host: { firstName: 'Ana', initial: 'S' } });
     expect(r.body.address).toBeUndefined();
     expect(r.body.accessCode).toBeUndefined();
@@ -119,7 +121,7 @@ describe('GET /spaces/:id', () => {
   it('sem €/kWh a energia é 0; sem janela não há custo', async () => {
     const id = await space({ energy: null });
     const r = await request(t.app).get(`/spaces/${id}`).set('Authorization', `Bearer ${driver}`)
-      .query({ date: today, start: '10:00', hours: 2 }).expect(200);
+      .query({ date: day1, start: '10:00', hours: 2 }).expect(200);
     expect(r.body.cost).toMatchObject({ energy: 0, energyKwh: 0, place: 0.6, serviceFee: 0.06, total: 0.66 });
     const plain = await request(t.app).get(`/spaces/${id}`).set('Authorization', `Bearer ${driver}`).expect(200);
     expect(plain.body.cost).toBeNull();

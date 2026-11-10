@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { addDays, todayLisbon } from './availability.js';
+import { addDays, lisbonToUtc, todayLisbon } from './availability.js';
 
 export const MAX_DAYS_AHEAD = 3;
 const MAX_SPAN = 0.5; // graus de lado (~50 km): impede pesquisar o país inteiro de uma vez
@@ -13,7 +13,20 @@ const windowFields = {
   hours: z.coerce.number().int('Duração inválida').min(1, 'Duração mínima de 1 hora').max(12, 'Duração máxima de 12 horas'),
 };
 
-export const windowSchema = z.object(windowFields);
+const GRACE_MS = 30 * 60_000; // a meia hora em curso ainda se pode escolher
+
+// Horas de hoje que já passaram não servem.
+function notPast(v: { date: string; start: string }, ctx: z.RefinementCtx) {
+  // Com a data ou a hora mal formadas o erro já foi dado pelo campo; não há nada a comparar.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v.date) || !/^\d{2}:\d{2}$/.test(v.start)) return;
+  const [h, m] = v.start.split(':').map(Number);
+  const t = lisbonToUtc(v.date, h * 60 + m).getTime();
+  if (Number.isFinite(t) && t < Date.now() - GRACE_MS) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['start'], message: 'Essa hora já passou. Escolhe uma hora a partir de agora.' });
+  }
+}
+
+export const windowSchema = z.object(windowFields).superRefine(notPast);
 
 const bbox = z.string().transform((s, ctx) => {
   const n = s.split(',').map(Number);
@@ -34,11 +47,11 @@ export const searchSchema = z.object({
   minKw: z.coerce.number().positive().optional(),
   plug: z.enum(['schuko', 'type2']).optional(),
   covered: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
-});
+}).superRefine(notPast);
 
 // No detalhe a janela é opcional (tudo ou nada).
 export const detailQuerySchema = z.union([
-  z.object(windowFields),
+  z.object(windowFields).superRefine(notPast),
   z.object({}).strict().transform(() => null),
 ]);
 

@@ -66,3 +66,32 @@ describe('singleFlight', () => {
     expect(busy).toEqual([]);
   });
 });
+
+import { Text as RNText } from 'react-native';
+import { Screen } from '@/ui/Screen';
+import { MenuRow } from '@/ui/MenuRow';
+import { TabBarVisibleProvider } from '@/ui/tabBarContext';
+
+describe('Screen e a margem de baixo', () => {
+  it('fora dos separadores respeita a margem de baixo', async () => {
+    const v = await render(<Screen><RNText>x</RNText></Screen>);
+    expect(v.getByTestId('screen-safe-area').props.edges).toMatchObject({ top: 'additive', bottom: 'additive' });
+  });
+
+  it('com a barra de separadores visível não soma a margem de baixo outra vez', async () => {
+    const v = await render(<TabBarVisibleProvider value><Screen><RNText>x</RNText></Screen></TabBarVisibleProvider>);
+    expect(v.getByTestId('screen-safe-area').props.edges).toMatchObject({ top: 'additive', bottom: 'off' });
+  });
+});
+
+describe('MenuRow', () => {
+  it('com etiqueta e sem ação, a etiqueta vai para a linha de baixo e o título não fica tapado', async () => {
+    const v = await render(<MenuRow icon="card" title="Métodos de Pagamento" sub="Cartão e MB WAY" badge="Em breve" />);
+    const title = v.getByText('Métodos de Pagamento');
+    expect(title.props.numberOfLines).toBe(1);
+    const badge = v.getByText('Em breve');
+    const sub = v.getByText('Cartão e MB WAY');
+    expect(badge.parent).toBe(sub.parent);
+    expect(badge.parent).not.toBe(title.parent);
+  });
+});

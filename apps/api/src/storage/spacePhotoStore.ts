@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { IMAGE_EXT, type ImageType } from '../lib/images.js';
 
 export interface SpacePhotoStore {
-  /** Guarda a imagem e devolve o caminho no bucket. */
-  upload(ownerId: string, spaceId: string, data: Buffer, contentType: ImageType): Promise<string>;
+  /** Guarda a imagem e devolve o caminho no bucket (`<spaceId>/<ficheiro>`, sem o id do proprietário: o URL é público). */
+  upload(spaceId: string, data: Buffer, contentType: ImageType): Promise<string>;
   /** Apaga as imagens (caminhos no bucket). */
   remove(paths: string[]): Promise<void>;
   publicUrl(path: string): string;
@@ -16,8 +16,8 @@ export function createSupabaseSpacePhotoStore(supabaseUrl: string, serviceRoleKe
   const storage = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } }).storage.from(BUCKET);
   let n = 0;
   return {
-    async upload(ownerId, spaceId, data, contentType) {
-      const path = `${ownerId}/${spaceId}/${Date.now()}-${n++}.${IMAGE_EXT[contentType]}`;
+    async upload(spaceId, data, contentType) {
+      const path = `${spaceId}/${Date.now()}-${n++}.${IMAGE_EXT[contentType]}`;
       const { error } = await storage.upload(path, data, { contentType, upsert: false });
       if (error) throw error;
       return path;

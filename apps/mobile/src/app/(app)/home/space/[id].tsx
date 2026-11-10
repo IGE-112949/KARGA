@@ -11,6 +11,7 @@ import { Avatar } from '@/ui/Avatar';
 import { Icon, type IconName } from '@/ui/Icon';
 import { theme } from '@/theme';
 import { useSearch } from '@/search/SearchContext';
+import { useTabBarVisible } from '@/ui/tabBarContext';
 import { effectiveWhen, toQueryString, whenLabel, windowQuery } from '@/search/search';
 import { WhenPicker } from '@/search/WhenPicker';
 import { setFavorite } from '@/search/favorites';
@@ -41,20 +42,24 @@ export default function SpaceDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { api } = useAuth();
-  const { when, setWhen, filters, setFilters } = useSearch();
+  const { when, setWhen, filters, setFilters, markFavorite } = useSearch();
   const { width } = useWindowDimensions();
+  const tabs = useTabBarVisible();
   const [s, setS] = useState<PublicSpace | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const seq = useRef(0);
   const w = effectiveWhen(when, filters);
 
   useEffect(() => {
     const n = ++seq.current;
+    setLoading(true);
     api.get<PublicSpace>(`/spaces/${id}?${toQueryString(windowQuery(when, filters))}`)
-      .then((r) => { if (n === seq.current) { setS(r); setError(null); } })
+      .then((r) => { if (n === seq.current) { setS(r); setError(null); setLoading(false); } })
       .catch((e) => {
         if (n !== seq.current) return;
+        setLoading(false);
         setError(e instanceof ApiError && e.status === 404 ? 'Este lugar já não está disponível.' : e instanceof ApiError ? e.message : 'Ocorreu um erro.');
       });
   }, [api, id, when, filters]);
@@ -73,7 +78,13 @@ export default function SpaceDetail() {
   const toggleFav = async () => {
     const on = !s.isFavorite;
     setS({ ...s, isFavorite: on });
-    try { await setFavorite(api, s.id, on); } catch { setS((x) => (x ? { ...x, isFavorite: !on } : x)); }
+    markFavorite(s.id, on);
+    try {
+      await setFavorite(api, s.id, on);
+    } catch {
+      setS((x) => (x ? { ...x, isFavorite: !on } : x));
+      markFavorite(s.id, !on);
+    }
   };
   const share = () => Share.share({
     message: `${s.title} · ${formatEuro(s.pricePerHour)}/h · ${s.area ?? ''} — vê na Karga: ${Linking.createURL(`/home/space/${s.id}`)}`,
@@ -130,10 +141,14 @@ export default function SpaceDetail() {
           <WhenPicker when={w} onChange={(nw) => { setWhen(nw); if (filters.tonight) setFilters({ ...filters, tonight: false }); }} />
           <View style={styles.availRow}>
             <Text style={styles.small}>{whenLabel(w)}</Text>
-            <Text style={[styles.pill, s.available ? styles.pillOk : styles.pillNo]}>{s.available ? 'Disponível' : 'Indisponível nesta janela'}</Text>
+            {error ? null : loading
+              ? <Text style={[styles.pill, styles.pillWait]}>A recalcular…</Text>
+              : <Text style={[styles.pill, s.available ? styles.pillOk : styles.pillNo]}>{s.available ? 'Disponível' : 'Indisponível nesta janela'}</Text>}
           </View>
+          {error ? <Text style={styles.recalcError} accessibilityLiveRegion="polite">{`Não foi possível atualizar: ${error}`}</Text> : null}
 
-          {c ? (
+          {/* Enquanto recalcula (ou se falhou) não mostra o custo da janela anterior. */}
+          {c && !loading && !error ? (
             <>
               <Text style={styles.h2}>Resumo de custos (estimado)</Text>
               <View style={styles.card}>
@@ -153,10 +168,10 @@ export default function SpaceDetail() {
         </View>
       </ScrollView>
 
-      <SafeAreaView edges={['bottom']} style={styles.bar}>
+      <SafeAreaView edges={tabs ? [] : ['bottom']} style={styles.bar}>
         <View style={styles.flex}>
           <Text style={styles.small}>Total estimado</Text>
-          <Text style={styles.barTotal}>{c ? formatEuro(c.total) : '—'}</Text>
+          <Text style={styles.barTotal}>{c && !loading && !error ? formatEuro(c.total) : '—'}</Text>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Reservar (em breve)" accessibilityState={{ disabled: true }} disabled style={styles.reserve}>
           <Text style={styles.reserveText}>Reservar</Text>
@@ -193,6 +208,8 @@ const styles = StyleSheet.create({
   pillOk: { backgroundColor: theme.colors.greenBg, color: theme.colors.greenText },
   pillNo: { backgroundColor: '#FDECEC', color: theme.colors.danger },
   card: { borderRadius: 18, backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.border, paddingHorizontal: 16 },
+  pillWait: { backgroundColor: theme.colors.surface, color: theme.colors.textMuted },
+  recalcError: { fontSize: 14, color: theme.colors.danger, fontFamily: theme.font.medium },
   costRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: theme.colors.divider },
   costV: { fontSize: 15, fontFamily: theme.font.medium, color: theme.colors.text },
   totalRow: { borderBottomWidth: 0 },

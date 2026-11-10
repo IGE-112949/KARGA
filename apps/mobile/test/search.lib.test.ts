@@ -47,3 +47,42 @@ describe('hora de Portugal (igual à API), não a do telemóvel', () => {
     expect(dayChips(now)[0].bot).toBe('Sáb 11');
   });
 });
+
+import { freshWhen, isPastStart, tonightWhen } from '@/search/search';
+
+describe('horas que já passaram', () => {
+  const at2 = (iso: string) => new Date(`${iso}Z`); // novembro: Lisboa = UTC
+
+  it('a hora escolhida hoje que entretanto passou avança para a próxima meia hora', () => {
+    const now = at2('2026-11-10T15:10:00');
+    expect(freshWhen({ dayOffset: 0, start: '11:30', hours: 3 }, now)).toEqual({ dayOffset: 0, start: '15:30', hours: 3 });
+  });
+
+  it('hora futura ou de outro dia fica como está', () => {
+    const now = at2('2026-11-10T15:10:00');
+    const w = { dayOffset: 0, start: '18:00', hours: 2 };
+    expect(freshWhen(w, now)).toBe(w);
+    const t = { dayOffset: 1, start: '08:00', hours: 2 };
+    expect(freshWhen(t, now)).toBe(t);
+  });
+
+  it('a meia hora em curso ainda conta como válida (até 25 min, antes do limite da API)', () => {
+    expect(isPastStart({ dayOffset: 0, start: '15:00', hours: 1 }, at2('2026-11-10T15:10:00'))).toBe(false);
+    expect(isPastStart({ dayOffset: 0, start: '15:00', hours: 1 }, at2('2026-11-10T15:25:00'))).toBe(true);
+    expect(isPastStart({ dayOffset: 0, start: '14:30', hours: 1 }, at2('2026-11-10T15:10:00'))).toBe(true);
+  });
+
+  it('"Esta noite" depois das 20:00 começa já e vai até às 08:00', () => {
+    expect(tonightWhen(at2('2026-11-10T18:00:00'))).toEqual({ dayOffset: 0, start: '20:00', hours: 12 });
+    expect(tonightWhen(at2('2026-11-10T22:10:00'))).toEqual({ dayOffset: 0, start: '22:30', hours: 9 });
+    expect(tonightWhen(at2('2026-11-10T02:10:00'))).toEqual({ dayOffset: 0, start: '02:30', hours: 5 });
+    expect(tonightWhen(at2('2026-11-10T07:40:00'))).toEqual({ dayOffset: 0, start: '20:00', hours: 12 });
+  });
+
+  it('a pesquisa "Esta noite" usa a janela ajustada', () => {
+    const now = at2('2026-11-10T22:10:00');
+    const q = searchQuery({ minLng: -9.2, minLat: 38.7, maxLng: -9.1, maxLat: 38.8 }, defaultWhen(now),
+      { maxPrice: null, minKw: null, plug: null, covered: false, fast: false, tonight: true }, now);
+    expect(q).toMatchObject({ start: '22:30', hours: '9' });
+  });
+});

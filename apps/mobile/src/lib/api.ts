@@ -20,8 +20,9 @@ export type Api = {
 export function createApi(getToken: () => Promise<string | null>, baseUrl: string, onUnauthorized: () => void): Api {
   async function request<T>(method: string, path: string, body?: unknown, form?: FormData): Promise<T> {
     const token = await getToken();
-    const headers: Record<string, string> = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
+    // Sem token (ex.: a Auth não respondeu ao renovar a sessão) a API devolvia 401 e a sessão terminava; assim não.
+    if (!token) throw new ApiError(0, 'NO_SESSION', 'Não foi possível validar a sessão. Tenta novamente.');
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     let res: Response;
     try {
@@ -45,7 +46,9 @@ export function createApi(getToken: () => Promise<string | null>, baseUrl: strin
     if (!res.ok) {
       if (res.status === 401) onUnauthorized();
       const e = (data as { error?: { code?: string; message?: string; details?: ErrorDetail[] } } | null)?.error;
-      if (e?.code) throw new ApiError(res.status, e.code, e.message ?? 'Ocorreu um erro.', e.details);
+      // Em erros de validação a mensagem genérica ("Dados inválidos") não ajuda: usa a do primeiro campo.
+      const msg = e?.code === 'VALIDATION_ERROR' && e.details?.[0]?.message ? e.details[0].message : e?.message;
+      if (e?.code) throw new ApiError(res.status, e.code, msg ?? 'Ocorreu um erro.', e.details);
       throw new ApiError(res.status, 'HTTP_ERROR', 'Ocorreu um erro. Tenta novamente.');
     }
     return data as T;

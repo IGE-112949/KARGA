@@ -38,7 +38,7 @@ export function createApp(deps: AppDeps): express.Express {
   // Todas as rotas abaixo exigem sessão.
   const api = express.Router();
   api.use(requireAuth(deps.auth));
-  api.use(meRoutes(deps.db, deps.authAdmin, deps.avatars));
+  api.use(meRoutes(deps.db, deps.authAdmin, deps.avatars, deps.spacePhotos));
   api.use(avatarRoutes(deps.db, deps.avatars));
   api.use(vehicleRoutes(deps.db));
   api.use(spaceRoutes(deps.db, deps.spacePhotos));
@@ -47,6 +47,9 @@ export function createApp(deps: AppDeps): express.Express {
   api.use(favoriteRoutes(deps.db, deps.spacePhotos));
   app.use(api);
 
+  app.use((_req, res) => {
+    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Recurso não encontrado.' } });
+  });
   app.use(errorHandler);
   return app;
 }

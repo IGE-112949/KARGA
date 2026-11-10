@@ -9,6 +9,8 @@ import { isAvailable, requestInterval, type Interval, type SearchWindow } from '
 import type { SearchQuery } from './schemas.js';
 
 export const MAX_RESULTS = 100;
+// Espaços lidos de cada vez (por preço); continua a ler até ter MAX_RESULTS livres ou acabarem os espaços da zona.
+export const searchConfig = { pageSize: 500, maxPages: 6 };
 const MAX_KWH = 20;
 
 // Segredo do servidor para o deslocamento (sem ele, quem tem o código não consegue reverter o ponto).
@@ -116,10 +118,16 @@ export async function searchSpaces(db: Db, store: SpacePhotoStore, userId: strin
   if (q.minKw !== undefined) conds.push(gte(spaces.powerKw, String(q.minKw)));
   if (q.plug) conds.push(eq(spaces.plugType, q.plug));
   if (q.covered) conds.push(inArray(spaces.spaceType, ['closed_garage', 'covered']));
-  const rows = (await db.select(cols).from(spaces).where(and(...conds)).orderBy(asc(spaces.pricePerHour), asc(spaces.createdAt)).limit(500)) as Row[];
-  if (!rows.length) return [];
-  const free = await loadAvailability(db, rows.map((r) => r.id), q);
-  const hits = rows.filter((r) => free(r.id)).slice(0, MAX_RESULTS);
+  const hits: Row[] = [];
+  for (let page = 0, offset = 0; hits.length < MAX_RESULTS && page < searchConfig.maxPages; page++, offset += searchConfig.pageSize) {
+    const rows = (await db.select(cols).from(spaces).where(and(...conds))
+      .orderBy(asc(spaces.pricePerHour), asc(spaces.createdAt), asc(spaces.id)).limit(searchConfig.pageSize).offset(offset)) as Row[];
+    if (!rows.length) break;
+    const free = await loadAvailability(db, rows.map((r) => r.id), q);
+    hits.push(...rows.filter((r) => free(r.id)).slice(0, MAX_RESULTS - hits.length));
+    if (rows.length < searchConfig.pageSize) break;
+  }
+  if (!hits.length) return [];
   const ids = hits.map((r) => r.id);
   const [cov, fav] = await Promise.all([covers(db, store, ids), favoriteIds(db, userId, ids)]);
   return hits.map((r) => summary(r, cov.get(r.id) ?? null, fav.has(r.id)));

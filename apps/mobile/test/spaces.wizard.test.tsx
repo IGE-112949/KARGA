@@ -43,6 +43,7 @@ async function step1() {
 }
 async function step2(plug: 'Schuko' | 'Tipo 2' = 'Tipo 2') {
   await fireEvent.press(screen.getByRole('button', { name: /Adicionar fotografia/ }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Escolher da galeria' }));
   await fireEvent.press(screen.getByRole('button', { name: new RegExp(`^${plug}`) }));
   if (plug === 'Tipo 2') await fireEvent.press(screen.getByRole('button', { name: '7,4 kW' }));
   await next();
@@ -84,6 +85,30 @@ describe('Novo espaço', () => {
     expect(await screen.findByText('Sem acesso à localização: marca o lugar tocando no mapa.')).toBeTruthy();
     await fireEvent(addr, 'blur');
     expect(loc.geocodeAddress).toHaveBeenCalledTimes(2);
+  });
+
+  it('"Usar a minha localização atual" mostra que está a carregar e não repete o pedido', async () => {
+    const loc = jest.requireMock('@/lib/location');
+    let resolve!: (v: unknown) => void;
+    loc.currentPlace.mockReturnValue(new Promise((r) => { resolve = r; }));
+    await render(<NewSpace />);
+    const first = fireEvent.press(screen.getByRole('button', { name: 'Usar a minha localização atual' }));
+    expect(await screen.findByText('A obter a localização…')).toBeTruthy();
+    const second = fireEvent.press(screen.getByRole('button', { name: /localização/ }));
+    expect(loc.currentPlace).toHaveBeenCalledTimes(1);
+    resolve({ latitude: 38.7, longitude: -9.1, address: 'Rua X, 1', area: 'Lisboa' });
+    await Promise.all([first, second]);
+    expect(await screen.findByText('Usar a minha localização atual')).toBeTruthy();
+  });
+
+  it('preço com mais de 2 casas decimais mostra o erro antes de publicar', async () => {
+    await render(<NewSpace />);
+    await step1();
+    await step2();
+    await fireEvent.changeText(screen.getByLabelText('Lugar (€/hora)'), '0,333');
+    await fireEvent.press(screen.getByRole('button', { name: 'Segunda' }));
+    await next();
+    expect(screen.getByText('O preço só pode ter 2 casas decimais (ex.: 0,35)')).toBeTruthy();
   });
 
   it('passo 1 não avança sem marcar o lugar', async () => {
@@ -133,6 +158,7 @@ describe('Novo espaço', () => {
     await render(<NewSpace />);
     await step1();
     await fireEvent.press(screen.getByRole('button', { name: /Adicionar fotografia/ }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Escolher da galeria' }));
     await fireEvent.press(screen.getByRole('button', { name: /^Schuko/ }));
     await fireEvent.press(screen.getByRole('button', { name: '13 A' }));
     await next();

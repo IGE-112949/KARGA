@@ -16,7 +16,8 @@ jest.mock('expo-router', () => {
   };
 });
 jest.mock('@/auth/AuthProvider', () => ({ useAuth: () => ({ api: mockApi }) }));
-jest.mock('@/lib/avatar', () => ({ pickSpacePhoto: jest.fn() }));
+const mockPickPhoto = jest.fn();
+jest.mock('@/lib/avatar', () => ({ pickSpacePhoto: (src: string) => mockPickPhoto(src) }));
 jest.mock('@/spaces/form', () => ({ photoFormData: async () => 'FORM' }));
 jest.mock('@/ui/MapPicker', () => ({ MapPicker: () => null }));
 jest.mock('@/lib/location', () => ({ geocodeAddress: jest.fn(), currentPlace: jest.fn(), LocationPermissionError: class extends Error {} }));
@@ -46,6 +47,42 @@ describe('Gerir espaço', () => {
     await render(<Manage />);
     await fireEvent(await screen.findByRole('switch', { name: 'Visível no mapa' }), 'valueChange', false);
     expect(mockApi.patch).toHaveBeenCalledWith('/me/spaces/s1', { status: 'inactive' });
+  });
+
+  it('o interruptor muda logo, sem voltar atrás enquanto o pedido decorre', async () => {
+    let resolve!: (v: unknown) => void;
+    mockApi.patch.mockReturnValue(new Promise((r) => { resolve = r; }));
+    await render(<Manage />);
+    const sw = await screen.findByRole('switch', { name: 'Visível no mapa' });
+    await fireEvent(sw, 'valueChange', false);
+    expect(screen.getByRole('switch', { name: 'Visível no mapa' }).props.value).toBe(false);
+    resolve({ ...space, status: 'inactive' });
+  });
+
+  it('se o pedido do interruptor falhar, volta ao estado anterior e mostra o erro', async () => {
+    mockApi.patch.mockRejectedValue(new ApiError(0, 'NETWORK_ERROR', 'Sem ligação à internet ou servidor indisponível.'));
+    await render(<Manage />);
+    await fireEvent(await screen.findByRole('switch', { name: 'Visível no mapa' }), 'valueChange', false);
+    expect(await screen.findByText('Sem ligação à internet ou servidor indisponível.')).toBeTruthy();
+    expect(screen.getByRole('switch', { name: 'Visível no mapa' }).props.value).toBe(true);
+  });
+
+  it('adicionar fotografia deixa escolher entre câmara e galeria', async () => {
+    mockPickPhoto.mockResolvedValue({ uri: 'file:///c.jpg' });
+    mockApi.upload.mockResolvedValue(space);
+    await render(<Manage />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Adicionar fotografia' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Tirar fotografia' }));
+    expect(mockPickPhoto).toHaveBeenCalledWith('camera');
+    expect(mockApi.upload).toHaveBeenCalledWith('/me/spaces/s1/photos', 'FORM', 'POST');
+  });
+
+  it('se a câmara/galeria falhar mostra um aviso', async () => {
+    mockPickPhoto.mockRejectedValue(new Error('x'));
+    await render(<Manage />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Adicionar fotografia' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Escolher da galeria' }));
+    expect(await screen.findByText('Não foi possível abrir a galeria. Tenta novamente.')).toBeTruthy();
   });
 
   it('tornar uma foto capa', async () => {
@@ -83,6 +120,23 @@ describe('Gerir espaço', () => {
       endsAt: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1).toISOString(),
       reason: 'Férias',
     });
+  });
+
+  it('se gravar o bloqueio falhar, o formulário fica aberto com o erro e as datas escolhidas', async () => {
+    mockApi.post.mockRejectedValue(new ApiError(409, 'BLOCK_OVERLAP', 'Já tens um bloqueio nessas datas.'));
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 40);
+    await render(<Manage />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Bloquear datas' }));
+    for (let i = 0; i < 4 && !screen.queryByRole('button', { name: dayLabel(start) }); i++) {
+      await fireEvent.press(screen.getByRole('button', { name: 'Mês seguinte' }));
+    }
+    await fireEvent.press(screen.getByRole('button', { name: dayLabel(start) }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar bloqueio' }));
+    expect(await screen.findAllByText('Já tens um bloqueio nessas datas.')).not.toHaveLength(0);
+    expect(screen.getByRole('button', { name: 'Guardar bloqueio' })).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar bloqueio' }));
+    expect(mockApi.post).toHaveBeenCalledTimes(2);
   });
 
   it('dias passados não se podem escolher; sem intervalo não guarda', async () => {

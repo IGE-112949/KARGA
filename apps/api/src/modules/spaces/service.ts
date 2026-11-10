@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, gt, lt, ne, sql } from 'drizzle-orm';
 import type { Db } from '../../db/types.js';
 import { spaceBlocks, spacePhotos, spaces } from '../../db/schema.js';
 import { AppError } from '../../lib/errors.js';
-import { detectImageType, invalidImage, tooManyPhotos, type ImageType } from '../../lib/images.js';
+import { detectImageType, invalidImage, storageUnavailable, tooManyPhotos, type ImageType } from '../../lib/images.js';
 import type { SpacePhotoStore } from '../../storage/spacePhotoStore.js';
 import { requireProfile } from '../me/service.js';
 import type { AvailabilityWindow } from './availability.js';
@@ -96,14 +96,15 @@ function checkImages(files: Express.Multer.File[]): ImageType[] {
 }
 
 // Envia as fotos uma a uma; se alguma falhar, apaga as já enviadas (tudo-ou-nada).
-async function uploadAll(store: SpacePhotoStore, ownerId: string, spaceId: string, files: Express.Multer.File[], types: ImageType[]) {
+async function uploadAll(store: SpacePhotoStore, spaceId: string, files: Express.Multer.File[], types: ImageType[]) {
   const paths: string[] = [];
   try {
-    for (let i = 0; i < files.length; i++) paths.push(await store.upload(ownerId, spaceId, files[i].buffer, types[i]));
+    for (let i = 0; i < files.length; i++) paths.push(await store.upload(spaceId, files[i].buffer, types[i]));
     return paths;
   } catch (e) {
+    console.error('Falha ao enviar fotografia para o Storage:', (e as Error).message);
     await removeQuietly(store, paths);
-    throw e;
+    throw storageUnavailable();
   }
 }
 
@@ -121,7 +122,7 @@ export async function createSpace(db: Db, store: SpacePhotoStore, userId: string
   if (files.length > MAX_PHOTOS) throw tooManyPhotos();
   const types = checkImages(files);
   const id = randomUUID();
-  const paths = await uploadAll(store, userId, id, files, types);
+  const paths = await uploadAll(store, id, files, types);
   try {
     await db.transaction(async (tx) => {
       const t = tx as unknown as Db;
@@ -160,7 +161,7 @@ export async function updateSpace(db: Db, store: SpacePhotoStore, userId: string
     ...(pricePerHour !== undefined ? { pricePerHour: String(pricePerHour) } : {}),
     ...(energyPriceKwh !== undefined ? { energyPriceKwh: energyPriceKwh === null ? null : String(energyPriceKwh) } : {}),
     updatedAt: sql`now()`,
-  }).where(eq(spaces.id, id));
+  }).where(and(eq(spaces.id, id), eq(spaces.ownerId, userId), ne(spaces.status, 'deleted')));
   return getSpace(db, store, userId, id);
 }
 
@@ -193,7 +194,9 @@ export async function addPhoto(db: Db, store: SpacePhotoStore, userId: string, i
   if (!file) throw invalidImage();
   const [type] = checkImages([file]);
   await requireOwn(db, userId, id);
-  const [path] = await uploadAll(store, userId, id, [file], [type]);
+  // Verifica o limite antes de enviar (volta a verificar dentro da transação, por causa de pedidos em paralelo).
+  if ((await repo.photosOf(db, [id])).length >= MAX_PHOTOS) throw tooManyPhotos();
+  const [path] = await uploadAll(store, id, [file], [type]);
   try {
     await db.transaction(async (tx) => {
       const t = tx as unknown as Db;
@@ -249,8 +252,17 @@ export async function listBlocks(db: Db, store: SpacePhotoStore, userId: string,
 
 export async function addBlock(db: Db, store: SpacePhotoStore, userId: string, id: string, b: { startsAt: string; endsAt: string; reason?: string | null }) {
   await requireHost(db, userId);
-  await requireOwn(db, userId, id);
-  await db.insert(spaceBlocks).values({ spaceId: id, startsAt: new Date(b.startsAt), endsAt: new Date(b.endsAt), reason: b.reason ?? null });
+  const startsAt = new Date(b.startsAt);
+  const endsAt = new Date(b.endsAt);
+  if (endsAt <= new Date()) throw new AppError(400, 'BLOCK_IN_PAST', 'Esse período já passou. Escolhe datas a partir de hoje.');
+  await db.transaction(async (tx) => {
+    const t = tx as unknown as Db;
+    await requireOwn(t, userId, id, true);
+    const [clash] = await t.select({ id: spaceBlocks.id }).from(spaceBlocks)
+      .where(and(eq(spaceBlocks.spaceId, id), lt(spaceBlocks.startsAt, endsAt), gt(spaceBlocks.endsAt, startsAt)));
+    if (clash) throw new AppError(409, 'BLOCK_OVERLAP', 'Já tens um bloqueio nessas datas.');
+    await t.insert(spaceBlocks).values({ spaceId: id, startsAt, endsAt, reason: b.reason ?? null });
+  });
   return listBlocks(db, store, userId, id);
 }
 

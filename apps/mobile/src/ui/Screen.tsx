@@ -1,13 +1,15 @@
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '@/theme';
+import { useTabBarVisible } from './tabBarContext';
 
 export function Screen({ children, scroll = true, background = theme.colors.white, contentStyle }: {
   children: React.ReactNode; scroll?: boolean; background?: string; contentStyle?: ViewStyle;
 }) {
   const content = [styles.content, contentStyle];
+  const tabs = useTabBarVisible();
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: background }]} edges={['top', 'bottom']}>
+    <SafeAreaView testID="screen-safe-area" style={[styles.safe, { backgroundColor: background }]} edges={tabs ? ['top'] : ['top', 'bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {scroll ? (
           <ScrollView contentContainerStyle={[{ flexGrow: 1 }, content]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>

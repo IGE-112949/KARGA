@@ -33,12 +33,14 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [entering, setEntering] = useState(false);
 
   const submit = async () => {
     setError(null);
     const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
-    // Com sucesso, o AuthProvider muda o estado e a navegação segue sozinha.
+    // Com sucesso, o AuthProvider muda o estado e a navegação segue sozinha; até lá o botão continua a carregar.
     if (err) setError(authErrorMessage(err));
+    else setEntering(true);
   };
 
   return (
@@ -55,7 +57,7 @@ export default function Login() {
           autoComplete="current-password" textContentType="password" />
       </View>
       {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
-      <Button title="Entrar" onPress={submit} disabled={!email.trim() || !password} />
+      <Button title="Entrar" onPress={submit} loading={entering} disabled={!email.trim() || !password} />
       <OrDivider />
       <GoogleSoon />
       <View style={styles.switch}>

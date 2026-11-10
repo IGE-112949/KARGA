@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { Button } from '@/ui/Button';
 import { Icon } from '@/ui/Icon';
 import { theme } from '@/theme';
-import { formatEuro, formatKw, plugLabelOf, scheduleSummary, spaceTypeLabel, type SpaceSummary } from '@/lib/spaces';
+import { formatEnergy, formatEuro, formatKw, plugLabelOf, scheduleSummary, spaceTypeLabel, type SpaceSummary } from '@/lib/spaces';
 
 function Chip({ children }: { children: string }) {
   return <Text style={styles.chip}>{children}</Text>;
@@ -30,7 +30,7 @@ export function SpaceCard({ s, onManage }: { s: SpaceSummary; onManage: () => vo
           <Chip>{formatKw(s.powerKw)}</Chip>
           <Chip>{plugLabelOf(s.plugType)}</Chip>
           <Chip>{spaceTypeLabel(s.spaceType)}</Chip>
-          {s.energyPriceKwh != null ? <Chip>{`Energia ${formatEuro(s.energyPriceKwh)}/kWh`}</Chip> : null}
+          {s.energyPriceKwh != null ? <Chip>{`Energia ${formatEnergy(s.energyPriceKwh)}/kWh`}</Chip> : null}
         </View>
         <View style={styles.addr}>
           <Icon name="clock" size={15} color={theme.colors.textMuted} />

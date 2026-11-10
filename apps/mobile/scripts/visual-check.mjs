@@ -106,6 +106,8 @@ const SCREENS = [
   { name: 'registo-2', path: '/register/role', mock: 'AUTENTICAÇÃO · 4', session: true, me: 404 },
   { name: 'registo-3', path: '/register/vehicle', mock: 'AUTENTICAÇÃO · 5', session: true, me: 200 },
   { name: 'perfil', path: '/profile', mock: 'PERFIL (condutor', session: true, me: 200, tabs: true },
+  { name: 'veiculos', path: '/profile/vehicles', mock: 'PERFIL (condutor', session: true, me: 200 },
+  { name: 'definicoes', path: '/profile/settings', mock: 'PERFIL (condutor', session: true, me: 200 },
   { name: 'espacos', path: '/spaces', mock: 'PROPRIETÁRIO · OS MEUS ESPAÇOS', session: true, host: true },
   { name: 'novo-espaco', path: '/spaces/new', mock: 'PROPRIETÁRIO · NOVO ESPAÇO', session: true, host: true },
   { name: 'gerir-espaco', path: '/spaces/s1', mock: 'PROPRIETÁRIO · GERIR ESPAÇO', session: true, host: true },
@@ -123,7 +125,7 @@ for (const s of SCREENS.filter((x) => !only || only.includes(x.name))) {
     await page.addInitScript((v) => localStorage.setItem('sb-vfpgzvhfxezszjrajuyv-auth-token', v), JSON.stringify(session));
   }
   if (s.host) {
-    await page.addInitScript((m) => localStorage.setItem('karga.mode', m), s.driver ? 'driver' : 'host');
+    await page.addInitScript((m) => localStorage.setItem('karga.mode.u1', m), s.driver ? 'driver' : 'host');
     await page.route((u) => u.port === '3000', (route) => {
       const body = HOST_API[new URL(route.request().url()).pathname];
       return route.fulfill(body ? { status: 200, contentType: 'application/json', body: JSON.stringify(body) } : { status: 404, contentType: 'application/json', body: '{"error":{"code":"NOT_FOUND","message":"x"}}' });

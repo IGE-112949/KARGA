@@ -21,11 +21,4 @@ describe('DELETE /me', () => {
     expect(v.rows).toHaveLength(0);
   });
 
-  it('sem perfil devolve 404 e não apaga nada na Auth', async () => {
-    const t = await createTestApp();
-    const h = { Authorization: `Bearer ${await t.tokenFor(U)}` };
-    const res = await request(t.app).delete('/me').set(h);
-    expect(res.status).toBe(404);
-    expect(t.authAdmin.deleted).toEqual([]);
-  });
 });

@@ -42,6 +42,20 @@ describe('Detalhe do lugar', () => {
     expect(screen.queryByText(/Rua/)).toBeNull();
   });
 
+  it('ao mudar a janela não mostra o custo antigo enquanto recalcula; erro no recálculo aparece', async () => {
+    await show();
+    expect(await screen.findByText('Disponível')).toBeTruthy();
+    let reject!: (e: unknown) => void;
+    mockApi.get.mockReturnValueOnce(new Promise((_, r) => { reject = r; }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Duração: mais' }));
+    expect(screen.getByText('A recalcular…')).toBeTruthy();
+    expect(screen.queryByText('Disponível')).toBeNull();
+    expect(screen.queryAllByText('3,10 €')).toHaveLength(0);
+    reject(new ApiError(0, 'NETWORK_ERROR', 'Sem ligação à internet ou servidor indisponível.'));
+    expect(await screen.findByText('Não foi possível atualizar: Sem ligação à internet ou servidor indisponível.')).toBeTruthy();
+    expect(screen.queryByText('Disponível')).toBeNull();
+  });
+
   it('indisponível na janela', async () => {
     mockApi.get.mockResolvedValue({ ...detail, available: false });
     await show();

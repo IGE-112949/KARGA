@@ -57,9 +57,9 @@ describe('favoritos', () => {
   it('a pesquisa marca os favoritos', async () => {
     await t.pg.query(`insert into space_availability (space_id, weekday, start_time, end_time) select $1, g, '00:00', '24:00' from generate_series(0,6) g`, [id]);
     await fav('put').expect(204);
-    const { todayLisbon } = await import('../src/modules/search/availability.js');
+    const { addDays, todayLisbon } = await import('../src/modules/search/availability.js');
     const r = await request(t.app).get('/spaces/search').set('Authorization', `Bearer ${driver}`)
-      .query({ bbox: '-9.3,38.7,-9.1,38.9', date: todayLisbon(), start: '10:00', hours: 1 }).expect(200);
+      .query({ bbox: '-9.3,38.7,-9.1,38.9', date: addDays(todayLisbon(), 1), start: '10:00', hours: 1 }).expect(200);
     expect(r.body[0].isFavorite).toBe(true);
   });
 });

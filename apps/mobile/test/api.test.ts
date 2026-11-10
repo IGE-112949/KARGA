@@ -11,6 +11,15 @@ const json = (status: number, body?: unknown) =>
 const make = (onUnauthorized = jest.fn()) => ({ api: createApi(async () => 'tok', 'http://api.test', onUnauthorized), onUnauthorized });
 
 describe('createApi', () => {
+  it('sem token (Auth indisponível) não chama a API nem termina a sessão', async () => {
+    const f = stubFetch(async () => json(401, { error: { code: 'UNAUTHORIZED', message: 'x' } }));
+    const onUnauthorized = jest.fn();
+    const api = createApi(async () => null, 'http://api.test', onUnauthorized);
+    await expect(api.get('/me')).rejects.toMatchObject({ code: 'NO_SESSION' });
+    expect(f).not.toHaveBeenCalled();
+    expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+
   it('envia o token no header Authorization', async () => {
     const f = stubFetch(async () => json(200, { ok: true }));
     const { api } = make();
@@ -23,6 +32,12 @@ describe('createApi', () => {
     stubFetch(async () => json(404, { error: { code: 'PROFILE_NOT_FOUND', message: 'x' } }));
     const { api } = make();
     await expect(api.get('/me')).rejects.toMatchObject({ status: 404, code: 'PROFILE_NOT_FOUND', message: 'x' });
+  });
+
+  it('erro de validação usa como mensagem a do primeiro campo (ex.: hora que já passou)', async () => {
+    stubFetch(async () => json(400, { error: { code: 'VALIDATION_ERROR', message: 'Dados inválidos', details: [{ field: 'start', message: 'Essa hora já passou.' }] } }));
+    const { api } = make();
+    await expect(api.get('/x')).rejects.toMatchObject({ code: 'VALIDATION_ERROR', message: 'Essa hora já passou.' });
   });
 
   it('mantém os detalhes de validação', async () => {

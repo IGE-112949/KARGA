@@ -9,7 +9,9 @@ const mockPick = jest.fn();
 let mockMetadata: Record<string, unknown> = { full_name: 'Ana Silva', phone: '+351912345678' };
 
 jest.mock('@/lib/supabase', () => ({ supabase: { auth: { signUp: (...a: unknown[]) => mockSignUp(...a) } } }));
-jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn(), replace: mockReplace, push: jest.fn(), canGoBack: () => true }) }));
+jest.mock('@/lib/navigation', () => ({ resetTo: (h: string) => mockReplace(h) }));
+let mockParams: Record<string, string> = {};
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ back: jest.fn(), replace: mockReplace, push: jest.fn(), canGoBack: () => true }) }));
 jest.mock('@/auth/AuthProvider', () => ({
   useAuth: () => ({ api: mockApi, refreshProfile: mockRefresh, session: { user: { user_metadata: mockMetadata } }, signOut: jest.fn() }),
 }));
@@ -20,6 +22,7 @@ import Step2 from '@/app/(auth)/register/role';
 import Step3 from '@/app/(auth)/register/vehicle';
 
 beforeEach(() => {
+  mockParams = {};
   jest.clearAllMocks();
   mockMetadata = { full_name: 'Ana Silva', phone: '+351912345678' };
   mockRefresh.mockResolvedValue({});
@@ -83,6 +86,13 @@ describe('Registo · passo 2', () => {
     expect(mockReplace).toHaveBeenCalledWith('/profile');
   });
 
+  it('se a galeria falhar mostra a mensagem e não bloqueia', async () => {
+    mockPick.mockRejectedValue(new Error('x'));
+    await render(<Step2 />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Adicionar foto' }));
+    expect(await screen.findByText('Não foi possível abrir a galeria. Tenta novamente.')).toBeTruthy();
+  });
+
   it('com foto escolhida faz POST /me e depois PUT /me/avatar', async () => {
     const calls: string[] = [];
     mockApi.post.mockImplementation(async (p: string) => { calls.push(`POST ${p}`); return {}; });
@@ -94,14 +104,20 @@ describe('Registo · passo 2', () => {
     expect(calls).toEqual(['POST /me', 'PUT /me/avatar']);
   });
 
-  it('falha da foto não bloqueia o registo', async () => {
+  it('falha da foto não bloqueia o registo e o aviso segue para o passo seguinte', async () => {
     mockApi.post.mockResolvedValue({});
     mockApi.upload.mockRejectedValue(new ApiError(400, 'INVALID_IMAGE', 'Imagem inválida'));
     mockPick.mockResolvedValue({ uri: 'file:///foto.jpg', mimeType: 'image/jpeg' });
     await render(<Step2 />);
     await fireEvent.press(screen.getByRole('button', { name: 'Adicionar foto' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
-    expect(mockReplace).toHaveBeenCalledWith('/register/vehicle');
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/register/vehicle', params: { aviso: 'foto' } });
+  });
+
+  it('o passo 3 mostra o aviso da foto não guardada', async () => {
+    mockParams = { aviso: 'foto' };
+    await render(<Step3 />);
+    expect(screen.getByText('A conta foi criada, mas a foto não foi guardada. Podes adicioná-la mais tarde no Perfil.')).toBeTruthy();
   });
 });
 
