@@ -40,6 +40,7 @@ function base(row: repo.SpaceRow) {
     title: row.title,
     address: row.address as string,
     spotDetails: row.spotDetails as string | null,
+    area: row.area as string | null,
     latitude: Number(row.latitude),
     longitude: Number(row.longitude),
     spaceType: row.spaceType as string,

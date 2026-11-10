@@ -174,6 +174,15 @@ export default function ProfileScreen() {
         </View>
       ) : null}
 
+      {profile.isDriver ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Os meus favoritos" onPress={() => router.push('/profile/favorites')}
+          style={({ pressed }) => [styles.card, styles.row, styles.rowLast, pressed && styles.pressed]}>
+          <View style={[styles.rowIcon, { backgroundColor: '#FDECEF' }]}><Icon name="heart" size={20} color="#E11D48" filled /></View>
+          <Text style={[styles.rowTitle, styles.rowText]}>Os meus favoritos</Text>
+          <Icon name="chevron" size={20} color={theme.colors.textMuted} />
+        </Pressable>
+      ) : null}
+
       <View style={styles.section}>
         <Text style={styles.h2}>Dados pessoais</Text>
         <View style={[styles.card, styles.form]}>

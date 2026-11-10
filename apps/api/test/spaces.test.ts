@@ -11,6 +11,7 @@ const base = {
   title: 'Garagem do Tiago',
   address: 'Rua Ferreira Borges, 40, Lisboa',
   spotDetails: 'Piso -1 · Lugar 7',
+  area: 'Campo de Ourique',
   latitude: 38.7183,
   longitude: -9.1655,
   spaceType: 'closed_garage',
@@ -50,7 +51,7 @@ beforeEach(async () => {
 describe('POST /me/spaces', () => {
   it('cria o espaço com fotos ordenadas e horário', async () => {
     const r = await create(host, base, 2).expect(201);
-    expect(r.body).toMatchObject({ title: 'Garagem do Tiago', powerKw: 7.4, pricePerHour: 0.3, energyPriceKwh: 0.15, status: 'active', accessCode: '1234#' });
+    expect(r.body).toMatchObject({ title: 'Garagem do Tiago', area: 'Campo de Ourique', powerKw: 7.4, pricePerHour: 0.3, energyPriceKwh: 0.15, status: 'active', accessCode: '1234#' });
     expect(r.body.latitude).toBeCloseTo(38.7183);
     expect(r.body.photos).toHaveLength(2);
     expect(r.body.photos[0].isCover).toBe(true);

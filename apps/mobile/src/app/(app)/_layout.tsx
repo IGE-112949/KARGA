@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Icon, type IconName } from '@/ui/Icon';
 import { ModeProvider, useMode } from '@/profile/ModeContext';
+import { SearchProvider } from '@/search/SearchContext';
 import { theme } from '@/theme';
 
 const ACTIVE = '#047857';
@@ -37,7 +38,9 @@ function AppTabs() {
 export default function AppLayout() {
   return (
     <ModeProvider>
-      <AppTabs />
+      <SearchProvider>
+        <AppTabs />
+      </SearchProvider>
     </ModeProvider>
   );
 }

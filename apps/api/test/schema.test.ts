@@ -91,7 +91,7 @@ describe('schema da base de dados', () => {
        where n.nspname = 'public' and c.relkind = 'r' and c.relname <> 'spatial_ref_sys'`,
     );
     expect(r.rows.map((x) => x.relname).sort()).toEqual(
-      ['bookings', 'platform_settings', 'profiles', 'space_availability', 'space_blocks', 'space_photos', 'spaces', 'vehicles'],
+      ['bookings', 'favorites', 'platform_settings', 'profiles', 'space_availability', 'space_blocks', 'space_photos', 'spaces', 'vehicles'],
     );
     expect(r.rows.every((x) => x.relrowsecurity)).toBe(true);
   });

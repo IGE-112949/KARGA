@@ -24,26 +24,32 @@ async function ensureAndroidPermission() {
   if (status !== 'granted') throw new LocationPermissionError('Sem acesso à localização');
 }
 
-function formatAddress(a: Location.LocationGeocodedAddress): string | null {
-  return [[a.street, a.streetNumber].filter(Boolean).join(', '), a.city ?? a.subregion].filter(Boolean).join(', ') || null;
+export type Place = { address: string | null; area: string | null };
+
+function toPlace(a: Location.LocationGeocodedAddress): Place {
+  const address = [[a.street, a.streetNumber].filter(Boolean).join(', '), a.city ?? a.subregion].filter(Boolean).join(', ') || null;
+  // Zona mostrada aos condutores antes de reservarem (freguesia/localidade).
+  const area = a.district ?? a.city ?? a.subregion ?? null;
+  return { address, area };
 }
 
-// Coordenadas → morada aproximada (null se não houver). Usado quando o pin é movido no mapa.
-export async function addressAt(point: LatLng): Promise<string | null> {
+// Coordenadas → morada e zona aproximadas (null se não houver). Usado quando o pin é movido no mapa.
+export async function addressAt(point: LatLng): Promise<Place | null> {
   await ensureAndroidPermission();
   try {
     const [a] = await Location.reverseGeocodeAsync(point);
-    return a ? formatAddress(a) : null;
+    return a ? toPlace(a) : null;
   } catch {
     return null;
   }
 }
 
 // Localização atual + morada aproximada (geocodificação inversa).
-export async function currentPlace(): Promise<LatLng & { address: string | null }> {
+export async function currentPlace(): Promise<LatLng & Place> {
   const { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== 'granted') throw new LocationPermissionError('Sem acesso à localização');
   const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
   const point = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-  return { ...point, address: await addressAt(point).catch(() => null) };
+  const place = await addressAt(point).catch(() => null);
+  return { ...point, address: place?.address ?? null, area: place?.area ?? null };
 }

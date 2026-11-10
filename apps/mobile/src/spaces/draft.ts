@@ -9,6 +9,7 @@ export type SpaceDraft = {
   title: string;
   address: string;
   spotDetails: string;
+  area: string;
   point: LatLng | null;
   spaceType: SpaceType;
   plugType: SpacePlug | null;
@@ -25,7 +26,7 @@ export type SpaceDraft = {
 export const DEFAULT_DAY: DayDraft = { on: false, startTime: '19:00', endTime: '08:00' };
 
 export const emptyDraft = (): SpaceDraft => ({
-  title: '', address: '', spotDetails: '', point: null, spaceType: 'closed_garage', plugType: null, amps: 10, wallboxKw: null,
+  title: '', address: '', spotDetails: '', area: '', point: null, spaceType: 'closed_garage', plugType: null, amps: 10, wallboxKw: null,
   photos: [], accessInstructions: '', accessCode: '', price: '', energy: '',
   days: Array.from({ length: 7 }, () => ({ ...DEFAULT_DAY })),
 });
@@ -38,7 +39,7 @@ export function draftFromSpace(s: Space): SpaceDraft {
     return w ? { on: true, startTime: w.startTime, endTime: w.endTime } : { ...DEFAULT_DAY };
   });
   return {
-    title: s.title, address: s.address, spotDetails: s.spotDetails ?? '', point: { latitude: s.latitude, longitude: s.longitude },
+    title: s.title, address: s.address, spotDetails: s.spotDetails ?? '', area: s.area ?? '', point: { latitude: s.latitude, longitude: s.longitude },
     spaceType: s.spaceType, plugType: s.plugType,
     amps: s.plugType === 'schuko' ? kwToAmps(s.powerKw) : 10, wallboxKw: s.plugType === 'type2' ? s.powerKw : null,
     photos: s.photos.map((p) => ({ uri: p.url })), accessInstructions: s.accessInstructions ?? '', accessCode: s.accessCode ?? '',
@@ -89,9 +90,17 @@ export function validatePriceSchedule(d: SpaceDraft): Errors {
 }
 
 const textOrNull = (s: string) => s.trim() || null;
+// Sem zona do GPS: usa a parte da morada depois da última vírgula (ex.: "…, 2675-300 Odivelas" → "Odivelas"),
+// só se houver vírgula e sem números — a zona é pública e não pode revelar a morada.
+const fallbackArea = (address: string) => {
+  if (!address.includes(',')) return null;
+  const a = (address.split(',').pop() ?? '').replace(/\b\d{4}-\d{3}\b/g, ' ').replace(/\s+/g, ' ').trim();
+  return a && !/\d/.test(a) ? a : null;
+};
 
 export const locationPatch = (d: SpaceDraft) => ({
   title: d.title.trim(), address: d.address.trim(), spotDetails: textOrNull(d.spotDetails),
+  area: textOrNull(d.area) ?? fallbackArea(d.address),
   latitude: d.point!.latitude, longitude: d.point!.longitude,
 });
 

@@ -93,7 +93,11 @@ const spaceDetail = {
 };
 const { accessCode, accessInstructions, photos, blocks, ...summaryBase } = spaceDetail;
 const spaceSummary = { ...summaryBase, coverUrl: photo };
-const HOST_API = { '/me': hostProfile, '/me/spaces': [spaceSummary], '/me/spaces/s1': spaceDetail };
+const searchHit = { id: 's9', title: 'Garagem Jardim · Lugar 3', area: 'Odivelas', latitude: 38.79, longitude: -9.18, pricePerHour: 0.3, energyPriceKwh: 0.16, powerKw: 7.4, plugType: 'type2', spaceType: 'closed_garage', coverUrl: photo, isFavorite: false };
+const publicDetail = { ...searchHit, photos: [{ id: 'p1', url: photo }, { id: 'p2', url: photo }], host: { firstName: 'Ana', initial: 'R', avatarUrl: null }, isOwn: false, available: true,
+  cost: { hours: 2, place: 0.6, energyKwh: 14.8, energy: 2.37, serviceFeePercent: 10, serviceFee: 0.3, total: 3.27 } };
+const HOST_API = {
+  '/spaces/search': [searchHit], '/spaces/s9': publicDetail, '/me': hostProfile, '/me/spaces': [spaceSummary], '/me/spaces/s1': spaceDetail };
 
 const SCREENS = [
   { name: 'boas-vindas', path: '/welcome', mock: 'AUTENTICAÇÃO · 1' },
@@ -105,6 +109,8 @@ const SCREENS = [
   { name: 'espacos', path: '/spaces', mock: 'PROPRIETÁRIO · OS MEUS ESPAÇOS', session: true, host: true },
   { name: 'novo-espaco', path: '/spaces/new', mock: 'PROPRIETÁRIO · NOVO ESPAÇO', session: true, host: true },
   { name: 'gerir-espaco', path: '/spaces/s1', mock: 'PROPRIETÁRIO · GERIR ESPAÇO', session: true, host: true },
+  { name: 'mapa', path: '/home', mock: 'ECRÃ 1 · MAPA', session: true, host: true, driver: true },
+  { name: 'detalhe', path: '/home/space/s9', mock: 'ECRÃ 2 · DETALHE DO LUGAR', session: true, host: true, driver: true },
   { name: 'espaco-publicado', path: '/spaces/published?id=s1', mock: 'PROPRIETÁRIO · ESPAÇO PUBLICADO', session: true, host: true },
 ];
 const only = process.argv.find((a) => a.startsWith('--only='))?.slice(7).split(',');
@@ -117,7 +123,7 @@ for (const s of SCREENS.filter((x) => !only || only.includes(x.name))) {
     await page.addInitScript((v) => localStorage.setItem('sb-vfpgzvhfxezszjrajuyv-auth-token', v), JSON.stringify(session));
   }
   if (s.host) {
-    await page.addInitScript(() => localStorage.setItem('karga.mode', 'host'));
+    await page.addInitScript((m) => localStorage.setItem('karga.mode', m), s.driver ? 'driver' : 'host');
     await page.route((u) => u.port === '3000', (route) => {
       const body = HOST_API[new URL(route.request().url()).pathname];
       return route.fulfill(body ? { status: 200, contentType: 'application/json', body: JSON.stringify(body) } : { status: 404, contentType: 'application/json', body: '{"error":{"code":"NOT_FOUND","message":"x"}}' });

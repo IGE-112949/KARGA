@@ -40,3 +40,16 @@ describe('schema · espaços (fase anfitrião)', () => {
     await expect(pg.query('delete from spaces where id = $1', [spaceId])).rejects.toThrow();
   });
 });
+
+describe('schema · favoritos e zona', () => {
+  it('favorito único por utilizador e espaço; apagar o espaço apaga o favorito', async () => {
+    await pg.query('insert into favorites (user_id, space_id) values ($1, $2)', [U1, spaceId]);
+    await expect(pg.query('insert into favorites (user_id, space_id) values ($1, $2)', [U1, spaceId])).rejects.toThrow();
+    await pg.query('delete from spaces where id = $1', [spaceId]);
+    expect((await pg.query('select * from favorites')).rows).toHaveLength(0);
+  });
+  it('spaces.area existe', async () => {
+    await pg.query(`update spaces set area = 'Odivelas' where id = $1`, [spaceId]);
+    expect((await pg.query<{ area: string }>('select area from spaces where id = $1', [spaceId])).rows[0].area).toBe('Odivelas');
+  });
+});
