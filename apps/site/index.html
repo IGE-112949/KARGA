@@ -44,7 +44,13 @@ a{color:#047857}a:hover{color:#065F46}
 .k-navlink:hover{color:#132A3E}
 .k-foot a{color:#CBD5E1;text-decoration:none}
 .k-foot a:hover{color:#FFFFFF}
-input[type=range]{width:100%;height:28px;cursor:pointer;margin:0;transition:accent-color .4s ease-out}
+input[type=range]{--k-c:#10B981;--k-fill:50%;-webkit-appearance:none;appearance:none;width:100%;height:28px;cursor:pointer;margin:0;background:transparent}
+input[type=range]:focus-visible{outline:2px solid #132A3E;outline-offset:4px;border-radius:999px}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(to right,var(--k-c) 0 var(--k-fill),#E2E8F0 var(--k-fill) 100%)}
+input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:#E2E8F0}
+input[type=range]::-moz-range-progress{height:8px;border-radius:999px;background:var(--k-c)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin-top:-8px;border-radius:50%;background:#FFFFFF;border:3px solid var(--k-c);box-shadow:0 2px 6px rgba(19,42,62,.25);transition:border-color .3s}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#FFFFFF;border:3px solid var(--k-c);box-shadow:0 2px 6px rgba(19,42,62,.25)}
 .k-opt:hover{border-color:#10B981 !important}
 @media (max-width: 880px){.k-navlinks{display:none !important}}
 @media (max-width: 520px){.k-navcta-label{display:none}}
@@ -309,6 +315,7 @@ Simular Ganhos
 <div style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
 <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #047857">Equipamento</div>
 <h2 style="margin: 0; font-size: clamp(32px, 3.6vw, 46px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; color: #132A3E">Tudo o que precisa para começar a faturar</h2>
+<p style="margin: 0; font-size: clamp(17px, 1.4vw, 19px); line-height: 1.6; color: #475569">O equipamento é <strong style="color: #132A3E">opcional</strong>: pode publicar o seu lugar sem kit nenhum e cobrar apenas o estacionamento à hora. Com o kit, a tomada mede a energia de cada sessão e o condutor paga <strong style="color: #132A3E">só os kWh que realmente gastou</strong>, a preço de custo &mdash; justo para os dois lados.</p>
 </div>
 <div id="k-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 24px; align-items: stretch">
 
@@ -365,6 +372,10 @@ Simular Ganhos
 </div>
 </div>
 </div>
+<div style="display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px; border-radius: 16px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+<p style="margin: 0; font-size: 16px; line-height: 1.55; font-weight: 500"><strong style="font-weight: 800">Sem kit?</strong> Também funciona. O lugar é cobrado à hora e a energia não é faturada. Pode juntar o kit mais tarde, quando quiser, sem alterar o anúncio.</p>
+</div>
 </div>
 </section>
 
@@ -376,9 +387,9 @@ Simular Ganhos
 <span style="font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em">Karga</span>
 </div>
 <nav aria-label="Rodapé" style="display: flex; flex-wrap: wrap; gap: 28px; font-size: 15px; font-weight: 600">
-<a href="#">Termos e Condições</a>
-<a href="#">Privacidade</a>
-<a href="#">Contactos</a>
+<a href="termos.html">Termos e Condições</a>
+<a href="privacidade.html">Privacidade</a>
+<a href="contactos.html">Contactos</a>
 </nav>
 <div style="font-size: 14px; color: #94A3B8; width: 100%; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1)">© 2026 Karga. Todos os direitos reservados.</div>
 </div>
