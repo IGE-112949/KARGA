@@ -1,14 +1,22 @@
-import { render, fireEvent, screen } from '@testing-library/react-native';
+import { render, fireEvent, screen, act } from '@testing-library/react-native';
+import { ApiError } from '@/lib/api';
 
 const mockApi = { get: jest.fn(), put: jest.fn(), del: jest.fn() };
 const mockPush = jest.fn();
+let mockFocus: () => void = () => {};
 jest.mock('expo-router', () => {
   const { useEffect } = require('react');
-  return { useRouter: () => ({ push: mockPush, back: jest.fn(), canGoBack: () => true }), useFocusEffect: (cb: () => void) => useEffect(cb, []) };
+  return {
+    useRouter: () => ({ push: mockPush, back: jest.fn(), canGoBack: () => true }),
+    useFocusEffect: (cb: () => void) => { mockFocus = cb; useEffect(cb, []); },
+  };
 });
 jest.mock('@/auth/AuthProvider', () => ({ useAuth: () => ({ api: mockApi }) }));
 
-import Favorites from '@/app/(app)/profile/favorites';
+import FavoritesScreen from '@/app/(app)/profile/favorites';
+import { SearchProvider } from '@/search/SearchContext';
+
+const Favorites = () => <SearchProvider><FavoritesScreen /></SearchProvider>;
 
 const fav = { id: 's1', title: 'Garagem Jardim', area: 'Odivelas', latitude: 1, longitude: 1, pricePerHour: 0.3, energyPriceKwh: null, powerKw: 7.4, plugType: 'type2', spaceType: 'covered', coverUrl: null, isFavorite: true, status: 'active' };
 
@@ -26,6 +34,16 @@ describe('Os meus favoritos', () => {
     await fireEvent.press(screen.getAllByRole('button', { name: 'Remover dos favoritos' })[0]);
     expect(mockApi.del).toHaveBeenCalledWith('/me/favorites/s1');
     expect(screen.queryByText('Garagem Jardim')).toBeNull();
+  });
+
+  it('a mensagem de erro desaparece quando volta a carregar bem', async () => {
+    mockApi.get.mockRejectedValueOnce(new ApiError(0, 'NETWORK_ERROR', 'Sem ligação à internet ou servidor indisponível.'));
+    await render(<Favorites />);
+    expect(await screen.findByText('Sem ligação à internet ou servidor indisponível.')).toBeTruthy();
+    mockApi.get.mockResolvedValue([fav]);
+    await act(async () => { mockFocus(); });
+    expect(await screen.findByText('Garagem Jardim')).toBeTruthy();
+    expect(screen.queryByText('Sem ligação à internet ou servidor indisponível.')).toBeNull();
   });
 
   it('estado vazio', async () => {

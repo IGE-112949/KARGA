@@ -43,8 +43,9 @@ export function SpacesMap({ results, selectedId, onSelect, onRegion, center, ini
         return (
           // Circle e Marker têm de ser filhos diretos do MapView (um View à volta parte no Android).
           <Fragment key={s.id}>
-            <Circle center={s} radius={APPROX_RADIUS_M} fillColor={sel ? 'rgba(19,38,58,0.18)' : 'rgba(16,185,129,0.20)'} strokeColor={sel ? theme.colors.navy : theme.colors.accent} strokeWidth={1.5} />
-            <Marker coordinate={s} onPress={(e) => { e.stopPropagation(); onSelect(s.id); }} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false} identifier={s.id}>
+            <Circle key={`c:${s.id}:${sel ? "sel" : "off"}`} center={s} radius={APPROX_RADIUS_M} fillColor={sel ? 'rgba(19,38,58,0.18)' : 'rgba(16,185,129,0.20)'} strokeColor={sel ? theme.colors.navy : theme.colors.accent} strokeWidth={1.5} />
+            {/* tracksViewChanges={false} (desempenho) congela o desenho do marcador; a key com o estado força o redesenho ao selecionar. */}
+            <Marker key={`${s.id}:${sel ? 'sel' : 'off'}`} coordinate={s} onPress={(e) => { e.stopPropagation(); onSelect(s.id); }} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false} identifier={s.id}>
               <View style={[styles.bubble, sel && styles.bubbleSel]}>
                 <Text style={[styles.price, sel && styles.priceSel]}>{formatEuro(s.pricePerHour)}</Text>
               </View>

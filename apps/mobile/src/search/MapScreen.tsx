@@ -30,7 +30,7 @@ function QuickChip({ label, icon, on, onPress }: { label: string; icon: IconName
 export function MapScreen() {
   const router = useRouter();
   const { api } = useAuth();
-  const { when, setWhen, filters, setFilters } = useSearch();
+  const { when, setWhen, filters, setFilters, favoriteOf, markFavorite } = useSearch();
   const [bbox, setBbox] = useState<Bbox | null>(null);
   const [center, setCenter] = useState<LatLng | null>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -86,16 +86,18 @@ export function MapScreen() {
   };
 
   const toggleFav = async (s: SearchResult) => {
-    setResults((rs) => rs.map((x) => (x.id === s.id ? { ...x, isFavorite: !s.isFavorite } : x)));
+    markFavorite(s.id, !s.isFavorite);
     try {
       await setFavorite(api, s.id, !s.isFavorite);
     } catch (e) {
-      setResults((rs) => rs.map((x) => (x.id === s.id ? { ...x, isFavorite: s.isFavorite } : x)));
+      markFavorite(s.id, s.isFavorite);
       setError(e instanceof ApiError ? e.message : 'Não foi possível guardar o favorito.');
     }
   };
 
-  const sel = results.find((r) => r.id === selected) ?? null;
+  // O favorito pode ter mudado no detalhe ou na página dos favoritos depois da última pesquisa.
+  const shown = results.map((x) => ({ ...x, isFavorite: favoriteOf(x.id, x.isFavorite) }));
+  const sel = shown.find((r) => r.id === selected) ?? null;
   const open = (id: string) => router.push({ pathname: '/home/space/[id]', params: { id } });
 
   return (
@@ -126,7 +128,7 @@ export function MapScreen() {
       </SafeAreaView>
 
       <View style={styles.mapArea}>
-      <SpacesMap results={results} selectedId={selected} onSelect={setSelected} onRegion={setBbox} center={center} initial={LISBON} />
+      <SpacesMap results={shown} selectedId={selected} onSelect={setSelected} onRegion={setBbox} center={center} initial={LISBON} />
       {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
       <View style={styles.bottom} pointerEvents="box-none">
         {sel ? (

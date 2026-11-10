@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { TIMES } from '@/lib/spaces';
 import { theme } from '@/theme';
-import { dayChips, type When } from './search';
+import { dayChips, freshWhen, isPastStart, type When } from './search';
 
 function Stepper({ label, value, onPrev, onNext }: { label: string; value: string; onPrev: () => void; onNext: () => void }) {
   return (
@@ -26,7 +26,7 @@ export function WhenPicker({ when, onChange }: { when: When; onChange: (w: When)
           const on = d.offset === when.dayOffset;
           return (
             <Pressable key={d.offset} accessibilityRole="button" accessibilityLabel={d.top} accessibilityState={{ selected: on }}
-              onPress={() => onChange({ ...when, dayOffset: d.offset })} style={[styles.day, on && styles.dayOn]}>
+              onPress={() => onChange(freshWhen({ ...when, dayOffset: d.offset }))} style={[styles.day, on && styles.dayOn]}>
               <Text style={[styles.dayTop, on && styles.on]}>{d.top}</Text>
               <Text style={[styles.dayBot, on && styles.on]}>{d.bot}</Text>
             </Pressable>
@@ -35,7 +35,11 @@ export function WhenPicker({ when, onChange }: { when: When; onChange: (w: When)
       </View>
       <View style={styles.row}>
         <Stepper label="Chegada" value={when.start}
-          onPrev={() => onChange({ ...when, start: TIMES[(idx - 1 + TIMES.length) % TIMES.length] })}
+          onPrev={() => {
+            // Hoje não recua para horas que já passaram.
+            const prev = { ...when, start: TIMES[(idx - 1 + TIMES.length) % TIMES.length] };
+            if (!isPastStart(prev) && !(when.dayOffset === 0 && prev.start > when.start)) onChange(prev);
+          }}
           onNext={() => onChange({ ...when, start: TIMES[(idx + 1) % TIMES.length] })} />
         <Stepper label="Duração" value={`${when.hours} h`}
           onPrev={() => onChange({ ...when, hours: Math.max(1, when.hours - 1) })}

@@ -22,19 +22,26 @@ export function weekdayOf(date: string): number {
   return (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7;
 }
 
+// Diferença (ms) entre a hora de Lisboa e UTC num instante.
+function offsetAt(t: number): number {
+  const p = parts(new Date(t));
+  const [y, m, d] = p.date.split('-').map(Number);
+  return Date.UTC(y, m - 1, d) + p.minutes * 60_000 - Math.floor(t / 60_000) * 60_000;
+}
+
 // Data local de Lisboa + minutos desde a meia-noite (podem passar de 1440) → instante UTC.
+// Na mudança de hora: uma hora que não existe (primavera, 01:00–01:59) passa para a hora de verão equivalente;
+// uma hora repetida (outono) usa a segunda ocorrência.
 export function lisbonToUtc(date: string, minutes: number): Date {
   const [y, m, d] = date.split('-').map(Number);
   const wanted = Date.UTC(y, m - 1, d) + minutes * 60_000;
-  let guess = wanted;
-  for (let i = 0; i < 3; i++) {
-    const p = parts(new Date(guess));
-    const [py, pm, pd] = p.date.split('-').map(Number);
-    const seen = Date.UTC(py, pm - 1, pd) + p.minutes * 60_000;
-    if (seen === wanted) break;
-    guess += wanted - seen;
-  }
-  return new Date(guess);
+  const o1 = offsetAt(wanted);
+  const c1 = wanted - o1;
+  const o2 = offsetAt(c1);
+  if (o1 === o2) return new Date(c1);
+  const c2 = wanted - o2;
+  if (offsetAt(c2) === o2) return new Date(c2);
+  return new Date(wanted - Math.min(o1, o2));
 }
 
 export type SearchWindow = { date: string; start: string; hours: number };
@@ -44,8 +51,9 @@ export type Interval = { startsAt: Date; endsAt: Date };
 const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 
 export function requestInterval(q: SearchWindow) {
-  const s = toMin(q.start);
-  return { from: lisbonToUtc(q.date, s), to: lisbonToUtc(q.date, s + q.hours * 60) };
+  // A duração é em horas reais (numa noite de mudança de hora, 2 h continuam a ser 2 h).
+  const from = lisbonToUtc(q.date, toMin(q.start));
+  return { from, to: new Date(from.getTime() + q.hours * 3_600_000) };
 }
 
 const overlaps = (a: { from: Date; to: Date }, b: Interval) => b.startsAt < a.to && b.endsAt > a.from;

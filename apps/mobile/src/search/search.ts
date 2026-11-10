@@ -67,7 +67,32 @@ const addMin = (t: string, mins: number) => {
   return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
 };
 
-export const effectiveWhen = (when: When, f: Pick<Filters, 'tonight'>) => (f.tonight ? TONIGHT : when);
+const minOf = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+const hhmm = (m: number) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+
+// A hora de chegada já passou? (a meia hora em curso ainda conta: ex.: às 15:10, "15:00" serve)
+export const isPastStart = (w: When, now = new Date()) => w.dayOffset === 0 && minOf(w.start) + 30 <= lisbon(now).minutes;
+
+// Com a app aberta muito tempo, a hora escolhida para hoje pode ficar para trás: avança para a próxima meia hora.
+export function freshWhen(w: When, now = new Date()): When {
+  if (!isPastStart(w, now)) return w;
+  const d = defaultWhen(now);
+  return { ...w, dayOffset: d.dayOffset, start: d.start };
+}
+
+// "Esta noite": das 20:00 às 08:00; se já passou das 20:00 (ou é madrugada), começa já e vai até às 08:00.
+export function tonightWhen(now = new Date()): When {
+  const m = lisbon(now).minutes;
+  if (m >= 480 && m < 1200) return TONIGHT;
+  let s = Math.ceil(m / 30) * 30;
+  const dayOffset = s >= 1440 ? 1 : 0;
+  s %= 1440;
+  const end = s < 480 ? 480 : 1920;
+  return { dayOffset, start: hhmm(s), hours: Math.max(1, Math.min(12, Math.floor((end - s) / 60))) };
+}
+
+export const effectiveWhen = (when: When, f: Pick<Filters, 'tonight'>, now = new Date()) =>
+  (f.tonight ? tonightWhen(now) : freshWhen(when, now));
 
 export function whenLabel(w: When, now = new Date()): string {
   const day = dayChips(now)[w.dayOffset]?.top ?? '';
@@ -84,7 +109,7 @@ const clampBbox = (b: Bbox): Bbox => {
 };
 
 export function searchQuery(bbox: Bbox, when: When, f: Filters, now = new Date()): Record<string, string> {
-  const w = effectiveWhen(when, f);
+  const w = effectiveWhen(when, f, now);
   const b = clampBbox(bbox);
   const q: Record<string, string> = {
     bbox: [b.minLng, b.minLat, b.maxLng, b.maxLat].join(','), date: dateFor(w.dayOffset, now), start: w.start, hours: String(w.hours),
@@ -98,7 +123,7 @@ export function searchQuery(bbox: Bbox, when: When, f: Filters, now = new Date()
 }
 
 export const windowQuery = (when: When, f: Filters, now = new Date()) => {
-  const w = effectiveWhen(when, f);
+  const w = effectiveWhen(when, f, now);
   return { date: dateFor(w.dayOffset, now), start: w.start, hours: String(w.hours) };
 };
 

@@ -66,6 +66,20 @@ describe('Mapa do condutor', () => {
     expect(screen.getByRole('button', { name: 'Remover dos favoritos' })).toBeTruthy();
   });
 
+  it('uma resposta antiga que chega depois da nova é ignorada', async () => {
+    let resolveOld!: (v: unknown) => void;
+    mockApi.get.mockReturnValueOnce(new Promise((r) => { resolveOld = r; }));
+    mockApi.get.mockResolvedValueOnce([{ ...result, id: 's2', title: 'Box Nova' }]);
+    await show();
+    await waitFor(() => expect(mockApi.get).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    await fireEvent.press(screen.getByRole('button', { name: 'Coberta' }));
+    expect(await screen.findByText('pin Box Nova', {}, { timeout: 2000 })).toBeTruthy();
+    resolveOld([result]);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(screen.queryByText('pin Garagem Jardim')).toBeNull();
+    expect(screen.getByText('pin Box Nova')).toBeTruthy();
+  });
+
   it('sem resultados mostra a mensagem do mockup', async () => {
     mockApi.get.mockResolvedValue([]);
     await show();

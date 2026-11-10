@@ -9,22 +9,32 @@ import { Icon } from '@/ui/Icon';
 import { theme } from '@/theme';
 import { ResultCard } from '@/search/ResultCard';
 import { setFavorite } from '@/search/favorites';
+import { useSearch } from '@/search/SearchContext';
 import type { SearchResult } from '@/search/types';
 
 export default function Favorites() {
   const router = useRouter();
   const { api } = useAuth();
+  const { markFavorite } = useSearch();
   const [items, setItems] = useState<SearchResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    api.get<SearchResult[]>('/me/favorites').then(setItems).catch((e) => setError(e instanceof ApiError ? e.message : 'Ocorreu um erro.'));
+    api.get<SearchResult[]>('/me/favorites')
+      .then((r) => { setItems(r); setError(null); })
+      .catch((e) => setError(e instanceof ApiError ? e.message : 'Ocorreu um erro.'));
   }, [api]);
   useFocusEffect(load);
 
   const remove = async (s: SearchResult) => {
     setItems((xs) => xs?.filter((x) => x.id !== s.id) ?? xs);
-    try { await setFavorite(api, s.id, false); } catch { load(); }
+    markFavorite(s.id, false);
+    try {
+      await setFavorite(api, s.id, false);
+    } catch {
+      markFavorite(s.id, true);
+      load();
+    }
   };
 
   return (
