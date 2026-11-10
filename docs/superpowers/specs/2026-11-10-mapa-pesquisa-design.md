@@ -13,7 +13,7 @@
 | Filtros (folha) | Quando; preço máximo (até 0,25 / 0,30 / 0,35 €/h / qualquer); potência mínima (qualquer / 3,7 / 7,4 / 11 kW); ficha (qualquer / Tipo 2 / Schuko); Limpar; "Ver N lugares" |
 | O que aparece | Espaços ativos, livres em toda a janela (horário semanal incluindo a meia-noite, sem bloqueios nem reservas confirmadas sobrepostas), excluindo os do próprio utilizador |
 | Mapa | `react-native-maps`; atualiza sozinho ao mover/zoom (0,5 s depois de parar); abre na localização atual (com permissão) ou Lisboa; barra "Pesquisar morada ou zona" move o mapa |
-| Privacidade | Antes de reservar: zona aproximada. No mapa um círculo verde (raio ~150 m) com etiqueta de preço, centrado num ponto deslocado 50–150 m, fixo por espaço (derivado do id). No detalhe só a zona ("Odivelas"). Morada exata e código só depois de reservar (fase das reservas) |
+| Privacidade | Antes de reservar: zona aproximada. No mapa um círculo verde (raio ~150 m) com etiqueta de preço, centrado num ponto deslocado 50–150 m, fixo, calculado com um segredo do servidor a partir do sítio (espaços no mesmo prédio partilham o ponto). No detalhe só a zona ("Odivelas"). Morada exata e código só depois de reservar (fase das reservas) |
 | Detalhe | Galeria (1/N), partilhar, favorito, nome, zona, proprietário (primeiro nome + inicial do apelido, "Novo" sem avaliações), características (kW, ficha, tipo, energia), "Quando precisas do lugar?" (mesma janela dos filtros), disponível/indisponível, resumo de custos (lugar, energia estimada, taxa de serviço 10%, total), notas do mockup (energia a preço de custo; taxa de ocupação 0,10 €/min), botão Reservar desativado ("Em breve") |
 | Custos | lugar = €/h × horas; energia = min(kW × horas, 20 kWh) × €/kWh (0 se o espaço não tiver €/kWh); taxa = 10% (platform_settings) × (lugar + energia); valores arredondados a 2 casas |
 | Favoritos | Tabela `favorites`; coração no detalhe e no cartão do mapa; página "Os meus favoritos" no Perfil (por baixo dos veículos) |
@@ -24,7 +24,7 @@
 ## 2. Base de dados (migração nova)
 
 - `favorites (user_id uuid → profiles on delete cascade, space_id uuid → spaces on delete cascade, created_at)`, PK `(user_id, space_id)`, RLS ativo sem políticas.
-- `spaces.area text null` — zona/localidade. A app envia-a ao criar e ao editar a localização (geocodificação inversa: `district ?? subregion ?? city`). Migração preenche os existentes com o texto depois da última vírgula da morada.
+- `spaces.area text null` — zona/localidade. A app envia-a ao criar e ao editar a localização (geocodificação inversa: `district ?? city ?? subregion`). A API limpa a zona (tira códigos postais; recusa texto com números). Migração preenche os existentes com o texto depois da última vírgula da morada, com as mesmas regras.
 
 ## 3. API
 

@@ -38,3 +38,12 @@ describe('pesquisa (app)', () => {
     expect(whenLabel({ dayOffset: 0, start: '20:00', hours: 12 }, at('2026-11-10T09:00:00'))).toBe('Hoje · 20:00 – 08:00 (12 h)');
   });
 });
+
+describe('hora de Portugal (igual à API), não a do telemóvel', () => {
+  it('23:12 UTC em julho já é dia seguinte em Lisboa', () => {
+    const now = new Date('2026-07-10T23:12:00Z');
+    expect(defaultWhen(now)).toEqual({ dayOffset: 0, start: '00:30', hours: 2 });
+    expect(dateFor(0, now)).toBe('2026-07-11');
+    expect(dayChips(now)[0].bot).toBe('Sáb 11');
+  });
+});

@@ -11,10 +11,11 @@ import { meRoutes } from './modules/me/routes.js';
 import { vehicleRoutes } from './modules/vehicles/routes.js';
 import { spaceRoutes } from './modules/spaces/routes.js';
 import { searchRoutes } from './modules/search/routes.js';
+import { configureLocationSecret } from './modules/search/service.js';
 import { favoriteRoutes } from './modules/favorites/routes.js';
 import type { SpacePhotoStore } from './storage/spacePhotoStore.js';
 
-export type AppDeps = { db: Db; auth: AuthVerifier; authAdmin: AuthAdmin; avatars: AvatarStore; spacePhotos: SpacePhotoStore };
+export type AppDeps = { db: Db; auth: AuthVerifier; authAdmin: AuthAdmin; avatars: AvatarStore; spacePhotos: SpacePhotoStore; locationSecret: string };
 
 export function createApp(deps: AppDeps): express.Express {
   const app = express();
@@ -41,6 +42,7 @@ export function createApp(deps: AppDeps): express.Express {
   api.use(avatarRoutes(deps.db, deps.avatars));
   api.use(vehicleRoutes(deps.db));
   api.use(spaceRoutes(deps.db, deps.spacePhotos));
+  configureLocationSecret(deps.locationSecret);
   api.use(searchRoutes(deps.db, deps.spacePhotos));
   api.use(favoriteRoutes(deps.db, deps.spacePhotos));
   app.use(api);

@@ -14,6 +14,8 @@ const app = createApp({
   authAdmin: createSupabaseAuthAdmin(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY),
   avatars: createSupabaseAvatarStore(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY),
   spacePhotos: createSupabaseSpacePhotoStore(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY),
+  // A chave service_role já é um segredo só do servidor; serve de chave para o deslocamento da localização.
+  locationSecret: `karga-location:${config.SUPABASE_SERVICE_ROLE_KEY}`,
 });
 
 app.listen(config.PORT, () => {

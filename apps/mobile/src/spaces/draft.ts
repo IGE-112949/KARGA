@@ -90,8 +90,13 @@ export function validatePriceSchedule(d: SpaceDraft): Errors {
 }
 
 const textOrNull = (s: string) => s.trim() || null;
-// Sem zona do GPS: usa a parte da morada depois da última vírgula (ex.: "…, Odivelas").
-const fallbackArea = (address: string) => textOrNull(address.split(',').pop() ?? '');
+// Sem zona do GPS: usa a parte da morada depois da última vírgula (ex.: "…, 2675-300 Odivelas" → "Odivelas"),
+// só se houver vírgula e sem números — a zona é pública e não pode revelar a morada.
+const fallbackArea = (address: string) => {
+  if (!address.includes(',')) return null;
+  const a = (address.split(',').pop() ?? '').replace(/\b\d{4}-\d{3}\b/g, ' ').replace(/\s+/g, ' ').trim();
+  return a && !/\d/.test(a) ? a : null;
+};
 
 export const locationPatch = (d: SpaceDraft) => ({
   title: d.title.trim(), address: d.address.trim(), spotDetails: textOrNull(d.spotDetails),

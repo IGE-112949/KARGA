@@ -19,25 +19,41 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const WD = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const WD_LONG = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
+// Data e hora em Portugal continental (a API usa a mesma referência), independente do fuso do telemóvel.
+function lisbon(now: Date) {
+  try {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }).formatToParts(now).map((x) => [x.type, x.value]));
+    return { y: Number(p.year), m: Number(p.month) - 1, d: Number(p.day), minutes: Number(p.hour) * 60 + Number(p.minute) };
+  } catch {
+    return { y: now.getFullYear(), m: now.getMonth(), d: now.getDate(), minutes: now.getHours() * 60 + now.getMinutes() };
+  }
+}
+
 export function defaultWhen(now = new Date()): When {
-  let m = now.getHours() * 60 + now.getMinutes();
+  let m = lisbon(now).minutes;
   m = Math.ceil(m / 30) * 30;
   const dayOffset = m >= 1440 ? 1 : 0;
   m %= 1440;
   return { dayOffset, start: `${pad(Math.floor(m / 60))}:${pad(m % 60)}`, hours: 2 };
 }
 
-const dayAt = (offset: number, now: Date) => new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+// Dia de calendário (em Lisboa) + offset, como Date ao meio-dia UTC (só para ler ano/mês/dia/dia da semana).
+const dayAt = (offset: number, now: Date) => {
+  const l = lisbon(now);
+  return new Date(Date.UTC(l.y, l.m, l.d + offset, 12));
+};
 
 export const dateFor = (offset: number, now = new Date()) => {
   const d = dayAt(offset, now);
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 };
 
 export function dayChips(now = new Date()) {
   return Array.from({ length: MAX_DAYS_AHEAD + 1 }, (_, i) => {
     const d = dayAt(i, now);
-    return { offset: i, top: i === 0 ? 'Hoje' : i === 1 ? 'Amanhã' : WD_LONG[d.getDay()], bot: `${WD[d.getDay()]} ${d.getDate()}` };
+    return { offset: i, top: i === 0 ? 'Hoje' : i === 1 ? 'Amanhã' : WD_LONG[d.getUTCDay()], bot: `${WD[d.getUTCDay()]} ${d.getUTCDate()}` };
   });
 }
 

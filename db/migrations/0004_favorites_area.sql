@@ -9,4 +9,5 @@ ALTER TABLE "spaces" ADD COLUMN "area" text;--> statement-breakpoint
 ALTER TABLE "favorites" ADD CONSTRAINT "favorites_user_id_profiles_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "favorites" ADD CONSTRAINT "favorites_space_id_spaces_id_fk" FOREIGN KEY ("space_id") REFERENCES "public"."spaces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "favorites" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
-UPDATE "spaces" SET "area" = nullif(trim(split_part("address", ',', -1)), '') WHERE "area" IS NULL;
+UPDATE "spaces" SET "area" = nullif(trim(regexp_replace(split_part("address", ',', -1), '\m\d{4}-\d{3}\M', '', 'g')), '') WHERE "area" IS NULL AND position(',' in "address") > 0;--> statement-breakpoint
+UPDATE "spaces" SET "area" = NULL WHERE "area" ~ '\d';

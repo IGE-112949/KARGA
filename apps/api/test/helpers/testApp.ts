@@ -61,7 +61,7 @@ export async function createTestApp() {
   const authAdmin = new FakeAuthAdmin(pg);
   const avatars = new FakeAvatarStore();
   const spacePhotos = new FakeSpacePhotoStore();
-  const app = createApp({ db: db as Db, auth: createHs256Verifier(SECRET, ISSUER), authAdmin, avatars, spacePhotos });
+  const app = createApp({ db: db as Db, auth: createHs256Verifier(SECRET, ISSUER), authAdmin, avatars, spacePhotos, locationSecret: 'segredo-de-teste' });
 
   // Cria o utilizador na "Auth" (se não existir) e devolve um token válido para ele.
   async function tokenFor(userId: string, opts: { expiresIn?: string } = {}) {

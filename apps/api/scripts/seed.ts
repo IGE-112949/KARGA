@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 import { inArray, sql } from 'drizzle-orm';
 import { loadConfig } from '../src/config.js';
 import { createDb } from '../src/db/client.js';
-import { profiles, spaceAvailability, spaceBlocks, spacePhotos, spaces } from '../src/db/schema.js';
+import { bookings, profiles, spaceAvailability, spaceBlocks, spacePhotos, spaces } from '../src/db/schema.js';
 import { createSupabaseSpacePhotoStore } from '../src/storage/spacePhotoStore.js';
 
 export const SEED_PASSWORD = 'KargaTeste2026!';
@@ -111,20 +111,27 @@ async function main() {
 
   const { data: list, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
   if (error) throw error;
-  const existing = list.users.filter((u) => SEED_USERS.some((s) => s.email === u.email));
+  // Só contas criadas por este script (email da lista E marcadas com seed: true) — nunca uma conta real.
+  const existing = list.users.filter((u) => SEED_USERS.some((s) => s.email === u.email) && u.user_metadata?.seed === true);
+  const clash = list.users.filter((u) => SEED_USERS.some((s) => s.email === u.email) && u.user_metadata?.seed !== true);
+  if (clash.length) throw new Error(`Estes emails pertencem a contas reais, não toco nelas: ${clash.map((u) => u.email).join(', ')}`);
 
   // Apagar sempre o que existir (assim "seed" recria do zero e "--apagar" só apaga).
   if (existing.length) {
     const ids = existing.map((u) => u.id);
     const own = await db.select({ id: spaces.id }).from(spaces).where(inArray(spaces.ownerId, ids));
-    if (own.length) {
-      const photos = await db.select({ path: spacePhotos.storagePath }).from(spacePhotos).where(inArray(spacePhotos.spaceId, own.map((s) => s.id)));
-      await store.remove(photos.map((p) => p.path)).catch((e) => console.warn('Aviso ao apagar fotos:', e.message));
-    }
+    const ownIds = own.map((s) => s.id);
+    const photos = ownIds.length
+      ? await db.select({ path: spacePhotos.storagePath }).from(spacePhotos).where(inArray(spacePhotos.spaceId, ownIds))
+      : [];
+    // Reservas feitas aos espaços de teste também são dados de teste (e bloqueariam apagar os espaços).
+    if (ownIds.length) await db.delete(bookings).where(inArray(bookings.spaceId, ownIds));
     for (const u of existing) {
       const { error: e } = await admin.auth.admin.deleteUser(u.id);
       if (e) throw e;
     }
+    // Fotos só depois de os espaços terem sido apagados.
+    await store.remove(photos.map((p) => p.path)).catch((e) => console.warn('Aviso ao apagar fotos:', e.message));
     console.log(`Apagados ${existing.length} utilizadores de teste e ${own.length} espaços.`);
   }
   if (args.includes('--apagar')) return process.exit(0);

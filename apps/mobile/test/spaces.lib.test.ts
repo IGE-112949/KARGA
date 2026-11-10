@@ -1,4 +1,4 @@
-import { emptyDraft, validateLocation, validatePriceSchedule } from '@/spaces/draft';
+import { emptyDraft, locationPatch, validateLocation, validatePriceSchedule } from '@/spaces/draft';
 import { ampsToKw, formatEuro, monthlyEstimate, parseEuro, scheduleSummary, weeklyHours, windowHours } from '@/lib/spaces';
 
 describe('regras dos espaços (app)', () => {
@@ -45,5 +45,14 @@ describe('validação do rascunho', () => {
   it('morada com mais de 200 caracteres é recusada', () => {
     const d = { ...emptyDraft(), title: 'Garagem', address: 'R'.repeat(201), point: { latitude: 1, longitude: 1 } };
     expect(validateLocation(d).address).toBe('A morada é demasiado longa');
+  });
+});
+
+describe('zona pública do espaço', () => {
+  const base = { ...emptyDraft(), title: 'Garagem', point: { latitude: 1, longitude: 1 } };
+  it('sem zona do GPS usa o fim da morada só se houver vírgula, sem código postal', () => {
+    expect(locationPatch({ ...base, address: 'Rua X, 12, 2675-300 Odivelas' }).area).toBe('Odivelas');
+    expect(locationPatch({ ...base, address: 'Rua Guilherme Gomes Fernandes 12 Odivelas' }).area).toBeNull();
+    expect(locationPatch({ ...base, address: 'Rua X, 12', area: 'Loures' }).area).toBe('Loures');
   });
 });

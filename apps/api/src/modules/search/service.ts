@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import { and, asc, eq, gte, inArray, lte, ne, sql } from 'drizzle-orm';
 import type { Db } from '../../db/types.js';
 import { bookings, favorites, platformSettings, profiles, spaceAvailability, spaceBlocks, spacePhotos, spaces } from '../../db/schema.js';
@@ -11,9 +11,17 @@ import type { SearchQuery } from './schemas.js';
 export const MAX_RESULTS = 100;
 const MAX_KWH = 20;
 
-// Ponto aproximado: 50–150 m do real, sempre o mesmo para o mesmo espaço.
-export function approximate(id: string, lat: number, lng: number) {
-  const h = createHash('sha256').update(id).digest();
+// Segredo do servidor para o deslocamento (sem ele, quem tem o código não consegue reverter o ponto).
+let locationSecret = '';
+export function configureLocationSecret(secret: string) {
+  locationSecret = secret;
+}
+
+// Ponto aproximado: 50–150 m do real, fixo. Calculado a partir do sítio (arredondado a ~10 m) e não do id,
+// para que espaços do mesmo prédio partilhem o mesmo ponto e não se possa triangular a localização.
+export function approximate(_id: string, lat: number, lng: number) {
+  if (!locationSecret) throw new Error('Segredo da localização aproximada não configurado');
+  const h = createHmac('sha256', locationSecret).update(`${lat.toFixed(4)},${lng.toFixed(4)}`).digest();
   const angle = (h.readUInt16BE(0) / 65535) * 2 * Math.PI;
   const dist = 50 + (h[2] / 255) * 100;
   const dLat = (dist * Math.cos(angle)) / 111320;

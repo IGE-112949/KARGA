@@ -10,13 +10,21 @@ const money = (min: number, max: number, decimals: number, label: string) =>
     .max(max, `${label}: máximo ${max.toFixed(2).replace('.', ',')} €`)
     .transform((v) => Number(v.toFixed(decimals)));
 
+// A zona é pública (mostrada antes de reservar): tira códigos postais e recusa o que pareça uma morada (números).
+export function sanitizeArea(v: string | null | undefined): string | null {
+  if (v == null) return null;
+  const s = v.replace(/\b\d{4}-\d{3}\b/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!s || /\d/.test(s) || s.length > 80) return null;
+  return s;
+}
+
 export const POWER_LIMITS = { schuko: [1.8, 3.7], type2: [3.7, 22] } as const;
 
 const fields = {
   title: trimmed(3, 60, 'O nome'),
   address: trimmed(5, 200, 'A morada'),
   spotDetails: optionalText(60, 'O piso/lugar'),
-  area: optionalText(80, 'A zona'),
+  area: z.string().nullable().optional().transform((v) => (v === undefined ? undefined : sanitizeArea(v))),
   description: optionalText(500, 'A descrição'),
   latitude: z.number().min(-90, 'Latitude inválida').max(90, 'Latitude inválida'),
   longitude: z.number().min(-180, 'Longitude inválida').max(180, 'Longitude inválida'),
