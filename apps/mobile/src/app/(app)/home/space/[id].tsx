@@ -11,6 +11,7 @@ import { Avatar } from '@/ui/Avatar';
 import { Icon, type IconName } from '@/ui/Icon';
 import { theme } from '@/theme';
 import { useSearch } from '@/search/SearchContext';
+import { useTabBarVisible } from '@/ui/tabBarContext';
 import { effectiveWhen, toQueryString, whenLabel, windowQuery } from '@/search/search';
 import { WhenPicker } from '@/search/WhenPicker';
 import { setFavorite } from '@/search/favorites';
@@ -43,6 +44,7 @@ export default function SpaceDetail() {
   const { api } = useAuth();
   const { when, setWhen, filters, setFilters, markFavorite } = useSearch();
   const { width } = useWindowDimensions();
+  const tabs = useTabBarVisible();
   const [s, setS] = useState<PublicSpace | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -166,7 +168,7 @@ export default function SpaceDetail() {
         </View>
       </ScrollView>
 
-      <SafeAreaView edges={['bottom']} style={styles.bar}>
+      <SafeAreaView edges={tabs ? [] : ['bottom']} style={styles.bar}>
         <View style={styles.flex}>
           <Text style={styles.small}>Total estimado</Text>
           <Text style={styles.barTotal}>{c && !loading && !error ? formatEuro(c.total) : '—'}</Text>

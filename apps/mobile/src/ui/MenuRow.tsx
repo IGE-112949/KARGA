@@ -13,10 +13,15 @@ export function MenuRow({ icon, title, sub, onPress, last, iconBg = theme.colors
       <View style={[styles.icon, { backgroundColor: iconBg }]}><Icon name={icon} size={20} color={iconColor} /></View>
       <View style={styles.text}>
         <View style={styles.titleLine}>
-          <Text style={[styles.title, danger && styles.danger]}>{title}</Text>
-          {badge ? <Text style={styles.badge}>{badge}</Text> : null}
+          <Text style={[styles.title, danger && styles.danger]} numberOfLines={1}>{title}</Text>
+          {badge && onPress ? <Text style={styles.badge}>{badge}</Text> : null}
         </View>
-        {sub ? <Text style={styles.sub} numberOfLines={1}>{sub}</Text> : null}
+        {sub || (badge && !onPress) ? (
+          <View style={styles.titleLine}>
+            {badge && !onPress ? <Text style={styles.badge}>{badge}</Text> : null}
+            {sub ? <Text style={styles.sub} numberOfLines={1}>{sub}</Text> : null}
+          </View>
+        ) : null}
         {children}
       </View>
       {onPress ? <Icon name="chevron" size={20} color={theme.colors.textMuted} /> : null}
@@ -41,10 +46,10 @@ const styles = StyleSheet.create({
   icon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   text: { flex: 1, gap: 2 },
   titleLine: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 17, fontFamily: theme.font.semibold, color: theme.colors.text },
+  title: { flexShrink: 1, fontSize: 17, fontFamily: theme.font.semibold, color: theme.colors.text },
   danger: { color: theme.colors.danger },
-  sub: { fontSize: 13, color: theme.colors.textMuted, fontFamily: theme.font.regular },
-  badge: { fontSize: 11, fontFamily: theme.font.semibold, color: theme.colors.greenText, backgroundColor: theme.colors.greenBg, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, overflow: 'hidden' },
+  sub: { flexShrink: 1, fontSize: 13, color: theme.colors.textMuted, fontFamily: theme.font.regular },
+  badge: { flexShrink: 0, fontSize: 11, fontFamily: theme.font.semibold, color: theme.colors.greenText, backgroundColor: theme.colors.greenBg, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, overflow: 'hidden' },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.7 },
 });

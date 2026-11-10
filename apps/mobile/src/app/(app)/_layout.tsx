@@ -1,5 +1,6 @@
 import { Tabs, usePathname } from 'expo-router';
 import { hideTabBarOn } from '@/ui/tabBar';
+import { TabBarVisibleProvider } from '@/ui/tabBarContext';
 import { Icon, type IconName } from '@/ui/Icon';
 import { ModeProvider, useMode } from '@/profile/ModeContext';
 import { SearchProvider } from '@/search/SearchContext';
@@ -18,6 +19,7 @@ function AppTabs() {
     tabBarIcon: ({ color }: { color: unknown }) => <Icon name={icon} size={24} color={String(color)} />,
   });
   return (
+    <TabBarVisibleProvider value={!hidden}>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -36,6 +38,7 @@ function AppTabs() {
       <Tabs.Screen name="wallet" options={tab('Carteira', 'wallet', driver)} />
       <Tabs.Screen name="profile" options={tab('Perfil', 'user')} />
     </Tabs>
+    </TabBarVisibleProvider>
   );
 }
 
