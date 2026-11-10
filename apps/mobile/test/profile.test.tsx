@@ -1,4 +1,5 @@
 import { render, fireEvent, screen } from '@testing-library/react-native';
+import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Profile } from '@/lib/types';
 
@@ -8,7 +9,9 @@ const mockSignOut = jest.fn();
 const mockPush = jest.fn();
 let mockProfile: Profile;
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn() }) }));
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn(), canGoBack: () => true }),
+}));
 jest.mock('@/auth/AuthProvider', () => ({
   useAuth: () => ({ api: mockApi, profile: mockProfile, refreshProfile: mockRefresh, signOut: mockSignOut, session: { user: { email: 'ana@mail.pt' } } }),
 }));
@@ -16,6 +19,8 @@ jest.mock('@/lib/avatar', () => ({ pickAvatar: jest.fn(), avatarFormData: jest.f
 
 import { ModeProvider } from '@/profile/ModeContext';
 import ProfileScreen from '@/app/(app)/profile/index';
+import VehiclesScreen from '@/app/(app)/profile/vehicles';
+import SettingsScreen from '@/app/(app)/profile/settings';
 
 const base: Profile = {
   id: 'u1', fullName: 'Ana Silva', phone: '+351912345678', avatarUrl: null, isDriver: true, isHost: false,
@@ -40,7 +45,6 @@ describe('Perfil', () => {
     await show();
     expect(screen.getAllByText('Ana Silva').length).toBeGreaterThan(0);
     expect(screen.getByText('ana@mail.pt')).toBeTruthy();
-    expect(screen.getByLabelText('Telemóvel').props.value).toBe('912 345 678');
     expect(await screen.findByText('Modo Condutor')).toBeTruthy();
   });
 
@@ -73,29 +77,40 @@ describe('Perfil', () => {
     expect(mockApi.patch).not.toHaveBeenCalled();
   });
 
-  it('lista os veículos com "Predefinido" no certo', async () => {
+  it('"Os meus veículos" mostra o predefinido e abre o ecrã dos veículos', async () => {
     await show();
-    const tesla = screen.getByRole('button', { name: /Tesla Model 3/ });
-    const zoe = screen.getByRole('button', { name: /Renault Zoe/ });
-    expect(tesla.props.accessibilityLabel).toMatch(/Predefinido/);
-    expect(zoe.props.accessibilityLabel).not.toMatch(/Predefinido/);
+    expect(screen.getByText('Tesla Model 3 · 12-AB-34')).toBeTruthy();
+    expect(screen.queryByText('Renault Zoe')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: /Os meus veículos/ }));
+    expect(mockPush).toHaveBeenCalledWith('/profile/vehicles');
   });
 
-  it('"Apagar conta" só chama DELETE /me depois de confirmar', async () => {
-    mockApi.del.mockResolvedValue(undefined);
+  it('"Os meus veículos" aparece também a quem só é proprietário', async () => {
+    mockProfile = { ...base, isDriver: false, isHost: true, vehicles: [] };
     await show();
-    await fireEvent.press(screen.getByRole('button', { name: 'Apagar conta' }));
-    expect(mockApi.del).not.toHaveBeenCalled();
-    expect(screen.getByText('Esta ação apaga a tua conta e todos os teus dados. Não pode ser desfeita.')).toBeTruthy();
-    await fireEvent.press(screen.getByRole('button', { name: 'Apagar definitivamente' }));
-    expect(mockApi.del).toHaveBeenCalledWith('/me');
-    expect(mockSignOut).toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /Os meus veículos/ })).toBeTruthy();
+    expect(screen.getByText('Nenhum veículo')).toBeTruthy();
   });
 
-  it('"Os meus favoritos" abre a página dos favoritos', async () => {
+  it('"Métodos de Pagamento" está marcado "Em breve" e não navega', async () => {
+    await show();
+    expect(screen.getByText('Em breve')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Métodos de Pagamento'));
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('"Os meus favoritos" e "Definições" abrem as páginas respetivas', async () => {
     await show();
     await fireEvent.press(screen.getByRole('button', { name: 'Os meus favoritos' }));
     expect(mockPush).toHaveBeenCalledWith('/profile/favorites');
+    await fireEvent.press(screen.getByRole('button', { name: 'Definições' }));
+    expect(mockPush).toHaveBeenCalledWith('/profile/settings');
+  });
+
+  it('o perfil já não tem dados pessoais nem "Apagar conta"', async () => {
+    await show();
+    expect(screen.queryByLabelText('Telemóvel')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Apagar conta' })).toBeNull();
   });
 
   it('"Terminar sessão" chama signOut', async () => {
@@ -103,12 +118,61 @@ describe('Perfil', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Terminar sessão' }));
     expect(mockSignOut).toHaveBeenCalled();
   });
+});
+
+describe('Os meus veículos', () => {
+  it('lista os veículos com "Predefinido" no certo e abre a edição', async () => {
+    await render(<VehiclesScreen />);
+    const tesla = screen.getByRole('button', { name: /Tesla Model 3/ });
+    const zoe = screen.getByRole('button', { name: /Renault Zoe/ });
+    expect(tesla.props.accessibilityLabel).toMatch(/Predefinido/);
+    expect(zoe.props.accessibilityLabel).not.toMatch(/Predefinido/);
+    await fireEvent.press(zoe);
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/profile/vehicle-form', params: { id: 'v1' } });
+  });
+
+  it('sem veículos mostra o estado vazio e "Adicionar veículo"', async () => {
+    mockProfile = { ...base, vehicles: [] };
+    await render(<VehiclesScreen />);
+    expect(screen.getByText('Ainda não adicionaste nenhum veículo.')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Adicionar veículo' }));
+    expect(mockPush).toHaveBeenCalledWith('/profile/vehicle-form');
+  });
+});
+
+describe('Definições', () => {
+  it('mostra os dados pessoais e o email só para leitura', async () => {
+    await render(<SettingsScreen />);
+    expect(screen.getByLabelText('Telemóvel').props.value).toBe('912 345 678');
+    expect(screen.getByText('ana@mail.pt')).toBeTruthy();
+  });
 
   it('guardar dados pessoais envia PATCH /me com o telemóvel sem espaços', async () => {
     mockApi.patch.mockResolvedValue({});
-    await show();
+    await render(<SettingsScreen />);
     await fireEvent.changeText(screen.getByLabelText('Telemóvel'), '913 000 000');
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar alterações' }));
     expect(mockApi.patch).toHaveBeenCalledWith('/me', { fullName: 'Ana Silva', phone: '+351913000000' });
+    expect(await screen.findByText('Dados guardados.')).toBeTruthy();
+  });
+
+  it('Termos e Privacidade abrem as páginas do site', async () => {
+    const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+    await render(<SettingsScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Termos e Condições' }));
+    expect(open).toHaveBeenCalledWith('https://karga-landing-page.vercel.app/termos');
+    await fireEvent.press(screen.getByRole('button', { name: 'Política de Privacidade' }));
+    expect(open).toHaveBeenCalledWith('https://karga-landing-page.vercel.app/privacidade');
+  });
+
+  it('"Apagar conta" só chama DELETE /me depois de confirmar', async () => {
+    mockApi.del.mockResolvedValue(undefined);
+    await render(<SettingsScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Apagar conta' }));
+    expect(mockApi.del).not.toHaveBeenCalled();
+    expect(screen.getByText('Esta ação apaga a tua conta e todos os teus dados. Não pode ser desfeita.')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Apagar definitivamente' }));
+    expect(mockApi.del).toHaveBeenCalledWith('/me');
+    expect(mockSignOut).toHaveBeenCalled();
   });
 });
