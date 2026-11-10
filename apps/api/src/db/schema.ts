@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
-  pgTable, pgEnum, uuid, text, boolean, timestamp, numeric, smallint, time, geometry, index, uniqueIndex, check,
+  pgTable, pgEnum, primaryKey, uuid, text, boolean, timestamp, numeric, smallint, time, geometry, index, uniqueIndex, check,
 } from 'drizzle-orm/pg-core';
 
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
@@ -56,6 +56,7 @@ export const spaces = pgTable('spaces', {
   energyPriceKwh: numeric('energy_price_kwh', { precision: 5, scale: 3 }),
   status: spaceStatus('status').notNull().default('active'),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  area: text('area'),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [
@@ -130,3 +131,9 @@ export const platformSettings = pgTable('platform_settings', {
   value: numeric('value').notNull(),
   updatedAt: updatedAt(),
 });
+
+export const favorites = pgTable('favorites', {
+  userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  spaceId: uuid('space_id').notNull().references(() => spaces.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.spaceId] })]);
