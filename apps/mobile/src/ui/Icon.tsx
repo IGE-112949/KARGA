@@ -24,6 +24,11 @@ const ICONS = {
   clock: <><Circle cx="12" cy="12" r="10" /><Path d="M12 6v6l4 2" /></>,
   star: <Polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
   locate: <><Circle cx="12" cy="12" r="3" /><Path d="M12 2v3M12 19v3M2 12h3M19 12h3" /><Circle cx="12" cy="12" r="7" /></>,
+  heart: <Path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />,
+  share: <><Circle cx="18" cy="5" r="3" /><Circle cx="6" cy="12" r="3" /><Circle cx="18" cy="19" r="3" /><Path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98" /></>,
+  search: <><Circle cx="11" cy="11" r="8" /><Path d="m21 21-4.3-4.3" /></>,
+  sliders: <Path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />,
+  moon: <Path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />,
   lock: <><Rect width="18" height="11" x="3" y="11" rx="2" /><Path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
 } as const;
 
