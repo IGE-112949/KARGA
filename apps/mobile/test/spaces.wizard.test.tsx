@@ -13,6 +13,7 @@ jest.mock('@/lib/location', () => ({
   LISBON: { latitude: 38.7, longitude: -9.1 },
   LocationPermissionError: class extends Error {},
   geocodeAddress: jest.fn(async () => ({ latitude: 38.71, longitude: -9.16 })),
+  addressAt: jest.fn(async () => 'Rua do Pin, 7, Loures'),
   currentPlace: jest.fn(),
 }));
 jest.mock('@/ui/MapPicker', () => ({
@@ -53,6 +54,15 @@ async function step3() {
 }
 
 describe('Novo espaço', () => {
+  it('mover o pin atualiza a morada', async () => {
+    await render(<NewSpace />);
+    await fireEvent.changeText(screen.getByLabelText('Morada'), 'Rua Antiga, 1');
+    await fireEvent.press(screen.getByRole('button', { name: 'Marcar pin' }));
+    expect(await screen.findByDisplayValue('Rua do Pin, 7, Loures')).toBeTruthy();
+    const loc = jest.requireMock('@/lib/location');
+    expect(loc.addressAt).toHaveBeenCalledWith({ latitude: 38.72, longitude: -9.15 });
+  });
+
   it('erro de validação da API ao publicar mostra a mensagem do campo', async () => {
     mockApi.upload.mockRejectedValue(new ApiError(400, 'VALIDATION_ERROR', 'Dados inválidos', [{ field: 'title', message: 'O nome é demasiado longo' }]));
     await render(<NewSpace />);

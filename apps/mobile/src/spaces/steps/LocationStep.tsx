@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { TextField } from '@/ui/TextField';
 import { Icon } from '@/ui/Icon';
 import { MapPicker } from '@/ui/MapPicker';
-import { currentPlace, geocodeAddress, LocationPermissionError } from '@/lib/location';
+import { addressAt, currentPlace, geocodeAddress, LocationPermissionError, type LatLng } from '@/lib/location';
 import type { Errors } from '@/lib/validation';
 import { theme } from '@/theme';
 import type { SpaceDraft } from '../draft';
@@ -31,6 +31,21 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
     }
   };
 
+  // Mover o pin (arrastar ou tocar no mapa) atualiza a morada para a do novo sítio.
+  const movePin = async (point: LatLng) => {
+    set({ point });
+    setWarning(null);
+    try {
+      const a = await addressAt(point);
+      if (a) {
+        lastGeocoded.current = a;
+        set({ address: a });
+      }
+    } catch {
+      // sem permissão: o pin fica onde o utilizador o pôs e a morada escrita mantém-se
+    }
+  };
+
   const useCurrent = async () => {
     setWarning(null);
     try {
@@ -50,7 +65,7 @@ export function LocationStep({ d, set, errors }: { d: SpaceDraft; set: (p: Parti
         onChangeText={(title) => set({ title })} />
       <TextField label="Morada" placeholder="Rua, número, localidade" value={d.address} error={errors.address}
         autoComplete="street-address" textContentType="fullStreetAddress" onChangeText={(address) => set({ address })} onBlur={geocode} />
-      <MapPicker value={d.point} onChange={(point) => set({ point })} />
+      <MapPicker value={d.point} onChange={movePin} />
       <FieldError>{errors.point}</FieldError>
       {warning ? <Text style={styles.warning}>{warning}</Text> : null}
       <Pressable accessibilityRole="button" accessibilityLabel="Usar a minha localização atual" onPress={useCurrent} hitSlop={8} style={styles.locate}>

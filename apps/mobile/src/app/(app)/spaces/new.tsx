@@ -64,7 +64,8 @@ export default function NewSpace() {
 
   const props = { d, set, errors };
   return (
-    <Screen background={theme.colors.screenBg}>
+    // key por passo: cada passo começa no topo do ecrã (senão herdava o scroll do passo anterior).
+    <Screen key={step} background={theme.colors.screenBg}>
       <WizardHeader label={`Passo ${step + 1} de ${STEPS.length}`} title={STEPS[step].title} sub={STEPS[step].sub} onBack={back} onClose={close} progress={(step + 1) / STEPS.length} />
       {step === 0 ? <LocationStep {...props} /> : null}
       {step === 1 ? <FeaturesStep {...props} /> : null}
