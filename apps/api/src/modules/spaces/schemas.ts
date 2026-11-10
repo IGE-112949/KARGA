@@ -16,6 +16,7 @@ const fields = {
   title: trimmed(3, 60, 'O nome'),
   address: trimmed(5, 200, 'A morada'),
   spotDetails: optionalText(60, 'O piso/lugar'),
+  area: optionalText(80, 'A zona'),
   description: optionalText(500, 'A descrição'),
   latitude: z.number().min(-90, 'Latitude inválida').max(90, 'Latitude inválida'),
   longitude: z.number().min(-180, 'Longitude inválida').max(180, 'Longitude inválida'),

@@ -10,6 +10,7 @@ const columns = {
   description: spaces.description,
   address: spaces.address,
   spotDetails: spaces.spotDetails,
+  area: spaces.area,
   latitude: sql<number>`ST_Y(${spaces.location})`,
   longitude: sql<number>`ST_X(${spaces.location})`,
   spaceType: spaces.spaceType,
