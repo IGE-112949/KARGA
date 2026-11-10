@@ -5,6 +5,7 @@ Plataforma P2P de aluguer de lugares de estacionamento com carregamento elétric
 ```
 apps/api/      → API REST (Node.js + TypeScript + Express + Drizzle ORM + Zod)
 apps/mobile/   → app React Native (Expo SDK 58 + Expo Router)
+apps/site/     → site (landing page estática, deploy na Vercel)
 db/migrations/ → migrações SQL da base de dados (Supabase / PostgreSQL + PostGIS)
 docs/          → especificações e planos
 ```
