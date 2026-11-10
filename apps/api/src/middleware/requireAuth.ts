@@ -15,8 +15,8 @@ export function requireAuth(verifier: AuthVerifier): RequestHandler {
   return async (req, _res, next) => {
     try {
       const header = req.headers.authorization ?? '';
-      const [scheme, token] = header.split(' ');
-      if (scheme !== 'Bearer' || !token) throw unauthorized();
+      const [scheme, token] = header.trim().split(/\s+/);
+      if (scheme?.toLowerCase() !== 'bearer' || !token) throw unauthorized();
       req.userId = (await verifier.verify(token)).userId;
       next();
     } catch (err) {

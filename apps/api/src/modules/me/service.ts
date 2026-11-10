@@ -1,9 +1,10 @@
 import type { Db } from '../../db/types.js';
 import type { AuthAdmin } from '../../auth/admin.js';
 import type { AvatarStore } from '../../storage/avatarStore.js';
-import { AppError } from '../../lib/errors.js';
+import { AppError, unauthorized } from '../../lib/errors.js';
+import { CHECK_VIOLATION, FOREIGN_KEY_VIOLATION, pgErrorCode } from '../../lib/pgErrors.js';
 import { listVehiclesByUser } from '../vehicles/repository.js';
-import { findProfile, insertProfile, updateProfile, type ProfileRow } from './repository.js';
+import { findProfile, insertProfile, updateProfileAtomic, type ProfileRow } from './repository.js';
 import type { CreateProfileInput, ProfileDto, UpdateProfileInput } from './schemas.js';
 
 export const profileNotFound = () =>
@@ -33,41 +34,49 @@ export async function getProfile(db: Db, userId: string): Promise<ProfileDto> {
 }
 
 export async function createProfile(db: Db, userId: string, input: CreateProfileInput): Promise<ProfileDto> {
-  const row = await insertProfile(db, {
-    id: userId,
-    fullName: input.fullName,
-    phone: input.phone ?? null,
-    isDriver: input.isDriver,
-    isHost: input.isHost,
-    termsAcceptedAt: new Date(),
-  });
+  let row: ProfileRow | undefined;
+  try {
+    row = await insertProfile(db, {
+      id: userId,
+      fullName: input.fullName,
+      phone: input.phone ?? null,
+      isDriver: input.isDriver,
+      isHost: input.isHost,
+      termsAcceptedAt: new Date(),
+    });
+  } catch (e) {
+    // A conta já não existe na Auth (apagada com o token ainda válido): a sessão não serve.
+    if (pgErrorCode(e) === FOREIGN_KEY_VIOLATION) throw unauthorized();
+    throw e;
+  }
   if (!row) throw new AppError(409, 'PROFILE_EXISTS', 'Já existe um perfil para esta conta');
   return toDto(db, row);
 }
 
+const needsOneMode = () => new AppError(400, 'VALIDATION_ERROR', 'Dados inválidos', [
+  { field: 'isDriver', message: 'Tens de manter pelo menos um modo ativo: condutor ou proprietário' },
+]);
+
 export async function editProfile(db: Db, userId: string, input: UpdateProfileInput): Promise<ProfileDto> {
-  const current = await requireProfile(db, userId);
-  const isDriver = input.isDriver ?? current.isDriver;
-  const isHost = input.isHost ?? current.isHost;
-  if (!isDriver && !isHost) {
-    throw new AppError(400, 'VALIDATION_ERROR', 'Dados inválidos', [
-      { field: 'isDriver', message: 'Tens de manter pelo menos um modo ativo: condutor ou proprietário' },
-    ]);
+  let row: ProfileRow | undefined;
+  try {
+    row = await updateProfileAtomic(db, userId, input);
+  } catch (e) {
+    if (pgErrorCode(e) === CHECK_VIOLATION) throw needsOneMode();
+    throw e;
   }
-  const row = await updateProfile(db, userId, {
-    ...(input.fullName !== undefined ? { fullName: input.fullName } : {}),
-    ...(input.phone !== undefined ? { phone: input.phone } : {}),
-    isDriver,
-    isHost,
-  });
-  return toDto(db, row);
+  if (row) return toDto(db, row);
+  // Nada atualizado: ou o perfil não existe (ou foi apagado entretanto), ou ficaria sem modos.
+  await requireProfile(db, userId);
+  throw needsOneMode();
 }
 
 // RGPD: apaga o utilizador na Auth; o cascade apaga o perfil e os dados associados.
+// Funciona também sem perfil (registo a meio): a conta da Auth é apagada na mesma.
 export async function deleteAccount(db: Db, authAdmin: AuthAdmin, avatars: AvatarStore, userId: string): Promise<void> {
-  const profile = await requireProfile(db, userId);
+  const profile = await findProfile(db, userId);
   await authAdmin.deleteUser(userId);
-  if (profile.avatarUrl) {
+  if (profile?.avatarUrl) {
     try {
       await avatars.remove(profile.avatarUrl);
     } catch (e) {

@@ -26,6 +26,20 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'JSON inválido' } });
     return;
   }
-  console.error(err);
+  if (err?.type === 'entity.too.large') {
+    res.status(413).json({ error: { code: 'PAYLOAD_TOO_LARGE', message: 'Pedido demasiado grande.' } });
+    return;
+  }
+  console.error(safeForLog(err));
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Ocorreu um erro inesperado.' } });
 };
+
+// Os erros do Drizzle trazem os valores do pedido ("params: ...", ex.: telemóveis): não vão para o registo.
+export function safeForLog(err: unknown): string {
+  const e = err as { name?: string; message?: string; stack?: string; cause?: { code?: string; message?: string } };
+  const strip = (t?: string) => (t ?? '').replace(/\n?params:[\s\S]*$/m, '\nparams: [omitidos]');
+  const head = `${e?.name ?? 'Error'}: ${strip(e?.message)}`;
+  const cause = e?.cause ? `\n  causa: ${e.cause.code ?? ''} ${e.cause.message ?? ''}` : '';
+  const frames = (e?.stack ?? '').split('\n').filter((l) => l.trim().startsWith('at ')).slice(0, 5).join('\n');
+  return `${head}${cause}${frames ? `\n${frames}` : ''}`;
+}

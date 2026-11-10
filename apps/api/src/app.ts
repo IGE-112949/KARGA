@@ -47,6 +47,9 @@ export function createApp(deps: AppDeps): express.Express {
   api.use(favoriteRoutes(deps.db, deps.spacePhotos));
   app.use(api);
 
+  app.use((_req, res) => {
+    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Recurso não encontrado.' } });
+  });
   app.use(errorHandler);
   return app;
 }
