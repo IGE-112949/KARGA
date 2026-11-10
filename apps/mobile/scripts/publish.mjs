@@ -31,7 +31,7 @@ console.log(`A publicar para o canal "preview" com a API ${vars.EXPO_PUBLIC_API_
 // As variáveis do processo têm prioridade sobre o .env (que aponta para localhost).
 // No Windows o npx corre pela shell, que parte os argumentos com espaços: vão entre aspas.
 const win = process.platform === 'win32';
-const args = ['eas-cli@latest', 'update', '--channel', 'preview', '--message', message, '--non-interactive']
+const args = ['eas-cli@latest', 'update', '--channel', 'preview', '--environment', 'preview', '--message', message, '--non-interactive']
   .map((a) => (win && /[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a));
 const r = spawnSync('npx', args, {
   cwd: ROOT, stdio: 'inherit', shell: win, env: { ...process.env, ...vars, NODE_ENV: 'production' },
