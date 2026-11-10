@@ -6,6 +6,13 @@
   var $ = function (id) { return document.getElementById(id); };
   var fmt = function (n, d) { return n.toLocaleString('pt-PT', { minimumFractionDigits: d, maximumFractionDigits: d }); };
 
+  // Barra: parte preenchida na cor do estado, o resto cinzento claro.
+  function paint(el, color) {
+    var min = Number(el.min), max = Number(el.max), v = Number(el.value);
+    el.style.setProperty('--k-c', color);
+    el.style.setProperty('--k-fill', ((v - min) / (max - min)) * 100 + '%');
+  }
+
   function render() {
     var sel = OPTS[s.power];
     var monthHours = s.hours * s.sessions * 4;
@@ -25,9 +32,9 @@
       if (dot) dot.style.background = on ? '#10B981' : 'transparent';
     });
 
-    $('k-sessions').style.accentColor = accent;
-    $('k-hours').style.accentColor = accent;
-    $('k-fee').style.accentColor = feeAccent;
+    paint($('k-sessions'), accent);
+    paint($('k-hours'), accent);
+    paint($('k-fee'), feeAccent);
     $('k-sessions-label').textContent = s.sessions + (s.sessions === 1 ? ' sessão' : ' sessões');
     $('k-hours-label').textContent = s.hours + ' horas';
     var feeLabel = $('k-fee-label');
