@@ -67,6 +67,29 @@ describe('PATCH /me e POST /me em casos-limite', () => {
     expect(res.body.error.code).toBe('UNAUTHORIZED');
   });
 
+  it('apagar a conta apaga também as fotos dos espaços do Storage', async () => {
+    const t = await createTestApp();
+    const h = { Authorization: `Bearer ${await t.tokenFor(U)}` };
+    await request(t.app).post('/me').set(h).send(profileBody).expect(201);
+    const JPEG = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(64)]);
+    const data = { title: 'Garagem', address: 'Rua Ferreira Borges, 40', latitude: 38.7, longitude: -9.1, spaceType: 'covered',
+      plugType: 'type2', powerKw: 7.4, pricePerHour: 0.3, availability: [{ weekday: 0, startTime: '09:00', endTime: '18:00' }] };
+    await request(t.app).post('/me/spaces').set(h).field('data', JSON.stringify(data)).attach('photos', JPEG, 'a.jpg').attach('photos', JPEG, 'b.jpg').expect(201);
+    const sent = [...t.spacePhotos.uploaded];
+    await request(t.app).delete('/me').set(h).expect(204);
+    expect(t.spacePhotos.removed).toEqual(expect.arrayContaining(sent));
+  });
+
+  it('o endereço da foto de perfil não inclui o id do utilizador', async () => {
+    const t = await createTestApp();
+    const h = { Authorization: `Bearer ${await t.tokenFor(U)}` };
+    await request(t.app).post('/me').set(h).send(profileBody).expect(201);
+    const JPEG = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(64)]);
+    const r = await request(t.app).put('/me/avatar').set(h).attach('file', JPEG, 'a.jpg');
+    expect(r.status).toBe(200);
+    expect(r.body.avatarUrl).not.toContain(U);
+  });
+
   it('utilizador sem perfil (registo a meio) pode apagar a conta da Auth', async () => {
     const t = await createTestApp();
     const h = { Authorization: `Bearer ${await t.tokenFor(U)}` };
@@ -89,6 +112,16 @@ describe('Autenticação', () => {
   it('tempo esgotado a obter as chaves dá 503', async () => {
     const v = createKeyVerifier(async () => { throw new errors.JWKSTimeout(); }, ISSUER);
     await expect(v.verify(await token())).rejects.toMatchObject({ status: 503 });
+  });
+
+  it('resposta de erro do servidor de chaves (ex.: 502, HTML) dá 503, não 401', async () => {
+    const v = createKeyVerifier(async () => { throw new errors.JOSEError('Expected 200 OK from the JSON Web Key Set HTTP response'); }, ISSUER);
+    await expect(v.verify(await token())).rejects.toMatchObject({ status: 503 });
+  });
+
+  it('token mal formado continua a dar 401', async () => {
+    const v = createKeyVerifier(async () => { throw new Error('não devia chegar aqui'); }, ISSUER);
+    await expect(v.verify('isto.nao.e-um-token')).rejects.toMatchObject({ status: 401 });
   });
 
   it('chave que não corresponde continua a dar 401', async () => {

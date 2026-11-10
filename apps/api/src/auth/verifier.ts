@@ -5,17 +5,23 @@ export interface AuthVerifier {
   verify(token: string): Promise<{ userId: string }>;
 }
 
+const TOKEN_FAULTS = [
+  errors.JWSInvalid, errors.JWTInvalid, errors.JWTClaimValidationFailed, errors.JWTExpired,
+  errors.JWSSignatureVerificationFailed, errors.JWKSNoMatchingKey, errors.JOSEAlgNotAllowed, errors.JOSENotSupported,
+  errors.JWKSMultipleMatchingKeys,
+];
+const isTokenFault = (e: unknown) => (e as Error)?.message === 'sem sub' || TOKEN_FAULTS.some((C) => e instanceof C);
+
 async function verifyWith(token: string, key: JWTVerifyGetKey | Uint8Array, issuer: string) {
   try {
     const { payload } = await jwtVerify(token, key as JWTVerifyGetKey, { issuer, audience: 'authenticated' });
     if (!payload.sub) throw new Error('sem sub');
     return { userId: payload.sub };
   } catch (e) {
-    // Sem acesso às chaves da Supabase (rede, tempo esgotado) não é culpa do token: 503 e a app não termina a sessão.
-    if (e instanceof errors.JWKSTimeout || !(e instanceof errors.JOSEError || (e as Error)?.message === 'sem sub')) {
-      throw new AppError(503, 'AUTH_UNAVAILABLE', 'Não foi possível validar a sessão. Tenta novamente.');
-    }
-    throw unauthorized();
+    // Só os problemas do próprio token dão 401 (e terminam a sessão na app). Tudo o resto (rede, tempo esgotado,
+    // servidor de chaves com erro ou resposta inválida) é 503: a sessão mantém-se e a app pode tentar outra vez.
+    if (isTokenFault(e)) throw unauthorized();
+    throw new AppError(503, 'AUTH_UNAVAILABLE', 'Não foi possível validar a sessão. Tenta novamente.');
   }
 }
 

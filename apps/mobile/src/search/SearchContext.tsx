@@ -11,19 +11,20 @@ const Ctx = createContext<Value | null>(null);
 
 // Janela, filtros e favoritos partilhados entre o mapa, o detalhe do lugar e a página de favoritos.
 export function SearchProvider({ children }: { children: React.ReactNode }) {
-  const [stored, setWhen] = useState<When>(() => defaultWhen());
+  const [stored, setStored] = useState<When>(() => defaultWhen());
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [favs, setFavs] = useState<Record<string, boolean>>({});
   // De minuto a minuto, para a hora de hoje que entretanto passou avançar sozinha (app aberta muito tempo).
-  const [tick, setTick] = useState(0);
+  // Guarda o valor avançado: assim a janela só muda quando passa mesmo (e não a cada minuto, o que repetia pesquisas).
   useEffect(() => {
-    const i = setInterval(() => setTick((t) => t + 1), 60_000);
+    const i = setInterval(() => setStored((w) => freshWhen(w)), 60_000);
     return () => clearInterval(i);
   }, []);
-  const when = useMemo(() => freshWhen(stored), [stored, tick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const setWhen = useCallback((w: When) => setStored(freshWhen(w)), []);
+  const when = stored;
   const markFavorite = useCallback((id: string, on: boolean) => setFavs((f) => ({ ...f, [id]: on })), []);
   const favoriteOf = useCallback((id: string, fromSearch: boolean) => favs[id] ?? fromSearch, [favs]);
-  const value = useMemo(() => ({ when, setWhen, filters, setFilters, favoriteOf, markFavorite }), [when, filters, favoriteOf, markFavorite]);
+  const value = useMemo(() => ({ when, setWhen, filters, setFilters, favoriteOf, markFavorite }), [when, setWhen, filters, favoriteOf, markFavorite]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

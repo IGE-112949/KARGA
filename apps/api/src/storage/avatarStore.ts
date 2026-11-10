@@ -1,9 +1,10 @@
+import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { IMAGE_EXT as EXT, type ImageType } from '../lib/images.js';
 export type { ImageType };
 
 export interface AvatarStore {
-  /** Guarda a imagem e devolve o URL público. */
+  /** Guarda a imagem e devolve o URL público (nome aleatório: o URL é público e não deve revelar o id da conta). */
   upload(userId: string, data: Buffer, contentType: ImageType): Promise<string>;
   /** Apaga a imagem a partir do URL público. */
   remove(url: string): Promise<void>;
@@ -17,8 +18,8 @@ export function createSupabaseAvatarStore(supabaseUrl: string, serviceRoleKey: s
   const storage = supabase.storage.from(BUCKET);
   const marker = `/object/public/${BUCKET}/`;
   return {
-    async upload(userId, data, contentType) {
-      const path = `${userId}/${Date.now()}.${EXT[contentType]}`;
+    async upload(_userId, data, contentType) {
+      const path = `${randomUUID()}.${EXT[contentType]}`;
       const { error } = await storage.upload(path, data, { contentType, upsert: false });
       if (error) throw error;
       return storage.getPublicUrl(path).data.publicUrl;

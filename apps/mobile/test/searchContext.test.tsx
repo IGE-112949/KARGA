@@ -25,6 +25,27 @@ describe('SearchProvider', () => {
     expect(screen.getByTestId('start').props.children).not.toBe('00:00');
   });
 
+  it('depois de avançar a hora, o valor guardado fica atualizado (não muda a cada minuto)', async () => {
+    jest.useFakeTimers();
+    try {
+      const now = new Date();
+      if (now.getUTCHours() < 1) return;
+      const seen: unknown[] = [];
+      function Track() {
+        const { when, setWhen } = useSearch();
+        seen.push(when);
+        return <Pressable accessibilityRole="button" accessibilityLabel="passado" onPress={() => setWhen({ dayOffset: 0, start: '00:00', hours: 2 })} />;
+      }
+      await render(<SearchProvider><Track /></SearchProvider>);
+      await fireEvent.press(screen.getByRole('button', { name: 'passado' }));
+      const after = seen[seen.length - 1];
+      await act(async () => { jest.advanceTimersByTime(180_000); });
+      expect(seen[seen.length - 1]).toBe(after);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('marcar um favorito (no detalhe) fica visível para o mapa', async () => {
     await render(<SearchProvider><Probe /></SearchProvider>);
     expect(screen.getByTestId('fav').props.children).toBe('false');

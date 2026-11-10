@@ -1,6 +1,9 @@
 import type { Db } from '../../db/types.js';
 import type { AuthAdmin } from '../../auth/admin.js';
 import type { AvatarStore } from '../../storage/avatarStore.js';
+import type { SpacePhotoStore } from '../../storage/spacePhotoStore.js';
+import { eq } from 'drizzle-orm';
+import { spacePhotos as spacePhotosTable, spaces } from '../../db/schema.js';
 import { AppError, unauthorized } from '../../lib/errors.js';
 import { CHECK_VIOLATION, FOREIGN_KEY_VIOLATION, pgErrorCode } from '../../lib/pgErrors.js';
 import { listVehiclesByUser } from '../vehicles/repository.js';
@@ -73,9 +76,19 @@ export async function editProfile(db: Db, userId: string, input: UpdateProfileIn
 
 // RGPD: apaga o utilizador na Auth; o cascade apaga o perfil e os dados associados.
 // Funciona também sem perfil (registo a meio): a conta da Auth é apagada na mesma.
-export async function deleteAccount(db: Db, authAdmin: AuthAdmin, avatars: AvatarStore, userId: string): Promise<void> {
+export async function deleteAccount(db: Db, authAdmin: AuthAdmin, avatars: AvatarStore, userId: string, spacePhotos?: SpacePhotoStore): Promise<void> {
   const profile = await findProfile(db, userId);
+  // Os caminhos das fotos dos espaços têm de ser lidos antes: o cascade apaga as linhas e os ficheiros ficariam públicos.
+  const photoPaths = (await db.select({ path: spacePhotosTable.storagePath }).from(spacePhotosTable)
+    .innerJoin(spaces, eq(spaces.id, spacePhotosTable.spaceId)).where(eq(spaces.ownerId, userId))).map((r) => r.path);
   await authAdmin.deleteUser(userId);
+  if (spacePhotos && photoPaths.length) {
+    try {
+      await spacePhotos.remove(photoPaths);
+    } catch (e) {
+      console.error('Não foi possível apagar as fotos dos espaços da conta apagada:', (e as Error).message);
+    }
+  }
   if (profile?.avatarUrl) {
     try {
       await avatars.remove(profile.avatarUrl);

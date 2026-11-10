@@ -70,8 +70,9 @@ const addMin = (t: string, mins: number) => {
 const minOf = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 const hhmm = (m: number) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
 
-// A hora de chegada já passou? (a meia hora em curso ainda conta: ex.: às 15:10, "15:00" serve)
-export const isPastStart = (w: When, now = new Date()) => w.dayOffset === 0 && minOf(w.start) + 30 <= lisbon(now).minutes;
+// A hora de chegada já passou? A meia hora em curso ainda conta até 25 min depois (a API aceita até 30 min:
+// a margem cobre pequenas diferenças entre o relógio do telemóvel e o do servidor).
+export const isPastStart = (w: When, now = new Date()) => w.dayOffset === 0 && minOf(w.start) + 25 <= lisbon(now).minutes;
 
 // Com a app aberta muito tempo, a hora escolhida para hoje pode ficar para trás: avança para a próxima meia hora.
 export function freshWhen(w: When, now = new Date()): When {
@@ -85,6 +86,7 @@ export function tonightWhen(now = new Date()): When {
   const m = lisbon(now).minutes;
   if (m >= 480 && m < 1200) return TONIGHT;
   let s = Math.ceil(m / 30) * 30;
+  if (s >= 480 && s < 1200) return TONIGHT; // 07:31–07:59 arredonda para as 08:00: já é a noite seguinte
   const dayOffset = s >= 1440 ? 1 : 0;
   s %= 1440;
   const end = s < 480 ? 480 : 1920;

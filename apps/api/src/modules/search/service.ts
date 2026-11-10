@@ -10,7 +10,7 @@ import type { SearchQuery } from './schemas.js';
 
 export const MAX_RESULTS = 100;
 // Espaços lidos de cada vez (por preço); continua a ler até ter MAX_RESULTS livres ou acabarem os espaços da zona.
-export const searchConfig = { pageSize: 500 };
+export const searchConfig = { pageSize: 500, maxPages: 6 };
 const MAX_KWH = 20;
 
 // Segredo do servidor para o deslocamento (sem ele, quem tem o código não consegue reverter o ponto).
@@ -119,7 +119,7 @@ export async function searchSpaces(db: Db, store: SpacePhotoStore, userId: strin
   if (q.plug) conds.push(eq(spaces.plugType, q.plug));
   if (q.covered) conds.push(inArray(spaces.spaceType, ['closed_garage', 'covered']));
   const hits: Row[] = [];
-  for (let offset = 0; hits.length < MAX_RESULTS; offset += searchConfig.pageSize) {
+  for (let page = 0, offset = 0; hits.length < MAX_RESULTS && page < searchConfig.maxPages; page++, offset += searchConfig.pageSize) {
     const rows = (await db.select(cols).from(spaces).where(and(...conds))
       .orderBy(asc(spaces.pricePerHour), asc(spaces.createdAt), asc(spaces.id)).limit(searchConfig.pageSize).offset(offset)) as Row[];
     if (!rows.length) break;

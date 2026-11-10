@@ -66,8 +66,9 @@ describe('horas que já passaram', () => {
     expect(freshWhen(t, now)).toBe(t);
   });
 
-  it('a meia hora em curso ainda conta como válida', () => {
+  it('a meia hora em curso ainda conta como válida (até 25 min, antes do limite da API)', () => {
     expect(isPastStart({ dayOffset: 0, start: '15:00', hours: 1 }, at2('2026-11-10T15:10:00'))).toBe(false);
+    expect(isPastStart({ dayOffset: 0, start: '15:00', hours: 1 }, at2('2026-11-10T15:25:00'))).toBe(true);
     expect(isPastStart({ dayOffset: 0, start: '14:30', hours: 1 }, at2('2026-11-10T15:10:00'))).toBe(true);
   });
 
@@ -75,6 +76,7 @@ describe('horas que já passaram', () => {
     expect(tonightWhen(at2('2026-11-10T18:00:00'))).toEqual({ dayOffset: 0, start: '20:00', hours: 12 });
     expect(tonightWhen(at2('2026-11-10T22:10:00'))).toEqual({ dayOffset: 0, start: '22:30', hours: 9 });
     expect(tonightWhen(at2('2026-11-10T02:10:00'))).toEqual({ dayOffset: 0, start: '02:30', hours: 5 });
+    expect(tonightWhen(at2('2026-11-10T07:40:00'))).toEqual({ dayOffset: 0, start: '20:00', hours: 12 });
   });
 
   it('a pesquisa "Esta noite" usa a janela ajustada', () => {

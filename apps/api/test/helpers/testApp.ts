@@ -24,9 +24,9 @@ export class FakeAvatarStore implements AvatarStore {
   uploaded: string[] = [];
   removed: string[] = [];
   private n = 0;
-  async upload(userId: string, _data: Buffer, contentType: string) {
+  async upload(_userId: string, _data: Buffer, contentType: string) {
     const ext = contentType.split('/')[1];
-    const url = `https://storage.test/avatars/${userId}/${++this.n}.${ext}`;
+    const url = `https://storage.test/avatars/foto-${++this.n}.${ext}`;
     this.uploaded.push(url);
     return url;
   }

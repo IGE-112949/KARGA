@@ -53,6 +53,7 @@ describe('Detalhe do lugar', () => {
     expect(screen.queryAllByText('3,10 €')).toHaveLength(0);
     reject(new ApiError(0, 'NETWORK_ERROR', 'Sem ligação à internet ou servidor indisponível.'));
     expect(await screen.findByText('Não foi possível atualizar: Sem ligação à internet ou servidor indisponível.')).toBeTruthy();
+    expect(screen.queryByText('Disponível')).toBeNull();
   });
 
   it('indisponível na janela', async () => {

@@ -79,3 +79,12 @@ describe('pesquisa: casos-limite', () => {
     }
   });
 });
+
+describe('revisão final: pesquisa', () => {
+  it('data ou hora mal formadas dão 400, não 500', async () => {
+    for (const q of [{ date: 'abc', start: '10:00' }, { date: addDays(todayLisbon(), 1), start: 'xx' }]) {
+      const r = await request(t.app).get('/spaces/search').set('Authorization', `Bearer ${driver}`).query({ bbox: BBOX, hours: 1, ...q });
+      expect(r.status).toBe(400);
+    }
+  });
+});

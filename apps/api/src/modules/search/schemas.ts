@@ -17,8 +17,11 @@ const GRACE_MS = 30 * 60_000; // a meia hora em curso ainda se pode escolher
 
 // Horas de hoje que já passaram não servem.
 function notPast(v: { date: string; start: string }, ctx: z.RefinementCtx) {
+  // Com a data ou a hora mal formadas o erro já foi dado pelo campo; não há nada a comparar.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v.date) || !/^\d{2}:\d{2}$/.test(v.start)) return;
   const [h, m] = v.start.split(':').map(Number);
-  if (lisbonToUtc(v.date, h * 60 + m).getTime() < Date.now() - GRACE_MS) {
+  const t = lisbonToUtc(v.date, h * 60 + m).getTime();
+  if (Number.isFinite(t) && t < Date.now() - GRACE_MS) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['start'], message: 'Essa hora já passou. Escolhe uma hora a partir de agora.' });
   }
 }

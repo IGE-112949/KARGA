@@ -34,6 +34,12 @@ describe('createApi', () => {
     await expect(api.get('/me')).rejects.toMatchObject({ status: 404, code: 'PROFILE_NOT_FOUND', message: 'x' });
   });
 
+  it('erro de validação usa como mensagem a do primeiro campo (ex.: hora que já passou)', async () => {
+    stubFetch(async () => json(400, { error: { code: 'VALIDATION_ERROR', message: 'Dados inválidos', details: [{ field: 'start', message: 'Essa hora já passou.' }] } }));
+    const { api } = make();
+    await expect(api.get('/x')).rejects.toMatchObject({ code: 'VALIDATION_ERROR', message: 'Essa hora já passou.' });
+  });
+
   it('mantém os detalhes de validação', async () => {
     const details = [{ field: 'plate', message: 'Matrícula inválida' }];
     stubFetch(async () => json(400, { error: { code: 'VALIDATION_ERROR', message: 'Dados inválidos', details } }));

@@ -38,7 +38,7 @@ export function createApp(deps: AppDeps): express.Express {
   // Todas as rotas abaixo exigem sessão.
   const api = express.Router();
   api.use(requireAuth(deps.auth));
-  api.use(meRoutes(deps.db, deps.authAdmin, deps.avatars));
+  api.use(meRoutes(deps.db, deps.authAdmin, deps.avatars, deps.spacePhotos));
   api.use(avatarRoutes(deps.db, deps.avatars));
   api.use(vehicleRoutes(deps.db));
   api.use(spaceRoutes(deps.db, deps.spacePhotos));

@@ -139,7 +139,7 @@ export default function SpaceDetail() {
           <WhenPicker when={w} onChange={(nw) => { setWhen(nw); if (filters.tonight) setFilters({ ...filters, tonight: false }); }} />
           <View style={styles.availRow}>
             <Text style={styles.small}>{whenLabel(w)}</Text>
-            {loading
+            {error ? null : loading
               ? <Text style={[styles.pill, styles.pillWait]}>A recalcular…</Text>
               : <Text style={[styles.pill, s.available ? styles.pillOk : styles.pillNo]}>{s.available ? 'Disponível' : 'Indisponível nesta janela'}</Text>}
           </View>

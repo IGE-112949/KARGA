@@ -46,7 +46,9 @@ export function createApi(getToken: () => Promise<string | null>, baseUrl: strin
     if (!res.ok) {
       if (res.status === 401) onUnauthorized();
       const e = (data as { error?: { code?: string; message?: string; details?: ErrorDetail[] } } | null)?.error;
-      if (e?.code) throw new ApiError(res.status, e.code, e.message ?? 'Ocorreu um erro.', e.details);
+      // Em erros de validação a mensagem genérica ("Dados inválidos") não ajuda: usa a do primeiro campo.
+      const msg = e?.code === 'VALIDATION_ERROR' && e.details?.[0]?.message ? e.details[0].message : e?.message;
+      if (e?.code) throw new ApiError(res.status, e.code, msg ?? 'Ocorreu um erro.', e.details);
       throw new ApiError(res.status, 'HTTP_ERROR', 'Ocorreu um erro. Tenta novamente.');
     }
     return data as T;
