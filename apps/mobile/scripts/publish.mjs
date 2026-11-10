@@ -29,7 +29,11 @@ if (!/^https:\/\//.test(vars.EXPO_PUBLIC_API_URL) || /localhost|10\.0\.2\.2/.tes
 const message = process.argv[2] ?? 'Atualização para testes';
 console.log(`A publicar para o canal "preview" com a API ${vars.EXPO_PUBLIC_API_URL} …`);
 // As variáveis do processo têm prioridade sobre o .env (que aponta para localhost).
-const r = spawnSync('npx', ['eas-cli@latest', 'update', '--channel', 'preview', '--message', message, '--non-interactive'], {
-  cwd: ROOT, stdio: 'inherit', shell: process.platform === 'win32', env: { ...process.env, ...vars, NODE_ENV: 'production' },
+// No Windows o npx corre pela shell, que parte os argumentos com espaços: vão entre aspas.
+const win = process.platform === 'win32';
+const args = ['eas-cli@latest', 'update', '--channel', 'preview', '--message', message, '--non-interactive']
+  .map((a) => (win && /[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a));
+const r = spawnSync('npx', args, {
+  cwd: ROOT, stdio: 'inherit', shell: win, env: { ...process.env, ...vars, NODE_ENV: 'production' },
 });
 process.exit(r.status ?? 1);
