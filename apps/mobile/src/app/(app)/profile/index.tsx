@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { noticeFor } from '@/lib/notices';
 import { useAuth } from '@/auth/AuthProvider';
 import { useMode } from '@/profile/ModeContext';
 import { ApiError } from '@/lib/api';
+import { pickerMessage } from '@/lib/pickerError';
 import { avatarFormData, pickAvatar } from '@/lib/avatar';
 import { Screen } from '@/ui/Screen';
 import { Avatar } from '@/ui/Avatar';
@@ -19,9 +21,11 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { api, profile, session, refreshProfile, signOut } = useAuth();
   const { mode, setMode } = useMode();
+  const lastSwitch = useRef(0);
   const [photoSheet, setPhotoSheet] = useState(false);
   const [activateSheet, setActivateSheet] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const aviso = noticeFor(useLocalSearchParams<{ aviso?: string }>().aviso);
+  const [notice, setNotice] = useState<string | null>(aviso);
   if (!profile) return null;
 
   const isHostMode = mode === 'host';
@@ -31,6 +35,9 @@ export default function ProfileScreen() {
 
   // Ativar um modo novo pede confirmação (evita toques acidentais); mudar entre modos já ativos é imediato.
   const switchMode = () => {
+    // Um segundo toque logo a seguir (duplo toque) não pode voltar a trocar de modo.
+    if (Date.now() - lastSwitch.current < 800) return;
+    lastSwitch.current = Date.now();
     setNotice(null);
     if (hasOther) setMode(other);
     else setActivateSheet(true);
@@ -50,7 +57,13 @@ export default function ProfileScreen() {
 
   const changePhoto = async () => {
     setPhotoSheet(false);
-    const p = await pickAvatar();
+    let p;
+    try {
+      p = await pickAvatar();
+    } catch (e) {
+      setNotice(pickerMessage(e));
+      return;
+    }
     if (!p) return;
     try {
       await api.upload('/me/avatar', await avatarFormData(p.uri));

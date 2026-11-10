@@ -1,7 +1,8 @@
 export type AppMode = 'driver' | 'host';
 type Roles = { isDriver: boolean; isHost: boolean };
 
-export const MODE_KEY = 'karga.mode';
+// Um modo guardado por conta: duas contas no mesmo telemóvel não partilham o modo.
+export const modeKey = (userId: string) => `karga.mode.${userId}`;
 
 export function initialMode(p: Roles): AppMode {
   return p.isDriver ? 'driver' : 'host';

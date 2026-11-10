@@ -15,7 +15,8 @@ import { render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-jest.mock('@/auth/AuthProvider', () => ({ useAuth: () => ({ profile: { isDriver: true, isHost: true } }) }));
+let mockUserId = 'u1';
+jest.mock('@/auth/AuthProvider', () => ({ useAuth: () => ({ profile: { id: mockUserId, isDriver: true, isHost: true } }) }));
 import { ModeProvider, useMode } from '@/profile/ModeContext';
 
 const seen: string[] = [];
@@ -27,9 +28,18 @@ function Show() {
 
 describe('ModeProvider', () => {
   it('usa o modo guardado logo na primeira renderização dos filhos', async () => {
-    await AsyncStorage.setItem('karga.mode', 'host');
+    await AsyncStorage.setItem('karga.mode.u1', 'host');
     await render(<ModeProvider><Show /></ModeProvider>);
     expect((await screen.findByTestId('mode')).props.children).toBe('host');
     expect(seen).not.toContain('driver');
+  });
+
+  it('o modo guardado é de cada conta: outra conta no mesmo telemóvel começa no seu modo inicial', async () => {
+    await AsyncStorage.setItem('karga.mode.u1', 'host');
+    await AsyncStorage.setItem('karga.mode', 'host'); // chave antiga, partilhada entre contas
+    mockUserId = 'u2';
+    await render(<ModeProvider><Show /></ModeProvider>);
+    expect((await screen.findByTestId('mode')).props.children).toBe('driver');
+    mockUserId = 'u1';
   });
 });

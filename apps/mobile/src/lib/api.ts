@@ -20,8 +20,9 @@ export type Api = {
 export function createApi(getToken: () => Promise<string | null>, baseUrl: string, onUnauthorized: () => void): Api {
   async function request<T>(method: string, path: string, body?: unknown, form?: FormData): Promise<T> {
     const token = await getToken();
-    const headers: Record<string, string> = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
+    // Sem token (ex.: a Auth não respondeu ao renovar a sessão) a API devolvia 401 e a sessão terminava; assim não.
+    if (!token) throw new ApiError(0, 'NO_SESSION', 'Não foi possível validar a sessão. Tenta novamente.');
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     let res: Response;
     try {

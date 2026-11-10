@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { resetTo } from '@/lib/navigation';
 import { useAuth } from '@/auth/AuthProvider';
 import { ApiError } from '@/lib/api';
+import { pickerMessage } from '@/lib/pickerError';
 import { avatarFormData, pickAvatar, type PickedImage } from '@/lib/avatar';
 import { validateName } from '@/lib/validation';
 import { Screen } from '@/ui/Screen';
@@ -27,8 +29,12 @@ export default function RegisterRole() {
   const [nameError, setNameError] = useState<string | undefined>();
 
   const choosePhoto = async () => {
-    const p = await pickAvatar();
-    if (p) setPhoto(p);
+    try {
+      const p = await pickAvatar();
+      if (p) setPhoto(p);
+    } catch (e) {
+      setError(pickerMessage(e));
+    }
   };
 
   const submit = async () => {
@@ -47,15 +53,18 @@ export default function RegisterRole() {
         return;
       }
     }
+    let photoFailed = false;
     if (photo) {
       try {
         await api.upload('/me/avatar', await avatarFormData(photo.uri));
       } catch {
-        Alert.alert('Foto não guardada', 'A conta foi criada. Podes adicionar a foto mais tarde no Perfil.');
+        photoFailed = true; // o aviso aparece no ecrã seguinte (o Alert não funciona no browser)
       }
     }
     await refreshProfile();
-    router.replace(isDriver ? '/register/vehicle' : '/profile');
+    const params = photoFailed ? { aviso: 'foto' } : undefined;
+    if (isDriver) router.replace(params ? { pathname: '/register/vehicle', params } : '/register/vehicle');
+    else resetTo(params ? { pathname: '/profile', params } : '/profile');
   };
 
   return (

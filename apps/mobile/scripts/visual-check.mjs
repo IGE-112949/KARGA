@@ -125,7 +125,7 @@ for (const s of SCREENS.filter((x) => !only || only.includes(x.name))) {
     await page.addInitScript((v) => localStorage.setItem('sb-vfpgzvhfxezszjrajuyv-auth-token', v), JSON.stringify(session));
   }
   if (s.host) {
-    await page.addInitScript((m) => localStorage.setItem('karga.mode', m), s.driver ? 'driver' : 'host');
+    await page.addInitScript((m) => localStorage.setItem('karga.mode.u1', m), s.driver ? 'driver' : 'host');
     await page.route((u) => u.port === '3000', (route) => {
       const body = HOST_API[new URL(route.request().url()).pathname];
       return route.fulfill(body ? { status: 200, contentType: 'application/json', body: JSON.stringify(body) } : { status: 404, contentType: 'application/json', body: '{"error":{"code":"NOT_FOUND","message":"x"}}' });

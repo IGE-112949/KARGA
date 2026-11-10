@@ -10,12 +10,14 @@ const mockPush = jest.fn();
 let mockProfile: Profile;
 
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
   useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn(), canGoBack: () => true }),
 }));
 jest.mock('@/auth/AuthProvider', () => ({
   useAuth: () => ({ api: mockApi, profile: mockProfile, refreshProfile: mockRefresh, signOut: mockSignOut, session: { user: { email: 'ana@mail.pt' } } }),
 }));
-jest.mock('@/lib/avatar', () => ({ pickAvatar: jest.fn(), avatarFormData: jest.fn() }));
+const mockPickAvatar = jest.fn();
+jest.mock('@/lib/avatar', () => ({ pickAvatar: () => mockPickAvatar(), avatarFormData: jest.fn() }));
 
 import { ModeProvider } from '@/profile/ModeContext';
 import ProfileScreen from '@/app/(app)/profile/index';
@@ -77,6 +79,14 @@ describe('Perfil', () => {
     expect(mockApi.patch).not.toHaveBeenCalled();
   });
 
+  it('dois toques seguidos no cartão de modo não desfazem a mudança', async () => {
+    mockProfile = { ...base, isHost: true };
+    await show();
+    await fireEvent.press(screen.getByRole('button', { name: /Mudar para Modo Proprietário/ }));
+    await fireEvent.press(screen.getByRole('button', { name: /Mudar para Modo/ }));
+    expect(await screen.findByText('Modo Proprietário')).toBeTruthy();
+  });
+
   it('"Os meus veículos" mostra o predefinido e abre o ecrã dos veículos', async () => {
     await show();
     expect(screen.getByText('Tesla Model 3 · 12-AB-34')).toBeTruthy();
@@ -111,6 +121,14 @@ describe('Perfil', () => {
     await show();
     expect(screen.queryByLabelText('Telemóvel')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Apagar conta' })).toBeNull();
+  });
+
+  it('se a galeria falhar a abrir mostra um aviso', async () => {
+    mockPickAvatar.mockRejectedValue(new Error('sem permissão'));
+    await show();
+    await fireEvent.press(screen.getByLabelText(/foto/i));
+    await fireEvent.press(screen.getByRole('button', { name: 'Adicionar foto' }));
+    expect(await screen.findByText('Não foi possível abrir a galeria. Tenta novamente.')).toBeTruthy();
   });
 
   it('"Terminar sessão" chama signOut', async () => {

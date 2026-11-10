@@ -27,6 +27,16 @@ describe('Login', () => {
     expect(await screen.findByText('Email ou password incorretos.')).toBeTruthy();
   });
 
+  it('depois de entrar com sucesso o botão fica a carregar até mudar de ecrã', async () => {
+    mockSignIn.mockResolvedValue({ data: {}, error: null });
+    await render(<LoginScreen />);
+    await fireEvent.changeText(screen.getByLabelText('Email'), 'ana@mail.pt');
+    await fireEvent.changeText(screen.getByLabelText('Password'), 'segredo123');
+    await fireEvent.press(screen.getByRole('button', { name: 'Entrar' }));
+    expect(mockSignIn).toHaveBeenCalled();
+    expect(screen.getByTestId('button-loading')).toBeTruthy();
+  });
+
   it('Google está desativado e mostra "Em breve"', async () => {
     await render(<LoginScreen />);
     const google = screen.getByRole('button', { name: /Continuar com Google/ });
