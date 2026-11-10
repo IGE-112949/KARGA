@@ -79,13 +79,17 @@ export function validateFeatures(d: SpaceDraft, withPhotos: boolean): Errors {
   return e;
 }
 
+const decimals = (s: string) => s.trim().replace(',', '.').split('.')[1]?.length ?? 0;
+
 export function validatePriceSchedule(d: SpaceDraft): Errors {
   const e: Errors = {};
   const p = parseEuro(d.price);
   if (Number.isNaN(p) || p < 0.1 || p > 20) e.price = 'Indica um preço entre 0,10 € e 20 € por hora';
+  else if (decimals(d.price) > 2) e.price = 'O preço só pode ter 2 casas decimais (ex.: 0,35)';
   if (d.energy.trim()) {
     const en = parseEuro(d.energy);
     if (Number.isNaN(en) || en < 0.05 || en > 1) e.energy = 'Entre 0,05 € e 1 € por kWh (ou deixa vazio)';
+    else if (decimals(d.energy) > 3) e.energy = 'A energia só pode ter 3 casas decimais (ex.: 0,155)';
   }
   if (!d.days.some((x) => x.on)) e.days = 'Escolhe pelo menos um dia';
   const same = d.days.findIndex((x) => x.on && x.startTime === x.endTime);

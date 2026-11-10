@@ -78,3 +78,13 @@ describe('potência fora das opções da app', () => {
     expect(powerOf(draftFromSpace(sp('type2', 9)))).toBe(9);
   });
 });
+
+import { hideTabBarOn } from '@/ui/tabBar';
+
+describe('barra de separadores', () => {
+  it('escondida no assistente de novo espaço (ecrã inteiro, como no mockup)', () => {
+    expect(hideTabBarOn('/spaces/new')).toBe(true);
+    expect(hideTabBarOn('/spaces')).toBe(false);
+    expect(hideTabBarOn('/spaces/s1')).toBe(false);
+  });
+});

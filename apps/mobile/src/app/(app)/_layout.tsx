@@ -1,4 +1,5 @@
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
+import { hideTabBarOn } from '@/ui/tabBar';
 import { Icon, type IconName } from '@/ui/Icon';
 import { ModeProvider, useMode } from '@/profile/ModeContext';
 import { SearchProvider } from '@/search/SearchContext';
@@ -10,6 +11,7 @@ const MUTED = theme.colors.textMuted;
 function AppTabs() {
   const { mode } = useMode();
   const driver = mode === 'driver';
+  const hidden = hideTabBarOn(usePathname());
   const tab = (title: string, icon: IconName, visible = true) => ({
     title,
     href: visible ? undefined : null,
@@ -22,7 +24,9 @@ function AppTabs() {
         tabBarActiveTintColor: ACTIVE,
         tabBarInactiveTintColor: MUTED,
         tabBarLabelStyle: { fontSize: 12, fontFamily: theme.font.semibold },
-        tabBarStyle: { height: 76, paddingTop: 8, paddingBottom: 12, borderTopColor: '#EEF2F0', backgroundColor: theme.colors.white },
+        tabBarStyle: hidden
+          ? { display: 'none' }
+          : { height: 76, paddingTop: 8, paddingBottom: 12, borderTopColor: '#EEF2F0', backgroundColor: theme.colors.white },
         sceneStyle: { backgroundColor: theme.colors.screenBg },
       }}
     >
