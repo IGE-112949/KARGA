@@ -1,0 +1,32 @@
+# Blueprint do Render: só a API (apps/api). O site está na Vercel e a app vai pelo Expo (eas update).
+services:
+  - type: web
+    name: karga-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    # Instala só o workspace da API (com as devDependencies: o build usa TypeScript).
+    buildCommand: npm ci --include=dev -w @karga/api --no-audit --no-fund && npm run build -w @karga/api
+    startCommand: npm run start -w @karga/api
+    healthCheckPath: /health
+    autoDeploy: true
+    # Só volta a publicar quando muda a API (commits no site ou na app não reiniciam o servidor).
+    buildFilter:
+      paths:
+        - apps/api/**
+        - package-lock.json
+        - render.yaml
+      ignoredPaths:
+        - apps/api/test/**
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        value: https://vfpgzvhfxezszjrajuyv.supabase.co
+      # Segredos: preenchidos à mão no painel do Render (nunca no repositório).
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
