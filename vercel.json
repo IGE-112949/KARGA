@@ -1,4 +1,9 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo 'site estático: nada a instalar'",
+  "buildCommand": "echo 'site estático: sem build'",
+  "outputDirectory": "apps/site",
   "cleanUrls": true,
   "headers": [
     { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] },
