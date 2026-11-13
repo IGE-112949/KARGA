@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Karga — Carregamento partilhado entre vizinhos</title>
-<meta name="description" content="A Karga liga condutores de veículos elétricos a vizinhos com tomadas disponíveis. Rentabilize a sua garagem ou carregue perto de casa.">
+<meta name="description" content="Carregue o seu carro elétrico perto de casa, com lugar garantido e o preço total à vista. Quem tem garagem com tomada rentabiliza o lugar sem obras. Piloto em Odivelas e Loures.">
 <meta property="og:title" content="Karga — Carregamento partilhado entre vizinhos">
-<meta property="og:description" content="Rentabilize a sua garagem. Carregue perto de casa.">
+<meta property="og:description" content="Carregue perto de casa. Rentabilize a sua garagem.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_PT">
 <meta name="theme-color" content="#132A3E">
@@ -37,6 +37,7 @@ a{color:#047857}a:hover{color:#065F46}
 .k-fade,.k-pop-a,.k-pop-b{animation:none}
 .k-reveal{opacity:1;transform:none;transition:none}
 .k-btn:hover,.k-card:hover{transform:none}
+html{scroll-behavior:auto}
 }
 .k-solid:hover{background:#0EA371 !important}
 .k-outline:hover{border-color:#132A3E !important;background:#F1F5F9 !important}
@@ -52,60 +53,142 @@ input[type=range]::-moz-range-progress{height:8px;border-radius:999px;background
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin-top:-8px;border-radius:50%;background:#FFFFFF;border:3px solid var(--k-c);box-shadow:0 2px 6px rgba(19,42,62,.25);transition:border-color .3s}
 input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#FFFFFF;border:3px solid var(--k-c);box-shadow:0 2px 6px rgba(19,42,62,.25)}
 .k-opt:hover{border-color:#10B981 !important}
-@media (max-width: 880px){.k-navlinks{display:none !important}}
-@media (max-width: 520px){.k-navcta-label{display:none}}
+@media (max-width: 960px){.k-navlinks{display:none !important}}
+@media (max-width: 520px){.k-navcta-label-long{display:none}}
+@media (min-width: 521px){.k-navcta-label-short{display:none}}
+
+[hidden]{display:none !important}
+/* Blocos reutilizados */
+.wrap{max-width:1200px;margin:0 auto;padding:clamp(64px,8vw,112px) clamp(20px,4vw,40px);display:flex;flex-direction:column;gap:48px}
+.sec-alt{background:#F8FAFC;border-top:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0}
+.head{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.eyebrow{font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#047857}
+.h2{margin:0;font-size:clamp(32px,3.6vw,46px);line-height:1.1;letter-spacing:-.03em;font-weight:800;color:#132A3E}
+.lead{margin:0;font-size:clamp(17px,1.4vw,19px);line-height:1.6;color:#475569}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:20px}
+.tile{padding:28px;border-radius:20px;background:#F8FAFC;border:1px solid #E2E8F0;display:flex;flex-direction:column;gap:10px}
+.sec-alt .tile{background:#FFFFFF}
+.tile h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.02em;color:#132A3E}
+.tile p{margin:0;font-size:16px;line-height:1.6;color:#475569}
+.ico{width:48px;height:48px;border-radius:14px;background:#132A3E;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 26px;border-radius:12px;font-weight:700;font-size:17px;text-decoration:none;font-family:inherit;cursor:pointer;box-sizing:border-box}
+.btn-solid{background:#10B981;color:#0B1F2E;border:0;box-shadow:0 8px 20px -8px rgba(16,185,129,.6)}
+.btn-outline{background:#FFFFFF;border:1.5px solid #CBD5E1;color:#132A3E}
+.btns{display:flex;flex-wrap:wrap;gap:14px}
+.fonte{font-size:12px;line-height:1.5;color:#64748B;margin:0}
+.fonte a{color:#475569}
+.small{font-size:14px;line-height:1.6;color:#64748B;margin:0}
+.note{display:flex;gap:14px;align-items:flex-start;padding:18px 22px;border-radius:16px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;font-size:15px;line-height:1.6}
+.note p{margin:0}
+.check{display:flex;gap:12px;font-size:16px;line-height:1.5;color:#334155}
+.check svg{flex-shrink:0;margin-top:1px}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+
+/* Números */
+.stat{padding:28px;border-radius:20px;background:#FFFFFF;border:1px solid #E2E8F0;display:flex;flex-direction:column;gap:10px}
+.stat .num{font-size:clamp(36px,4vw,48px);font-weight:800;letter-spacing:-.04em;color:#047857;line-height:1}
+.stat p{margin:0;font-size:16px;line-height:1.55;color:#334155}
+
+/* Separadores */
+.tabs{display:inline-flex;padding:5px;border-radius:14px;background:#F1F5F9;gap:4px;align-self:flex-start;flex-wrap:wrap}
+.tab{font-family:inherit;font-size:16px;font-weight:700;border:0;background:transparent;color:#475569;padding:10px 20px;border-radius:10px;cursor:pointer;min-height:44px}
+.tab[aria-selected=true]{background:#FFFFFF;color:#132A3E;box-shadow:0 1px 3px rgba(15,23,42,.12)}
+.step-n{font-size:40px;font-weight:800;color:#E2E8F0;letter-spacing:-.04em;line-height:1}
+
+/* Tabela de preços */
+.table-wrap{overflow-x:auto;border:1px solid #E2E8F0;border-radius:20px;background:#FFFFFF}
+.ptable{width:100%;border-collapse:collapse;font-size:15px;min-width:680px}
+.ptable th,.ptable td{text-align:left;padding:16px 18px;border-bottom:1px solid #E2E8F0;vertical-align:top;color:#334155;line-height:1.5}
+.ptable th{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#64748B;background:#F8FAFC}
+.ptable tr:last-child td{border-bottom:0}
+.ptable .karga td{background:#ECFDF5}
+.ptable strong{color:#132A3E}
+
+/* Acordeões */
+details.acc{border:1px solid #E2E8F0;border-radius:16px;background:#FFFFFF;padding:0 22px}
+details.acc+details.acc{margin-top:12px}
+details.acc summary{cursor:pointer;list-style:none;padding:20px 0;font-size:18px;font-weight:700;color:#132A3E;display:flex;justify-content:space-between;align-items:center;gap:16px}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:'+';font-size:26px;font-weight:600;color:#047857;line-height:1}
+details.acc[open] summary::after{content:'–'}
+details.acc .acc-body{padding:0 0 22px;font-size:16px;line-height:1.65;color:#475569}
+details.acc .acc-body p{margin:0}
+.roles{width:100%;border-collapse:collapse;font-size:15px}
+.roles th,.roles td{text-align:left;padding:10px 12px;border-bottom:1px solid #EEF2F6;vertical-align:top;line-height:1.5}
+.roles th{color:#132A3E;font-size:14px;width:50%}
+.roles td{color:#475569}
+
+/* Formulário */
+.form{background:#FFFFFF;border:1px solid #E2E8F0;border-radius:24px;padding:clamp(24px,3vw,40px);display:flex;flex-direction:column;gap:22px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.form fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.form legend,.form label.lbl{padding:0;margin-bottom:8px;font-size:15px;font-weight:700;color:#132A3E}
+.form input[type=text],.form input[type=email]{font-family:inherit;font-size:16px;min-height:50px;padding:0 16px;border-radius:12px;border:1.5px solid #CBD5E1;color:#132A3E;background:#FFFFFF;box-sizing:border-box;width:100%}
+.form input:focus-visible{outline:2px solid #10B981;outline-offset:1px}
+.radios{display:flex;flex-wrap:wrap;gap:10px}
+.radios label{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;border:1.5px solid #E2E8F0;font-size:15px;font-weight:600;color:#334155;cursor:pointer}
+.radios label:has(input:checked){border-color:#10B981;background:#ECFDF5;color:#065F46}
+.radios input{accent-color:#10B981;margin:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:18px}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.55;color:#475569}
+.consent input{margin-top:3px;accent-color:#10B981;width:18px;height:18px;flex-shrink:0}
+.form-error{color:#B91C1C;font-size:14px;font-weight:600;margin:0}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 </style>
 </head>
 <body>
 <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #132A3E; background: #FFFFFF; min-height: 100vh">
 
-<!-- NAV -->
+<!-- 2.1 FAIXA DE AVISO -->
+<div role="note" style="background: #ECF8F2; color: #065F46; font-size: 14px; font-weight: 600; text-align: center; padding: 10px clamp(16px, 4vw, 40px); line-height: 1.5">
+Projeto académico em fase piloto em Odivelas e Loures. A app ainda não está nas lojas: <a href="#lista-espera" style="color: #065F46">inscreva-se na lista de espera</a> e avisamos quando abrir na sua zona.
+</div>
+
+<!-- 2.2 CABEÇALHO -->
 <header style="position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid #E2E8F0">
 <nav style="max-width: 1200px; margin: 0 auto; padding: 14px clamp(20px, 4vw, 40px); display: flex; align-items: center; justify-content: space-between; gap: 24px">
 <a href="#topo" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #132A3E">
 <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="9" fill="#132A3E"></rect><rect x="9.5" y="8" width="5" height="20" rx="1.2" fill="#FFFFFF"></rect><path d="M27.5 8h-5.6l-7.4 9.2 3.1 2.1z" fill="#FFFFFF"></path><path d="M20.5 14.5l-5.2 7h4l-1.8 6.2 6.8-8.6h-4.1l2.6-4.6z" fill="#10B981"></path></svg>
 <span style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em">Karga</span>
 </a>
-<div class="k-navlinks" style="display: flex; gap: 36px; font-size: 15px; font-weight: 600">
-<a class="k-navlink" href="#como-funciona">Como Funciona</a>
+<div class="k-navlinks" style="display: flex; gap: 30px; font-size: 15px; font-weight: 600">
+<a class="k-navlink" href="#como-funciona">Como funciona</a>
+<a class="k-navlink" href="#condutores">Condutores</a>
+<a class="k-navlink" href="#proprietarios">Proprietários</a>
 <a class="k-navlink" href="#simulador">Simulador</a>
-<a class="k-navlink" href="#equipamento">Equipamento</a>
+<a class="k-navlink" href="#perguntas">Perguntas</a>
 </div>
-<a class="k-btn k-solid" href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 10px; background: #10B981; color: #0B1F2E; font-weight: 700; font-size: 15px; text-decoration: none">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-<span class="k-navcta-label">Descarregar App</span>
+<a class="k-btn k-solid" href="#lista-espera" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 10px; background: #10B981; color: #0B1F2E; font-weight: 700; font-size: 15px; text-decoration: none; white-space: nowrap">
+<span class="k-navcta-label-long">Entrar na lista de espera</span><span class="k-navcta-label-short">Lista de espera</span>
 </a>
 </nav>
 </header>
 
-<!-- HERO -->
+<!-- 2.3 HERO -->
 <section id="topo" style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0">
 <div style="max-width: 1200px; margin: 0 auto; padding: clamp(56px, 8vw, 104px) clamp(20px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: center; gap: 64px">
 <div style="flex: 1 1 460px; display: flex; flex-direction: column; gap: 28px">
 <div class="k-fade" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: #ECFDF5; border: 1px solid #A7F3D0; font-size: 14px; font-weight: 600; color: #065F46">
 <span style="display: inline-flex; width: 22px; height: 22px; border-radius: 999px; background: #10B981; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0B1F2E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path></svg></span>
-Carregamento partilhado entre vizinhos, em Portugal
+Carregamento partilhado entre vizinhos · Portugal
 </div>
-<h1 class="k-fade k-d1" style="margin: 0; font-size: clamp(40px, 5.2vw, 66px); line-height: 1.04; letter-spacing: -0.035em; font-weight: 800; color: #132A3E">Rentabilize a sua garagem. <span style="color: #059669">Carregue perto de casa.</span></h1>
-<p class="k-fade k-d2" style="margin: 0; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: #475569; max-width: 540px">A Karga liga condutores de veículos elétricos a vizinhos com tomadas disponíveis. Sem obras na via pública, sem taxas escondidas.</p>
-<div class="k-fade k-d3" style="display: flex; flex-wrap: wrap; gap: 14px; padding-top: 4px">
-<a class="k-btn k-solid" href="#simulador" style="display: inline-flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 28px; border-radius: 12px; background: #10B981; color: #0B1F2E; font-weight: 700; font-size: 17px; text-decoration: none; box-shadow: 0 8px 20px -8px rgba(16,185,129,0.6)">
-Simular Ganhos
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-</a>
-<a class="k-btn k-outline" href="#equipamento" style="display: inline-flex; align-items: center; min-height: 54px; padding: 0 28px; border-radius: 12px; background: #FFFFFF; border: 1.5px solid #CBD5E1; color: #132A3E; font-weight: 700; font-size: 17px; text-decoration: none">Comprar Hardware</a>
+<h1 class="k-fade k-d1" style="margin: 0; font-size: clamp(40px, 5.2vw, 66px); line-height: 1.04; letter-spacing: -0.035em; font-weight: 800; color: #132A3E">Carregue perto de casa. <span style="color: #059669">Rentabilize a sua garagem.</span></h1>
+<p class="k-fade k-d2" style="margin: 0; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: #475569; max-width: 560px">A Karga liga condutores de carros elétricos a vizinhos com um lugar de garagem e uma tomada. O condutor reserva um lugar garantido, a poucos minutos de casa, e vê o preço total antes de confirmar. O proprietário põe a render um lugar que já tem, sem obras.</p>
+<div class="k-fade k-d3 btns" style="padding-top: 4px">
+<a class="k-btn k-solid btn btn-solid" href="#lista-espera?perfil=condutor">Tenho carro elétrico
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+<a class="k-btn k-outline btn btn-outline" href="#lista-espera?perfil=proprietario">Tenho garagem com tomada</a>
 </div>
-<div class="k-fade k-d4" style="display: flex; flex-wrap: wrap; gap: 24px; padding-top: 8px; font-size: 14px; font-weight: 600; color: #475569">
-<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Sem obras</span>
-<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Sem taxas escondidas</span>
-<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Pagamentos pela app</span>
+<div class="k-fade k-d4" style="display: flex; flex-wrap: wrap; gap: 12px 24px; padding-top: 8px; font-size: 14px; font-weight: 600; color: #475569">
+<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong style="color: #132A3E">Lugar garantido</strong> durante a reserva</span></span>
+<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong style="color: #132A3E">Morada protegida:</strong> só quem reserva a vê</span></span>
+<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg><span><strong style="color: #132A3E">Preço total à vista:</strong> lugar, energia e taxa de 10%</span></span>
 </div>
 </div>
 
 <!-- Phone mockup -->
-<div class="k-fade k-d5" style="flex: 1 1 380px; display: flex; justify-content: center; position: relative; padding: 12px 0">
+<div class="k-fade k-d5" style="flex: 1 1 380px; display: flex; justify-content: center; position: relative; padding: 12px 0 28px">
 <div aria-hidden="true" style="position: absolute; width: 420px; height: 420px; max-width: 100%; border-radius: 999px; background: #D1FAE5; top: 50%; left: 50%; transform: translate(-50%, -50%)"></div>
-<div style="position: relative; width: 300px; height: 610px; border-radius: 46px; background: #132A3E; padding: 12px; box-sizing: border-box; box-shadow: 0 40px 80px -30px rgba(19,42,62,0.55)">
+<div role="img" aria-label="Ecrã da app Karga com o mapa de lugares de garagem perto do condutor e a sua disponibilidade." style="position: relative; width: 300px; height: 610px; border-radius: 46px; background: #132A3E; padding: 12px; box-sizing: border-box; box-shadow: 0 40px 80px -30px rgba(19,42,62,0.55)">
 <div style="width: 100%; height: 100%; border-radius: 36px; background: #FFFFFF; overflow: hidden; display: flex; flex-direction: column">
 <div style="padding: 26px 20px 14px; display: flex; flex-direction: column; gap: 4px">
 <div style="font-size: 12px; font-weight: 600; color: #64748B">Olá, Joana</div>
@@ -127,10 +210,9 @@ Simular Ganhos
 </div>
 <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1px solid #E2E8F0">
 <div style="width: 38px; height: 38px; border-radius: 10px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#132A3E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-5"></path><path d="M9 8V2"></path><path d="M15 8V2"></path><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"></path></svg></div>
-<div style="flex-grow: 1; min-width: 0"><div style="font-size: 13px; font-weight: 700; color: #132A3E">Casa da Marta</div><div style="font-size: 11px; color: #475569; font-weight: 500">800 m · Tomada 3,7 kW</div></div>
+<div style="flex-grow: 1; min-width: 0"><div style="font-size: 13px; font-weight: 700; color: #132A3E">Casa da Marta</div><div style="font-size: 11px; color: #475569; font-weight: 500">800 m · Tomada 2,3 kW</div></div>
 <div style="font-size: 11px; font-weight: 700; color: #065F46; background: #ECFDF5; padding: 5px 9px; border-radius: 999px">Livre</div>
 </div>
-<div style="margin-top: 4px; height: 46px; border-radius: 12px; background: #132A3E; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">Reservar carregamento</div>
 </div>
 </div>
 </div>
@@ -138,213 +220,267 @@ Simular Ganhos
 <div style="width: 10px; height: 10px; border-radius: 999px; background: #10B981; box-shadow: 0 0 0 5px #D1FAE5"></div>
 <div><div style="font-size: 12px; font-weight: 600; color: #64748B">Sessão em curso</div><div style="font-size: 15px; font-weight: 800; color: #132A3E">A carregar · 7,4 kW</div></div>
 </div>
+<p class="fonte" style="position: absolute; bottom: -14px; left: 0; right: 0; text-align: center">Ecrã ilustrativo do protótipo. Nomes e valores são exemplos.</p>
 </div>
 </div>
 </section>
 
-<!-- COMO FUNCIONA -->
+<!-- 2.4 O PROBLEMA, EM NÚMEROS -->
+<section id="numeros" class="sec-alt" style="border-top: 0">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">O problema</div>
+<h2 class="h2">Cada vez mais elétricos. Nem todos têm onde carregar.</h2>
+</div>
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr))">
+<div class="stat k-reveal">
+<div class="num">29%</div>
+<p>dos carros novos vendidos em Portugal entre janeiro e setembro de 2026 eram 100% elétricos.</p>
+<p class="fonte">Fonte: <a href="https://www.forbespt.com/?p=196390" target="_blank" rel="noopener">ACAP, via Forbes Portugal, out. 2026</a></p>
+</div>
+<div class="stat k-reveal" style="transition-delay: .08s">
+<div class="num">8,09 € <span style="font-size: .55em; color: #64748B; letter-spacing: -.02em">vs</span> 3,19 €</div>
+<p>custo de 100 km na rede pública contra o carregamento em casa.</p>
+<p class="fonte">Fonte: <a href="https://www.deco.proteste.pt/auto/carros-eletricos/noticias/carros-eletricos-vendem-mais-apoios-carregamento-continuam-problema" target="_blank" rel="noopener">DECO Proteste, jan. 2026</a></p>
+</div>
+<div class="stat k-reveal" style="transition-delay: .16s">
+<div class="num">44%</div>
+<p>dos condutores de elétricos em seis países europeus não têm ponto de carregamento em casa.</p>
+<p class="fonte">Fonte: <a href="https://www.djsresearch.co.uk/AutomotiveMarketResearchInsightsAndFindings/article/44percent-of-EV-drivers-do-not-have-a-charge-point-at-home-finds-survey-05390" target="_blank" rel="noopener">Shell Recharge Survey, 2023</a> (Reino Unido, Alemanha, França, Itália, Bélgica e Países Baixos; não inclui Portugal)</p>
+</div>
+</div>
+<p class="lead" style="max-width: 820px">Quem vive num prédio sem lugar com tomada depende de haver um posto livre. Há lugares de garagem com tomada parados a maior parte do dia. A Karga junta as duas coisas.</p>
+</div>
+</section>
+
+<!-- 2.6 COMO FUNCIONA -->
 <section id="como-funciona" style="background: #FFFFFF">
-<div style="max-width: 1200px; margin: 0 auto; padding: clamp(64px, 8vw, 112px) clamp(20px, 4vw, 40px); display: flex; flex-direction: column; gap: 56px">
-<div style="display: flex; flex-direction: column; gap: 14px; max-width: 680px">
-<div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #047857">Como Funciona</div>
-<h2 style="margin: 0; font-size: clamp(32px, 3.6vw, 46px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; color: #132A3E">Da tomada da garagem ao primeiro pagamento, em três passos.</h2>
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Como funciona</div>
+<h2 class="h2">Três passos, de cada lado.</h2>
 </div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px">
-<div style="padding: 32px; border-radius: 20px; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 16px">
-<div style="display: flex; align-items: center; justify-content: space-between"><div style="width: 52px; height: 52px; border-radius: 14px; background: #132A3E; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-5"></path><path d="M9 8V2"></path><path d="M15 8V2"></path><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"></path></svg></div><span style="font-size: 44px; font-weight: 800; color: #E2E8F0; letter-spacing: -0.04em">01</span></div>
-<h3 style="margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -0.02em">Ligue o kit Karga</h3>
-<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #475569">Escolha o Kit Básico para ligar à tomada que já tem, ou o Kit Pro com instalação por um eletricista certificado.</p>
+<div class="tabs" role="tablist" aria-label="Escolha o seu perfil">
+<button class="tab" role="tab" id="tab-condutor" aria-controls="painel-condutor" aria-selected="true" type="button">Sou condutor</button>
+<button class="tab" role="tab" id="tab-garagem" aria-controls="painel-garagem" aria-selected="false" tabindex="-1" type="button">Tenho garagem</button>
 </div>
-<div style="padding: 32px; border-radius: 20px; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 16px">
-<div style="display: flex; align-items: center; justify-content: space-between"><div style="width: 52px; height: 52px; border-radius: 14px; background: #132A3E; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><span style="font-size: 44px; font-weight: 800; color: #E2E8F0; letter-spacing: -0.04em">02</span></div>
-<h3 style="margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -0.02em">Defina a sua disponibilidade</h3>
-<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #475569">Na app, indique os dias e horários em que a garagem está livre. Os condutores da zona reservam com antecedência.</p>
+<div id="painel-condutor" role="tabpanel" aria-labelledby="tab-condutor" class="grid">
+<div class="tile"><span class="step-n">01</span><h3>Encontre um lugar perto de si.</h3><p>Veja no mapa os lugares disponíveis, com preço por hora, potência e tipo de ficha.</p></div>
+<div class="tile"><span class="step-n">02</span><h3>Reserve com o preço à vista.</h3><p>Escolha a hora de chegada e a duração. A app mostra o custo estimado antes de confirmar: lugar, energia e taxa de serviço.</p></div>
+<div class="tile"><span class="step-n">03</span><h3>Chegue, ligue e carregue.</h3><p>A morada exata e as instruções de acesso aparecem depois da reserva. O pagamento é feito na app.</p></div>
 </div>
-<div style="padding: 32px; border-radius: 20px; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 16px">
-<div style="display: flex; align-items: center; justify-content: space-between"><div style="width: 52px; height: 52px; border-radius: 14px; background: #132A3E; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"></path><path d="M4 14h9"></path><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"></path></svg></div><span style="font-size: 44px; font-weight: 800; color: #E2E8F0; letter-spacing: -0.04em">03</span></div>
-<h3 style="margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -0.02em">Receba por cada sessão</h3>
-<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #475569">A energia é medida em tempo real e paga pela app. Recebe a sua margem sem ter de tratar de cobranças.</p>
-</div>
+<div id="painel-garagem" role="tabpanel" aria-labelledby="tab-garagem" class="grid" hidden>
+<div class="tile"><span class="step-n">01</span><h3>Publique o seu lugar.</h3><p>Indique a morada, a potência da tomada e o preço por hora. Sem kit, o investimento é zero.</p></div>
+<div class="tile"><span class="step-n">02</span><h3>Defina quando está livre.</h3><p>Escolha os dias e os horários. Só recebe reservas nessas janelas.</p></div>
+<div class="tile"><span class="step-n">03</span><h3>Receba por cada reserva.</h3><p>O pagamento é feito pela app. Com tomada inteligente, a energia é medida e cobrada ao seu preço de custo.</p></div>
 </div>
 </div>
 </section>
 
-<!-- SIMULADOR -->
-<section id="simulador" style="background: #F8FAFC; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0">
-<div style="max-width: 1200px; margin: 0 auto; padding: clamp(64px, 8vw, 112px) clamp(20px, 4vw, 40px); display: flex; flex-direction: column; gap: 48px">
-<div style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
-<div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #047857">Simulador de Ganhos</div>
-<h2 style="margin: 0; font-size: clamp(32px, 3.6vw, 46px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; color: #132A3E">Descubra quanto pode ganhar com a sua garagem</h2>
-<p style="margin: 0; font-size: 18px; line-height: 1.6; color: #475569">Ajuste os valores e veja a estimativa atualizar em tempo real.</p>
+<!-- 2.7 PARA CONDUTORES -->
+<section id="condutores" class="sec-alt">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Para condutores</div>
+<h2 class="h2">Para quem não tem onde carregar em casa</h2>
 </div>
-<div id="k-sim-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 24px; align-items: stretch">
+<div class="grid">
+<div class="tile k-reveal"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div><h3>Lugar garantido.</h3><p>O lugar é seu durante o período reservado. Não há posto ocupado à chegada.</p></div>
+<div class="tile k-reveal" style="transition-delay: .06s"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div><h3>Noite inteira, sem pressa.</h3><p>Reserve várias horas e carregue enquanto dorme, ao preço por hora definido pelo proprietário.</p></div>
+<div class="tile k-reveal" style="transition-delay: .12s"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg></div><h3>Preço total antes de reservar.</h3><p>Lugar, energia a preço de custo e taxa de serviço de 10%, tudo visível antes de confirmar.</p></div>
+<div class="tile k-reveal" style="transition-delay: .18s"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg></div><h3>Perto de casa.</h3><p>Lugares em garagens de vizinhos, na sua zona.</p></div>
+</div>
+<p class="small" style="max-width: 820px"><strong style="color: #334155">O que lhe pedimos:</strong> use o lugar só no período reservado, deixe-o como o encontrou e respeite as regras do prédio. Depois da hora de fim aplica-se uma taxa de ocupação de 0,10 €/min.</p>
+<div class="btns"><a class="k-btn k-solid btn btn-solid" href="#lista-espera?perfil=condutor">Quero carregar perto de casa</a></div>
+</div>
+</section>
 
-<div class="k-reveal" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px; padding: clamp(24px, 3vw, 40px); display: flex; flex-direction: column; gap: 36px; box-shadow: 0 1px 2px rgba(15,23,42,0.04)">
+<!-- 2.8 PARA PROPRIETÁRIOS -->
+<section id="proprietarios" style="background: #FFFFFF">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Para proprietários</div>
+<h2 class="h2">Tem um lugar com tomada parado? Ponha-o a render.</h2>
+</div>
+<div class="grid">
+<div class="tile k-reveal"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></div><h3>Investimento zero.</h3><p>Publique o lugar sem kit e cobre só à hora. O kit é opcional e pode ser adicionado mais tarde.</p></div>
+<div class="tile k-reveal" style="transition-delay: .06s"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h3>Você decide.</h3><p>Define o preço por hora, os dias e os horários. Desativa o lugar quando quiser.</p></div>
+<div class="tile k-reveal" style="transition-delay: .12s"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>A sua morada fica protegida.</h3><p>Antes da reserva, os condutores veem só uma zona aproximada (um círculo de cerca de 150 m). A morada exata e o código de acesso são mostrados apenas a quem reservar.</p></div>
+<div class="tile k-reveal" style="transition-delay: .18s"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3>Sem carros esquecidos.</h3><p>Depois da hora de fim, o condutor paga 0,10 €/min de taxa de ocupação.</p></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 20px; align-items: start">
+<div class="tile" style="background: #F8FAFC">
+<h3>O que lhe pedimos</h3>
+<ul class="list" style="margin-top: 6px">
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Publique só lugares que tem direito a ceder: é o dono, é arrendatário com autorização ou tem permissão do condomínio.</li>
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Mantenha a instalação elétrica em bom estado e adequada à potência anunciada.</li>
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Garanta que horários, preços e fotos correspondem à realidade.</li>
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Dê o código de acesso apenas ao condutor com reserva.</li>
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Se cancelar (por avaria ou emergência), avise o condutor. Ele recebe o reembolso total.</li>
+</ul>
+</div>
+<div class="note" style="flex-direction: column; gap: 8px">
+<p><strong>E o condomínio?</strong> Desde o Decreto-Lei n.º 93/2025, qualquer condómino pode instalar um carregador no seu lugar mediante comunicação escrita à administração com 30 dias de antecedência. Ceder o lugar a outras pessoas pode estar sujeito ao regulamento do prédio: confirme-o antes de publicar.</p>
+<p class="fonte">Fonte: <a href="https://www.plmj.com/xms/files/02_Artigos_e_Entrevistas/2026/jan_2026_vj.pdf" target="_blank" rel="noopener">PLMJ, jan. 2026</a></p>
+</div>
+</div>
+<div class="btns">
+<a class="k-btn k-outline btn btn-outline" href="#simulador">Simular quanto posso ganhar</a>
+<a class="k-btn k-solid btn btn-solid" href="#lista-espera?perfil=proprietario">Pré-registar o meu lugar</a>
+</div>
+</div>
+</section>
+
+<!-- 2.9 SIMULADOR -->
+<section id="simulador" class="sec-alt">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Simulador de ganhos</div>
+<h2 class="h2">Quanto pode ganhar com o seu lugar?</h2>
+<p class="lead">Estimativa do valor do aluguer. A energia é cobrada ao seu preço de custo: não é lucro, apenas o reembolso do que gasta.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 24px; align-items: stretch">
+
+<div class="k-reveal" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px; padding: clamp(24px, 3vw, 40px); display: flex; flex-direction: column; gap: 32px; box-shadow: 0 1px 2px rgba(15,23,42,0.04)">
 <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
-<legend style="padding: 0; margin-bottom: 14px; font-size: 16px; font-weight: 700; color: #132A3E">Potência da tomada</legend>
+<legend style="padding: 0; margin-bottom: 14px; font-size: 16px; font-weight: 700; color: #132A3E">Tipo de tomada</legend>
 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
-<button class="k-opt" type="button" aria-pressed="false" data-power="3.7" style="font-family: inherit; text-align: left; cursor: pointer; min-height: 88px; padding: 16px 18px; border-radius: 16px; border: 2px solid #E2E8F0; background: #FFFFFF; display: flex; align-items: flex-start; gap: 12px; transition: border-color .15s ease, background-color .15s ease">
+<button class="k-opt" type="button" aria-pressed="false" data-power="2.3" style="font-family: inherit; text-align: left; cursor: pointer; min-height: 88px; padding: 16px 18px; border-radius: 16px; border: 2px solid #E2E8F0; background: #FFFFFF; display: flex; align-items: flex-start; gap: 12px; transition: border-color .15s ease, background-color .15s ease">
 <span class="k-ring" style="margin-top: 3px; width: 18px; height: 18px; border-radius: 999px; border: 2px solid #94A3B8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box"><span class="k-dot" style="width: 8px; height: 8px; border-radius: 999px; background: transparent"></span></span>
-<span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; font-weight: 700; color: #132A3E">Tomada Normal</span><span style="font-size: 22px; font-weight: 800; color: #132A3E; letter-spacing: -0.02em">3,7 kW</span></span>
+<span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; font-weight: 700; color: #132A3E">Tomada normal</span><span style="font-size: 20px; font-weight: 800; color: #132A3E; letter-spacing: -0.02em">até 2,3 kW</span></span>
 </button>
 <button class="k-opt" type="button" aria-pressed="false" data-power="7.4" style="font-family: inherit; text-align: left; cursor: pointer; min-height: 88px; padding: 16px 18px; border-radius: 16px; border: 2px solid #E2E8F0; background: #FFFFFF; display: flex; align-items: flex-start; gap: 12px; transition: border-color .15s ease, background-color .15s ease">
 <span class="k-ring" style="margin-top: 3px; width: 18px; height: 18px; border-radius: 999px; border: 2px solid #94A3B8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box"><span class="k-dot" style="width: 8px; height: 8px; border-radius: 999px; background: transparent"></span></span>
-<span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; font-weight: 700; color: #132A3E">Wallbox</span><span style="font-size: 22px; font-weight: 800; color: #132A3E; letter-spacing: -0.02em">7,4 kW</span></span>
+<span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; font-weight: 700; color: #132A3E">Wallbox</span><span style="font-size: 20px; font-weight: 800; color: #132A3E; letter-spacing: -0.02em">até 7,4 kW</span></span>
 </button>
 </div>
 </fieldset>
 
 <div style="display: flex; flex-direction: column; gap: 14px">
 <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
-<label for="k-sessions" style="font-size: 16px; font-weight: 700; color: #132A3E">Sessões de carregamento por semana</label>
-<span style="font-size: 16px; font-weight: 800; color: #065F46; background: #ECFDF5; padding: 4px 12px; border-radius: 999px; white-space: nowrap" id="k-sessions-label">3 sessões</span>
+<label for="k-sessions" style="font-size: 16px; font-weight: 700; color: #132A3E">Reservas por semana</label>
+<span style="font-size: 16px; font-weight: 800; color: #065F46; background: #ECFDF5; padding: 4px 12px; border-radius: 999px; white-space: nowrap" id="k-sessions-label">2 reservas</span>
 </div>
-<input id="k-sessions" type="range" min="1" max="7" step="1" value="3">
-<div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #64748B"><span>1</span><span>7</span></div>
-</div>
-
-<div style="display: flex; flex-direction: column; gap: 14px">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
-<label for="k-hours" style="font-size: 16px; font-weight: 700; color: #132A3E">Duração média por sessão</label>
-<span style="font-size: 16px; font-weight: 800; color: #065F46; background: #ECFDF5; padding: 4px 12px; border-radius: 999px; white-space: nowrap" id="k-hours-label">4 horas</span>
-</div>
-<input id="k-hours" type="range" min="2" max="10" step="1" value="4">
-<div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #64748B"><span>2 h</span><span>10 h</span></div>
+<input id="k-sessions" type="range" min="1" max="10" step="1" value="2">
+<div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #64748B"><span>1</span><span>10</span></div>
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 14px">
 <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
-<label for="k-fee" style="font-size: 16px; font-weight: 700; color: #132A3E">Taxa do Espaço (€/hora)</label>
-<span style="font-size: 16px; font-weight: 800; color: #065F46; background: #ECFDF5; padding: 4px 12px; border-radius: 999px; white-space: nowrap; transition: background-color .3s ease-out, color .3s ease-out" id="k-fee-label">0,50 €/h</span>
+<label for="k-hours" style="font-size: 16px; font-weight: 700; color: #132A3E">Horas por reserva</label>
+<span style="font-size: 16px; font-weight: 800; color: #065F46; background: #ECFDF5; padding: 4px 12px; border-radius: 999px; white-space: nowrap" id="k-hours-label">10 horas</span>
 </div>
-<input id="k-fee" type="range" min="0.2" max="1.5" step="0.1" value="0.5">
+<input id="k-hours" type="range" min="1" max="12" step="1" value="10">
+<div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #64748B"><span>1 h</span><span>12 h</span></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+<label for="k-fee" style="font-size: 16px; font-weight: 700; color: #132A3E">Preço do lugar</label>
+<span style="font-size: 16px; font-weight: 800; color: #065F46; background: #ECFDF5; padding: 4px 12px; border-radius: 999px; white-space: nowrap; transition: background-color .3s ease-out, color .3s ease-out" id="k-fee-label">0,30 €/h</span>
+</div>
+<input id="k-fee" type="range" min="0.2" max="1.5" step="0.05" value="0.3">
 <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #64748B"><span>0,20 €</span><span>1,50 €</span></div>
+<p id="k-tip" class="small" style="color: #475569">Numa tomada normal o carro carrega devagar. Preços entre 0,20 € e 0,30 €/h mantêm a Karga competitiva com a rede pública.</p>
 </div>
 </div>
 
 <div class="k-reveal" style="transition-delay: .12s; background: #132A3E; color: #FFFFFF; border-radius: 24px; padding: clamp(28px, 3.5vw, 48px); display: flex; flex-direction: column; justify-content: space-between; gap: 32px; position: relative; overflow: hidden">
 <div aria-hidden="true" style="position: absolute; width: 320px; height: 320px; border-radius: 999px; border: 48px solid rgba(16,185,129,0.12); right: -120px; top: -120px"></div>
 <div style="position: relative; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
-<div style="font-size: 17px; font-weight: 600; color: #CBD5E1">Ganhos mensais estimados</div>
+<div style="font-size: 17px; font-weight: 600; color: #CBD5E1">Ganho estimado por mês</div>
 <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
-<span id="k-monthly" style="font-size: clamp(64px, 7vw, 96px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; color: #34D399; font-variant-numeric: tabular-nums">48,00</span>
+<span id="k-monthly" style="font-size: clamp(64px, 7vw, 96px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; color: #34D399; font-variant-numeric: tabular-nums">24,00</span>
 <span style="font-size: clamp(32px, 3.5vw, 44px); font-weight: 800; color: #34D399">€</span>
 </div>
-<div style="font-size: 16px; color: #CBD5E1; font-weight: 500">Cerca de <strong style="color: #FFFFFF" id="k-yearly">576 €</strong> por ano</div>
+<div style="font-size: 16px; color: #CBD5E1; font-weight: 500">Por ano: <strong style="color: #FFFFFF" id="k-yearly">288 €</strong></div>
 </div>
-<div style="position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
-<div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px"><div style="font-size: 12px; font-weight: 600; color: #CBD5E1">Taxa / hora</div><div style="font-size: 20px; font-weight: 800; margin-top: 4px" id="k-rate">0,50 €</div></div>
-<div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px"><div style="font-size: 12px; font-weight: 600; color: #CBD5E1">Horas / mês</div><div style="font-size: 20px; font-weight: 800; margin-top: 4px" id="k-month-hours">48 h</div></div>
-<div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px"><div style="font-size: 12px; font-weight: 600; color: #CBD5E1">Energia / mês</div><div style="font-size: 20px; font-weight: 800; margin-top: 4px" id="k-kwh">178 kWh</div></div>
+<div style="position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px"><div style="font-size: 12px; font-weight: 600; color: #CBD5E1">Horas de aluguer por mês</div><div style="font-size: 20px; font-weight: 800; margin-top: 4px" id="k-month-hours">80 h</div></div>
+<div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px"><div style="font-size: 12px; font-weight: 600; color: #CBD5E1">Energia fornecida (máx.) — paga ao seu preço de custo</div><div style="font-size: 20px; font-weight: 800; margin-top: 4px" id="k-kwh">até 184 kWh</div></div>
 </div>
 <div style="position: relative; display: flex; flex-direction: column; gap: 16px">
-<a class="k-btn k-solid" href="#equipamento" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 24px; border-radius: 12px; background: #10B981; color: #0B1F2E; font-weight: 700; font-size: 17px; text-decoration: none">Começar a faturar<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
-<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #94A3B8">Ganhos = Taxa do Espaço × duração × sessões por semana × 4 semanas. A energia é cobrada ao condutor a preço de custo. Os valores reais dependem da procura na sua zona.</p>
+<a class="k-btn k-solid btn btn-solid" href="#lista-espera?perfil=proprietario">Pré-registar o meu lugar<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #94A3B8">Estimativa antes de impostos. Os valores dependem das reservas que receber. Sem kit, a energia não é faturada: tenha isso em conta ao definir o preço por hora.</p>
 </div>
-</div>
-</div>
-<div id="k-warning" hidden>
-<div role="status" class="k-fade" style="display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px; border-radius: 16px; background: #FFF7ED; border: 1.5px solid #FDBA74; color: #9A3412">
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-<p style="margin: 0; font-size: 16px; line-height: 1.55; font-weight: 500"><strong style="font-weight: 800">Atenção:</strong> Com esta taxa numa tomada lenta, o custo final para o condutor será superior à rede pública. Recomendamos baixar a taxa ou instalar uma Wallbox.</p>
 </div>
 </div>
 </div>
 </section>
 
-<!-- COMPARE E POUPE -->
-<section id="compare" style="background: #FFFFFF">
-<div style="max-width: 1200px; margin: 0 auto; padding: clamp(64px, 8vw, 112px) clamp(20px, 4vw, 40px) 0; display: flex; flex-direction: column; gap: 48px">
-<div style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
-<div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #047857">Compare e Poupe</div>
-<h2 style="margin: 0; font-size: clamp(32px, 3.6vw, 46px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; color: #132A3E">Onde prefere carregar o seu carro?</h2>
-<p style="margin: 0; font-size: 18px; line-height: 1.6; color: #475569">Custo de uma sessão de carregamento típica de 20 kWh.</p>
+<!-- 2.10 QUANTO CUSTA CARREGAR -->
+<section id="precos" style="background: #FFFFFF">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Quanto custa carregar</div>
+<h2 class="h2">Preço de rede pública, com lugar garantido à porta de casa</h2>
+<p class="lead">Custo total por kWh, com tudo incluído.</p>
 </div>
-<div id="k-compare-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 24px; align-items: stretch">
-
-<div class="k-reveal" style="display: flex">
-<div class="k-card" style="flex-grow: 1; border: 1px solid #E2E8F0; border-radius: 24px; padding: clamp(28px, 3vw, 40px); display: flex; flex-direction: column; gap: 28px; background: #F8FAFC">
-<div style="display: flex; align-items: center; gap: 14px">
-<div style="width: 52px; height: 52px; border-radius: 14px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="10" height="18" rx="2"></rect><path d="M14 10h2a2 2 0 0 1 2 2v3a2 2 0 0 0 4 0V8l-3-3"></path><path d="M10 8l-2 4h3l-2 4"></path></svg></div>
-<div><h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #132A3E">Rede Pública de Rua</h3><div style="font-size: 14px; font-weight: 600; color: #64748B; margin-top: 2px">Posto de carregamento na via pública</div></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px">
+<div class="table-wrap k-reveal">
+<table class="ptable">
+<thead><tr><th scope="col">Opção</th><th scope="col">Custo por kWh</th><th scope="col">Exemplo</th><th scope="col">O que inclui</th></tr></thead>
+<tbody>
+<tr><td>Rede pública, carregamento normal (AC, até 22 kW)</td><td>0,25–0,45 €</td><td>20 kWh: 5,00–9,00 €</td><td>Depende do posto e do operador; pode haver taxas por tempo</td></tr>
+<tr><td>Rede pública, carregamento rápido (DC, até 50 kW)</td><td>0,45–0,65 €</td><td>20 kWh: 9,00–13,00 €</td><td>Mais rápido, mais caro</td></tr>
+<tr class="karga"><td><strong>Karga com wallbox</strong> (7,4 kW)</td><td><strong>0,31 €</strong></td><td>20 kWh em 3 h a 0,50 €/h: <strong>6,27 €</strong></td><td>Lugar 1,50 € + energia 4,20 € + taxa 10% (0,57 €)</td></tr>
+<tr class="karga"><td><strong>Karga, uma noite em tomada normal</strong> (2,3 kW)</td><td><strong>0,37 €</strong></td><td>23 kWh em 10 h a 0,30 €/h: <strong>8,61 €</strong></td><td>Lugar 3,00 € + energia 4,83 € + taxa 10% (0,78 €); lugar garantido a noite toda</td></tr>
+</tbody>
+</table>
 </div>
-<div style="display: flex; flex-direction: column; gap: 12px; padding: 22px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E2E8F0">
-<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px; color: #475569"><span>20 kWh × ~0,55 €/kWh</span><span style="font-weight: 700; color: #132A3E">11,00 €</span></div>
-<div style="font-size: 13px; color: #64748B">Preço médio incluindo taxas CEME/OPC</div>
-<div style="height: 1px; background: #E2E8F0; margin: 4px 0"></div>
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-size: 16px; font-weight: 700; color: #475569">Custo total</span><span style="font-size: 44px; font-weight: 800; letter-spacing: -0.04em; color: #B91C1C">~11,00 €</span></div>
-<div aria-hidden="true" style="height: 10px; border-radius: 999px; background: #F1F5F9; overflow: hidden"><div style="width: 100%; height: 100%; background: #DC2626; border-radius: 999px"></div></div>
-</div>
-<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Postos partilhados</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Sujeito a mau tempo</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Taxas ativadas por tempo</li>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 24px; align-items: start">
+<div class="tile" style="background: #ECFDF5; border-color: #A7F3D0">
+<h3>Vantagens da Karga</h3>
+<ul class="list" style="margin-top: 6px">
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Lugar privado e garantido durante a reserva</li>
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Pode ficar a noite inteira</li>
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Preço total visível antes de reservar</li>
+<li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Pagamento na app</li>
 </ul>
 </div>
-</div>
-
-<div class="k-reveal" style="display: flex; transition-delay: .12s">
-<div class="k-card k-card-pro" style="flex-grow: 1; position: relative; border: 2px solid #10B981; border-radius: 24px; padding: clamp(28px, 3vw, 40px); display: flex; flex-direction: column; gap: 28px; background: #ECFDF5; box-shadow: 0 30px 60px -30px rgba(16,185,129,0.45)">
-<div style="position: absolute; top: -18px; right: 28px; background: #132A3E; color: #34D399; font-size: 15px; font-weight: 800; padding: 8px 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px -8px rgba(19,42,62,0.5)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg>Poupança de 50%</div>
-<div style="display: flex; align-items: center; gap: 14px">
-<div style="width: 52px; height: 52px; border-radius: 14px; background: #10B981; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B1F2E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path></svg></div>
-<div><h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #132A3E">App Karga</h3><div style="font-size: 14px; font-weight: 600; color: #065F46; margin-top: 2px">Garagem de um vizinho</div></div>
-</div>
-<div style="display: flex; flex-direction: column; gap: 12px; padding: 22px; border-radius: 16px; background: #FFFFFF; border: 1px solid #A7F3D0">
-<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px; color: #475569"><span>Energia a preço de custo<br><span style="font-size: 13px; color: #64748B">20 kWh × 0,16 €</span></span><span style="font-weight: 700; color: #132A3E">3,20 €</span></div>
-<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px; color: #475569"><span>Aluguer do Espaço<br><span style="font-size: 13px; color: #64748B">ex: 4 h × 0,50 €</span></span><span style="font-weight: 700; color: #132A3E">2,00 €</span></div>
-<div style="height: 1px; background: #D1FAE5; margin: 4px 0"></div>
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-size: 16px; font-weight: 700; color: #475569">Total final</span><span style="font-size: 44px; font-weight: 800; letter-spacing: -0.04em; color: #047857">5,20 €</span></div>
-<div aria-hidden="true" style="height: 10px; border-radius: 999px; background: #F1F5F9; overflow: hidden"><div style="width: 47.3%; height: 100%; background: #10B981; border-radius: 999px"></div></div>
-</div>
-<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Garagem privada</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Lugar garantido</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Sem taxas escondidas</li>
-</ul>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p class="small">Energia da Karga calculada a 0,21 €/kWh (tarifa simples regulada com IVA, out.–dez. 2026). Cada proprietário indica o seu preço de custo, que pode ser mais baixo em tarifa bi-horária. O preço por hora é definido pelo proprietário. Na rede pública, alguns operadores cobram tempo de ocupação: por exemplo, 0,20 €/min após 15 minutos nos postos do Continente.</p>
+<p class="fonte">Fontes: <a href="https://www.e-konomista.pt/quanto-custa-carregar-carro-eletrico/" target="_blank" rel="noopener">e-konomista (mar. 2026)</a> para os preços da rede pública; <a href="https://www.literaciafinanceira.pt/artigos/preco-kwh" target="_blank" rel="noopener">Literacia Financeira (out. 2026)</a> para a tarifa; <a href="https://www.e-konomista.pt/carregar-eletrico-fora-de-casa/" target="_blank" rel="noopener">e-konomista (jul. 2026)</a> para a taxa de ocupação.</p>
 </div>
 </div>
 </div>
-<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #64748B">Valores de referência. O preço na rede pública varia por operador e tarifário; o aluguer do espaço é definido por cada anfitrião.</p>
+<div class="btns"><a class="k-btn k-solid btn btn-solid" href="#lista-espera?perfil=condutor">Quero carregar perto de casa</a></div>
 </div>
 </section>
 
-<!-- EQUIPAMENTO -->
-<section id="equipamento" style="background: #FFFFFF">
-<div style="max-width: 1200px; margin: 0 auto; padding: clamp(64px, 8vw, 112px) clamp(20px, 4vw, 40px); display: flex; flex-direction: column; gap: 48px">
-<div style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
-<div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #047857">Equipamento</div>
-<h2 style="margin: 0; font-size: clamp(32px, 3.6vw, 46px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; color: #132A3E">Tudo o que precisa para começar a faturar</h2>
-<p style="margin: 0; font-size: clamp(17px, 1.4vw, 19px); line-height: 1.6; color: #475569">O equipamento é <strong style="color: #132A3E">opcional</strong>: pode publicar o seu lugar sem kit nenhum e cobrar apenas o estacionamento à hora. Com o kit, a tomada mede a energia de cada sessão e o condutor paga <strong style="color: #132A3E">só os kWh que realmente gastou</strong>, a preço de custo &mdash; justo para os dois lados.</p>
+<!-- 2.11 EQUIPAMENTO -->
+<section id="equipamento" class="sec-alt">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Equipamento</div>
+<h2 class="h2">Escolha como quer cobrar</h2>
+<p class="lead">O kit é opcional. Pode começar sem ele e acrescentá-lo mais tarde, sem mudar o anúncio.</p>
 </div>
-<div id="k-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 24px; align-items: stretch">
-
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; align-items: stretch">
 <div class="k-reveal" style="display: flex">
-<div class="k-card" style="flex-grow: 1; border: 1px solid #E2E8F0; border-radius: 24px; padding: clamp(28px, 3vw, 40px); display: flex; flex-direction: column; gap: 28px; background: #FFFFFF">
-<div style="display: flex; flex-direction: column; gap: 16px">
-<div style="height: 240px; border-radius: 16px; background: #F8FAFC; border: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px">
-<img src="assets/shelly-plus-plug-s.png" alt="Tomada inteligente Shelly Plus Plug S" style="height: 210px; width: auto; max-width: 90%; object-fit: contain; mix-blend-mode: multiply">
-</div>
-<h3 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.02em">Kit Karga Básico (Plug &amp; Play)</h3>
-<div style="font-size: 15px; color: #475569; font-weight: 500">Tomada inteligente (Shelly Plus Plug S)</div>
-</div>
-<div style="display: flex; align-items: baseline; gap: 8px; padding-bottom: 24px; border-bottom: 1px solid #E2E8F0"><span style="font-size: 48px; font-weight: 800; letter-spacing: -0.04em">24,90 €</span><span style="font-size: 15px; color: #64748B; font-weight: 600">pagamento único</span></div>
-<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; flex-grow: 1">
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Instalação zero (basta ligar à tomada)</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Medição de energia em tempo real</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Potência limitada por segurança (10A)</li>
-</ul>
-<a class="k-btn k-outline" href="#" style="display: inline-flex; align-items: center; justify-content: center; min-height: 54px; border-radius: 12px; background: #FFFFFF; border: 1.5px solid #CBD5E1; color: #132A3E; font-weight: 700; font-size: 17px; text-decoration: none">Comprar Kit</a>
-</div>
-</div>
+<div class="k-card" style="flex-grow: 1; position: relative; border: 1px solid #E2E8F0; border-radius: 24px; padding: clamp(24px, 3vw, 36px); display: flex; flex-direction: column; gap: 22px; background: #FFFFFF">
 
-<div class="k-reveal" style="display: flex; transition-delay: .12s">
-<div class="k-card k-card-pro" style="flex-grow: 1; position: relative; border: 2px solid #10B981; border-radius: 24px; padding: clamp(28px, 3vw, 40px); display: flex; flex-direction: column; gap: 28px; background: #FFFFFF; box-shadow: 0 30px 60px -30px rgba(16,185,129,0.45)">
-<div style="position: absolute; top: -15px; right: 28px; background: #10B981; color: #0B1F2E; font-size: 13px; font-weight: 800; letter-spacing: 0.02em; padding: 6px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path></svg>Recomendado</div>
-<div style="display: flex; flex-direction: column; gap: 16px">
-<div role="img" aria-label="Wallbox de carregamento montada na parede" style="height: 240px; border-radius: 16px; background: #F8FAFC; border: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px; position: relative">
-<div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: #EEF2F6; border-top: 1px solid #E2E8F0"></div>
-<svg width="220" height="210" viewBox="0 0 220 210" aria-hidden="true" style="position: relative">
+<div style="height: 180px; border-radius: 16px; background: #F8FAFC; border: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: center; overflow: hidden"><svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#132A3E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="3"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M12 15v2"/></svg></div>
+<h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Sem kit</h3>
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-bottom: 20px; border-bottom: 1px solid #E2E8F0"><span style="font-size: 40px; font-weight: 800; letter-spacing: -0.04em">0 €</span><span style="font-size: 15px; color: #64748B; font-weight: 600"></span></div>
+<ul class="list" style="flex-grow: 1"><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>O lugar é cobrado à hora</li><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>A energia não é faturada</li><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Ideal para começar sem investimento</li></ul>
+<a class="k-btn k-outline btn btn-outline" href="#lista-espera?perfil=proprietario&amp;kit=sem">Pré-registar o meu lugar</a>
+</div>
+</div>
+<div class="k-reveal" style="display: flex">
+<div class="k-card k-card-pro" style="flex-grow: 1; position: relative; border: 2px solid #10B981; border-radius: 24px; padding: clamp(24px, 3vw, 36px); display: flex; flex-direction: column; gap: 22px; background: #FFFFFF; box-shadow: 0 30px 60px -30px rgba(16,185,129,0.45)">
+<div style="position: absolute; top: -15px; right: 28px; background: #10B981; color: #0B1F2E; font-size: 13px; font-weight: 800; padding: 6px 14px; border-radius: 999px">Recomendado</div>
+<div style="height: 180px; border-radius: 16px; background: #F8FAFC; border: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: center; overflow: hidden"><img src="assets/shelly-plus-plug-s.png" alt="Tomada inteligente Shelly Plus Plug S" style="height: 160px; width: auto; max-width: 90%; object-fit: contain; mix-blend-mode: multiply"></div>
+<h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Kit Básico</h3>
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-bottom: 20px; border-bottom: 1px solid #E2E8F0"><span style="font-size: 40px; font-weight: 800; letter-spacing: -0.04em">24,90 €</span><span style="font-size: 15px; color: #64748B; font-weight: 600">pagamento único</span></div>
+<ul class="list" style="flex-grow: 1"><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Tomada inteligente Shelly Plus Plug S, ligada à tomada que já tem</li><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Mede a energia em tempo real: o condutor paga os kWh ao seu preço de custo</li><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Instalação zero</li><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Limitada a 10 A (cerca de 2,3 kW) por segurança</li></ul>
+<a class="k-btn k-solid btn btn-solid" href="#lista-espera?perfil=proprietario&amp;kit=basico">Pré-reservar Kit Básico</a>
+</div>
+</div>
+<div class="k-reveal" style="display: flex">
+<div class="k-card" style="flex-grow: 1; position: relative; border: 1px solid #E2E8F0; border-radius: 24px; padding: clamp(24px, 3vw, 36px); display: flex; flex-direction: column; gap: 22px; background: #FFFFFF">
+
+<div style="height: 180px; border-radius: 16px; background: #F8FAFC; border: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: center; overflow: hidden"><div role="img" aria-label="Wallbox de carregamento montada na parede"><svg width="180" height="172" viewBox="0 0 220 210" aria-hidden="true" style="position: relative">
 <rect x="58" y="10" width="104" height="150" rx="22" fill="#132A3E"></rect>
 <rect x="64" y="16" width="92" height="138" rx="17" fill="#1B3850"></rect>
 <circle cx="110" cy="66" r="27" fill="none" stroke="#10B981" stroke-width="5"></circle>
@@ -356,42 +492,163 @@ Simular Ganhos
 <path d="M110 172 C110 196, 150 200, 168 184 S176 150, 168 136" fill="none" stroke="#132A3E" stroke-width="7" stroke-linecap="round"></path>
 <rect x="158" y="112" width="20" height="30" rx="6" fill="#132A3E"></rect>
 <rect x="161" y="104" width="14" height="10" rx="3" fill="#10B981"></rect>
-</svg>
-<div style="position: absolute; top: 14px; left: 14px; font-size: 12px; font-weight: 700; color: #475569; background: #FFFFFF; border: 1px solid #E2E8F0; padding: 4px 10px; border-radius: 999px">Até 7,4 kW</div>
-</div>
-<h3 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.02em">Kit Karga Pro (Instalação Fixa)</h3>
-<div style="font-size: 15px; color: #475569; font-weight: 500">Tomada reforçada 16A ou módulo de quadro elétrico</div>
-</div>
-<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-bottom: 24px; border-bottom: 1px solid #E2E8F0"><span style="font-size: 48px; font-weight: 800; letter-spacing: -0.04em">249,99 €</span><span style="font-size: 15px; color: #065F46; font-weight: 700">Instalação incluída</span></div>
-<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; flex-grow: 1">
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Visita de eletricista certificado</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Carregamento mais rápido e seguro (até 32A)</li>
-<li style="display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Ideal para uso intensivo</li>
-</ul>
-<a class="k-btn k-solid" href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; border-radius: 12px; background: #10B981; color: #0B1F2E; font-weight: 700; font-size: 17px; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Agendar Instalação</a>
+</svg></div></div>
+<h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Kit Pro</h3>
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-bottom: 20px; border-bottom: 1px solid #E2E8F0"><span style="font-size: 40px; font-weight: 800; letter-spacing: -0.04em">249,99 €</span><span style="font-size: 15px; color: #64748B; font-weight: 600">instalação incluída</span></div>
+<ul class="list" style="flex-grow: 1"><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Tomada reforçada de 16 A ou módulo no quadro elétrico</li><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Instalação por eletricista certificado</li><li class="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Carregamento até 32 A, para uso intensivo</li></ul>
+<a class="k-btn k-outline btn btn-outline" href="#lista-espera?perfil=proprietario&amp;kit=pro">Pedir Kit Pro</a>
 </div>
 </div>
 </div>
-<div style="display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px; border-radius: 16px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46">
+<div class="note">
 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-<p style="margin: 0; font-size: 16px; line-height: 1.55; font-weight: 500"><strong style="font-weight: 800">Sem kit?</strong> Também funciona. O lugar é cobrado à hora e a energia não é faturada. Pode juntar o kit mais tarde, quando quiser, sem alterar o anúncio.</p>
+<p>Os kits ainda não estão à venda. A pré-reserva não tem custo nem compromisso: avisamos quando estiverem disponíveis. O kit fica sempre seu.</p>
 </div>
 </div>
 </section>
 
-<!-- FOOTER -->
+<!-- 2.12 QUEM GANHA E QUEM FAZ O QUÊ -->
+<section id="responsabilidades" style="background: #FFFFFF">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Regras claras</div>
+<h2 class="h2">Quem ganha e quem faz o quê</h2>
+<p class="lead">Regras simples, iguais para todos. A versão completa está nos <a href="termos.html">Termos e Condições</a>.</p>
+</div>
+<div>
+<details class="acc"><summary>Condutor</summary><div class="acc-body"><table class="roles"><thead><tr><th scope="col">Benefícios</th><th scope="col">Responsabilidades</th></tr></thead><tbody><tr><td>Lugar garantido durante a reserva</td><td>Ter 18 anos ou mais e dados verdadeiros na conta</td></tr><tr><td>Custo estimado visível antes de reservar; valor final calculado no fim da sessão</td><td>Usar o lugar só no período reservado</td></tr><tr><td>Energia ao preço de custo do proprietário, sem margem (só em lugares com kit)</td><td>Deixar o lugar como o encontrou</td></tr><tr><td>Reembolso total se o proprietário cancelar</td><td>Pagar 0,10 €/min de taxa de ocupação depois da hora de fim</td></tr><tr><td>Pagamento na app</td><td>Cumprir as instruções de acesso e as regras do prédio ou da garagem</td></tr><tr><td>Pode apagar a conta a qualquer momento (Perfil › Definições › Apagar conta)</td><td>Guardar a password</td></tr></tbody></table></div></details>
+<details class="acc"><summary>Proprietário</summary><div class="acc-body"><table class="roles"><thead><tr><th scope="col">Benefícios</th><th scope="col">Responsabilidades</th></tr></thead><tbody><tr><td>Rendimento de um lugar parado, ao preço por hora que define</td><td>Publicar só lugares que tem direito a ceder (dono, arrendatário com autorização ou permissão do condomínio)</td></tr><tr><td>Investimento zero sem kit; o kit é opcional e fica seu</td><td>Manter a instalação elétrica em bom estado e adequada à potência anunciada</td></tr><tr><td>Com kit, a energia é medida e reembolsada ao seu preço de custo</td><td>Garantir que horários, preços e fotos correspondem à realidade</td></tr><tr><td>Morada protegida: antes da reserva só se vê uma zona de cerca de 150 m</td><td>Dar o código de acesso apenas a quem tem reserva</td></tr><tr><td>Só o primeiro nome e a inicial do apelido são partilhados com o condutor</td><td>Em caso de cancelamento (avaria, emergência), avisar o condutor, que recebe o reembolso total</td></tr><tr><td>Taxa de ocupação de 0,10 €/min para quem fica depois da hora</td><td>Kit Pro instalado só por eletricista certificado</td></tr></tbody></table></div></details>
+<details class="acc"><summary>Condomínio / administração do prédio</summary><div class="acc-body"><table class="roles"><thead><tr><th scope="col">O que ganha</th><th scope="col">O que lhe pode caber</th></tr></thead><tbody><tr><td>Sem obras nas partes comuns quando o lugar usa a tomada e o contador do próprio condómino</td><td>Definir no regulamento interno as regras de acesso de terceiros à garagem</td></tr><tr><td>Acesso dado só a condutores identificados e com reserva, com código entregue apenas a eles</td><td>Receber a comunicação escrita do condómino que instala um carregador (30 dias de antecedência, DL 93/2025)</td></tr><tr><td>Um serviço que valoriza os lugares de garagem do prédio</td><td>Dar permissão, quando o lugar não é do condómino que o publica</td></tr></tbody></table><p class="small" style="margin-top: 12px">Os Termos não criam obrigações para o condomínio. Esta tabela descreve a relação prática e o enquadramento legal, não deveres perante a Karga.</p></div></details>
+<details class="acc"><summary>Karga</summary><div class="acc-body"><table class="roles"><thead><tr><th scope="col">O que faz</th><th scope="col">O que não faz</th></tr></thead><tbody><tr><td>Mostra os lugares, gere reservas e pagamentos</td><td>Não é operadora de pontos de carregamento da rede pública</td></tr><tr><td>Mede a energia quando há tomada inteligente</td><td>Não responde por falhas de energia nem pela instalação elétrica do proprietário</td></tr><tr><td>Mostra o custo estimado antes da reserva e calcula o valor final no fim</td><td>Não vende dados pessoais</td></tr><tr><td>Cobra uma taxa de serviço de 10% sobre lugar + energia</td><td>Não resolve sozinha os danos: são tratados entre condutor e proprietário, com o apoio da Karga e dos seguros de cada um, quando aplicável</td></tr><tr><td>Apoia a resolução de problemas entre utilizadores</td><td>—</td></tr><tr><td>Pode suspender contas que violem os Termos ou ponham pessoas ou bens em risco</td><td>—</td></tr></tbody></table></div></details>
+</div>
+</div>
+</section>
+
+<!-- 2.13 PERGUNTAS FREQUENTES -->
+<section id="perguntas" class="sec-alt">
+<div class="wrap">
+<div class="head">
+<div class="eyebrow">Perguntas frequentes</div>
+<h2 class="h2">Perguntas frequentes</h2>
+</div>
+<div>
+<details class="acc"><summary>A Karga já está disponível?</summary><div class="acc-body"><p>Ainda não. É um projeto académico em fase piloto em Odivelas e Loures. Inscreva-se na <a href="#lista-espera">lista de espera</a> e avisamos quando a app abrir na sua zona.</p></div></details>
+<details class="acc"><summary>Quanto posso ganhar com o meu lugar?</summary><div class="acc-body"><p>Depende do preço por hora e das reservas que receber. Por exemplo, 2 noites por semana, 10 horas cada, a 0,30 €/h dão cerca de 24 € por mês. Use o <a href="#simulador">simulador</a> com os seus valores. A energia não é lucro: com kit, é reembolsada ao seu preço de custo.</p></div></details>
+<details class="acc"><summary>Preciso de comprar o kit?</summary><div class="acc-body"><p>Não. Sem kit, o lugar é cobrado à hora e a energia não é faturada, por isso tenha-a em conta no preço. Com o Kit Básico (24,90 €), a energia é medida e o condutor paga os kWh ao seu preço de custo.</p></div></details>
+<details class="acc"><summary>Como funciona o pagamento da energia?</summary><div class="acc-body"><p>Só há cobrança de energia em lugares com tomada inteligente. Paga-se o consumo medido em kWh, ao preço de custo indicado pelo proprietário, sem margem. A isto somam-se o preço do lugar e a taxa de serviço de 10%.</p></div></details>
+<details class="acc"><summary>Um desconhecido vai saber onde moro?</summary><div class="acc-body"><p>Antes de reservar, o condutor vê só uma zona aproximada (um círculo de cerca de 150 m) e o nome da localidade. A morada exata e o código de acesso são mostrados apenas a quem reservar. Do proprietário, o condutor vê o primeiro nome e a inicial do apelido.</p></div></details>
+<details class="acc"><summary>E se o condutor se atrasar a sair?</summary><div class="acc-body"><p>Depois da hora de fim da reserva, o condutor paga uma taxa de ocupação de 0,10 € por minuto. O valor é cobrado automaticamente na app.</p></div></details>
+<details class="acc"><summary>E se houver danos no lugar ou no carro?</summary><div class="acc-body"><p>Cada utilizador responde pelo que faz. Os danos resolvem-se entre proprietário e condutor, com o apoio da Karga e dos seguros de cada um, quando aplicável. A Karga não inclui seguro próprio: recomendamos confirmar a sua cobertura com a seguradora.</p></div></details>
+<details class="acc"><summary>Posso cancelar uma reserva?</summary><div class="acc-body"><p>As condições de cancelamento e reembolso aparecem na app no momento da reserva. Se for o proprietário a cancelar, o condutor recebe sempre o reembolso total.</p></div></details>
+<details class="acc"><summary>O condomínio tem de autorizar?</summary><div class="acc-body"><p>Só pode publicar lugares que tem direito a ceder: é o dono, é arrendatário com autorização ou tem permissão do condomínio. Para instalar um carregador no seu lugar, basta comunicar por escrito à administração com 30 dias de antecedência (DL 93/2025). Confirme também o regulamento do prédio sobre o acesso de terceiros.</p></div></details>
+<details class="acc"><summary>A Karga é uma rede pública de carregamento?</summary><div class="acc-body"><p>Não. A Karga é uma intermediária: mostra lugares privados, gere reservas e pagamentos e mede a energia quando há tomada inteligente. Não é operadora de pontos de carregamento da rede pública.</p></div></details>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px">
+<span style="font-size: 18px; font-weight: 700; color: #132A3E">Ainda tem dúvidas?</span>
+<a class="k-btn k-outline btn btn-outline" href="mailto:ola@karga.pt">Escreva-nos</a>
+</div>
+</div>
+</section>
+
+<!-- 2.14 LISTA DE ESPERA -->
+<section id="lista-espera" style="background: #FFFFFF; scroll-margin-top: 72px">
+<div class="wrap" style="max-width: 860px">
+<div class="head">
+<div class="eyebrow">Lista de espera</div>
+<h2 class="h2">Entre na lista de espera</h2>
+<p class="lead">Estamos a começar por Odivelas e Loures. Deixe o seu código postal e avisamos quando a Karga abrir na sua zona.</p>
+</div>
+<form id="k-form" class="form" novalidate>
+<fieldset>
+<legend>Sou…</legend>
+<div class="radios">
+<label><input type="radio" name="perfil" value="condutor" required> Tenho carro elétrico</label>
+<label><input type="radio" name="perfil" value="proprietario"> Tenho garagem com tomada</label>
+<label><input type="radio" name="perfil" value="ambos"> As duas coisas</label>
+</div>
+</fieldset>
+<div class="two">
+<div><label class="lbl" for="k-nome" style="display: block">Primeiro nome</label><input id="k-nome" name="nome" type="text" autocomplete="given-name" maxlength="60" required></div>
+<div><label class="lbl" for="k-email" style="display: block">Email</label><input id="k-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+</div>
+<div><label class="lbl" for="k-cp" style="display: block">Código postal (ex.: 2675-123)</label><input id="k-cp" name="codigo_postal" type="text" inputmode="numeric" autocomplete="postal-code" pattern="^\d{4}-\d{3}$" maxlength="8" placeholder="0000-000" required style="max-width: 220px"></div>
+
+<div data-for="condutor" hidden style="display: flex; flex-direction: column; gap: 22px">
+<fieldset><legend>Carro elétrico (opcional)</legend><div class="radios">
+<label><input type="radio" name="ve_situacao" value="tem"> Já tenho carro elétrico</label>
+<label><input type="radio" name="ve_situacao" value="vai_comprar"> Vou comprar nos próximos 12 meses</label>
+</div></fieldset>
+<fieldset><legend>Onde carrega hoje? (opcional)</legend><div class="radios">
+<label><input type="radio" name="carrega_onde" value="rede_publica"> Rede pública</label>
+<label><input type="radio" name="carrega_onde" value="trabalho"> No trabalho</label>
+<label><input type="radio" name="carrega_onde" value="familiares"> Em casa de familiares</label>
+<label><input type="radio" name="carrega_onde" value="outro"> Outro</label>
+</div></fieldset>
+</div>
+
+<div data-for="proprietario" hidden style="display: flex; flex-direction: column; gap: 22px">
+<fieldset><legend>Tipo de lugar (opcional)</legend><div class="radios">
+<label><input type="radio" name="tipo_lugar" value="box"> Box fechada</label>
+<label><input type="radio" name="tipo_lugar" value="garagem_coletiva"> Lugar em garagem coletiva</label>
+<label><input type="radio" name="tipo_lugar" value="exterior"> Lugar exterior</label>
+</div></fieldset>
+<fieldset><legend>Tomada (opcional)</legend><div class="radios">
+<label><input type="radio" name="tomada" value="tomada"> Já tenho tomada no lugar</label>
+<label><input type="radio" name="tomada" value="wallbox"> Tenho wallbox</label>
+<label><input type="radio" name="tomada" value="nao_tem"> Ainda não tenho</label>
+</div></fieldset>
+<fieldset><legend>Kit (opcional)</legend><div class="radios">
+<label><input type="radio" name="kit" value="sem"> Sem kit</label>
+<label><input type="radio" name="kit" value="basico"> Kit Básico</label>
+<label><input type="radio" name="kit" value="pro"> Kit Pro</label>
+<label><input type="radio" name="kit" value="nao_sei"> Ainda não sei</label>
+</div></fieldset>
+</div>
+
+<div class="hp" aria-hidden="true"><label for="k-site">Não preencher</label><input id="k-site" name="site" type="text" tabindex="-1" autocomplete="off"></div>
+
+<label class="consent"><input type="checkbox" name="consentimento" required> <span>Aceito que a Karga guarde estes dados para me contactar sobre o lançamento, nos termos da <a href="privacidade.html">Política de Privacidade</a>.</span></label>
+<p id="k-form-error" class="form-error" role="alert" hidden></p>
+<div><button id="k-submit" class="k-btn k-solid btn btn-solid" type="submit">Inscrever-me</button></div>
+</form>
+<div id="k-form-ok" class="note" role="status" hidden style="font-size: 17px">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+<p><span id="k-ok-text">Obrigado! Está na lista.</span> Vamos avisá-lo por email quando a Karga abrir na sua zona. Não enviamos publicidade de terceiros.</p>
+</div>
+</div>
+</section>
+
+<!-- 2.15 CONFIANÇA -->
+<section id="confianca" class="sec-alt">
+<div class="wrap" style="gap: 32px">
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr))">
+<div class="tile"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></div><h3>Projeto académico ISCTE</h3><p>Desenvolvido no âmbito de um projeto de empreendedorismo do ISCTE, em 2026/2027.</p></div>
+<div class="tile"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div><h3>Piloto em Odivelas e Loures</h3><p>Começamos onde vivemos, bairro a bairro, antes de crescer para o resto do país.</p></div>
+<div class="tile"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>Morada protegida</h3><p>A morada exata só é mostrada a quem reserva. Antes disso, vê-se uma zona de cerca de 150 m.</p></div>
+<div class="tile"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg></div><h3>Preço à vista e pagamento na app</h3><p>O custo estimado aparece antes de reservar, e tudo é pago na app, sem dinheiro em mão.</p></div>
+<div class="tile"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>Os seus dados na Europa</h3><p>Dados guardados na UE. Não vendemos dados pessoais. Pode apagar a conta a qualquer momento.</p></div>
+</div>
+<p class="small" style="text-align: center">Em breve na App Store e no Google Play.</p>
+</div>
+</section>
+
+<!-- 2.16 RODAPÉ -->
 <footer class="k-foot" style="background: #132A3E; color: #CBD5E1">
 <div style="max-width: 1200px; margin: 0 auto; padding: 48px clamp(20px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 560px">
 <div style="display: flex; align-items: center; gap: 10px">
 <svg width="32" height="32" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="9" fill="#FFFFFF"></rect><rect x="9.5" y="8" width="5" height="20" rx="1.2" fill="#132A3E"></rect><path d="M27.5 8h-5.6l-7.4 9.2 3.1 2.1z" fill="#132A3E"></path><path d="M20.5 14.5l-5.2 7h4l-1.8 6.2 6.8-8.6h-4.1l2.6-4.6z" fill="#10B981"></path></svg>
 <span style="font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em">Karga</span>
 </div>
-<nav aria-label="Rodapé" style="display: flex; flex-wrap: wrap; gap: 28px; font-size: 15px; font-weight: 600">
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #94A3B8">Karga — carregamento partilhado entre vizinhos. Projeto académico de empreendedorismo do ISCTE – Instituto Universitário de Lisboa, 2026/2027. Serviço ainda não disponível comercialmente.</p>
+</div>
+<nav aria-label="Rodapé" style="display: flex; flex-wrap: wrap; gap: 24px; font-size: 15px; font-weight: 600">
 <a href="termos.html">Termos e Condições</a>
 <a href="privacidade.html">Privacidade</a>
 <a href="contactos.html">Contactos</a>
+<a href="https://www.livroreclamacoes.pt" target="_blank" rel="noopener">Livro de Reclamações</a>
 </nav>
-<div style="font-size: 14px; color: #94A3B8; width: 100%; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1)">© 2026 Karga. Todos os direitos reservados.</div>
+<div style="font-size: 14px; color: #94A3B8; width: 100%; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1)">© 2026 Karga.</div>
 </div>
 </footer>
 
