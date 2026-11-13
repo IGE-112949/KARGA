@@ -17,6 +17,11 @@ Os pontos das fases de registo/perfil, espaços e mapa/pesquisa foram resolvidos
 - [ ] Fotos e avatares antigos mantêm o caminho com o id do utilizador (só os novos mudaram).
 - [ ] Rotas desconhecidas sem token devolvem 401 (com token, 404).
 
+## Site (decisões do grupo)
+- [ ] "Sugestões para discutir" do `docs/site-karga-alteracoes.md`: quem paga os 10% (a app e a API já somam os 10% ao total do condutor; só a maqueta do Claude Design mostra 0,50 € fixos), enquadramento legal (DL 93/2025), tolerância na taxa de ocupação, energia sem kit, prazos de cancelamento, seguro.
+- [ ] App: o €/kWh pode ser definido mesmo sem tomada inteligente (a tomada está "Em breve"); o site diz que a energia só é cobrada com kit.
+- [ ] Lista de espera: ler as inscrições no Supabase (tabela `lista_espera`, só pelo painel ou pela API com a chave secreta).
+
 ## Decisões futuras (não são bugs)
 - [ ] Apagar a conta (RGPD) com reservas: anonimizar em vez de apagar em cascata (fase das reservas).
 - [ ] Mapa com chave do Google Maps quando a app for publicada numa loja.
